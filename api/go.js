@@ -1,9 +1,7 @@
 // api/go.js
-// БАЗОВЫЙ серверный редирект (302) на Vercel.
-// Читает ?t=<base64url(affiliateUrl)> или ?to=<plainUrl>, проверяет домен трекера и редиректит.
-// Для новичка: это запускается на сервере Vercel по адресу https://<твойдомен>/api/go
+// Серверный редирект (302) на Vercel с быстрым зондом целевого товара (ulp).
+// Если зонд даёт 404/ошибку/таймаут — отправляем пользователя на /out-of-stock.html.
 
-// Разрешённые домены трекеров (белый список)
 const AFF_HOSTS = new Set([
   'bywiola.com',
   'uuwgc.com',
@@ -13,6 +11,7 @@ const AFF_HOSTS = new Set([
   'actionpay.net',
   'cityads.com',
   'effiliation.com',
+  'advcake.com',
 ]);
 
 function b64urlDecode(input) {
@@ -24,13 +23,30 @@ function b64urlDecode(input) {
   }
 }
 
-module.exports = (req, res) => {
-  // 1) Читаем параметр t (base64url) или to (прямой URL)
+// Быстрый HEAD-зонд с таймаутом (в мс). Возвращает { ok: boolean, status?: number, host?: string }
+async function probeUlp(targetUrl, timeoutMs = 700) {
+  try {
+    const u = new URL(targetUrl);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return { ok: false };
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    const resp = await fetch(targetUrl, {
+      method: 'HEAD',
+      signal: controller.signal,
+    });
+    clearTimeout(t);
+    // Многие магазины вернут 200/30x — считаем OK. 4xx/5xx — считаем мёртвым.
+    return { ok: resp.status < 400, status: resp.status, host: u.hostname };
+  } catch {
+    return { ok: false };
+  }
+}
+
+module.exports = async (req, res) => {
   const { t, to } = req.query || {};
   const raw =
     typeof to === 'string' ? to : typeof t === 'string' ? b64urlDecode(t) : '';
 
-  // 2) Пытаемся распарсить URL
   let url;
   try {
     url = new URL(raw);
@@ -41,7 +57,6 @@ module.exports = (req, res) => {
     return;
   }
 
-  // 3) Проверяем схему и домен
   const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
   if (!isHttp) {
     res.statusCode = 400;
@@ -56,16 +71,38 @@ module.exports = (req, res) => {
     return;
   }
 
-  // (опц.) можно достать ulp и показать домен магазина в логах — пока пропустим
+  // Пытаемся достать ulp (финальный URL товара). Если есть — зондируем.
+  let shopHost = '';
+  const ulp = url.searchParams.get('ulp');
+  if (ulp) {
+    try {
+      const decodedUlp = decodeURIComponent(ulp);
+      const probe = await probeUlp(decodedUlp, 700);
+      shopHost = probe.host || '';
 
-  // 4) Отдаём 302 на партнёрский URL
+      if (!probe.ok) {
+        // Ведём на дружелюбную заглушку
+        const shopParam = shopHost
+          ? `?shop=${encodeURIComponent(shopHost)}`
+          : '';
+        res.statusCode = 302;
+        res.setHeader('Location', `/out-of-stock.html${shopParam}`);
+        res.setHeader('Referrer-Policy', 'no-referrer');
+        res.setHeader('Cache-Control', 'no-store');
+        res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+        res.end();
+        return;
+      }
+    } catch {
+      // Если не смогли распарсить ulp — просто пойдём по обычному редиректу
+    }
+  }
+
+  // Штатный 302 на партнёрскую ссылку
   res.statusCode = 302;
   res.setHeader('Location', url.toString());
-
-  // Важные заголовки:
-  res.setHeader('Referrer-Policy', 'no-referrer'); // магазин не видит адрес твоей страницы
-  res.setHeader('Cache-Control', 'no-store'); // не кэшируем редирект
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow'); // не индексировать ботовыми системами
-
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.end();
 };
