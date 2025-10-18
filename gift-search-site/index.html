@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GiftBot — подбор подарков за 10 секунд</title>
-  <meta name="description" content="GiftBot — Telegram-бот и каталог для подбора подарков по возрасту и бюджету. Найдите идеальный подарок за секунды!">
+  <meta name="description" content="gift-search-site —  каталог для подбора подарков по возрасту и бюджету. Найдите идеальный подарок за секунды!">
 
   <!-- Сохраняем существующие метатеги -->
   <link rel="canonical" href="https://<username>.github.io/giftbot/">
@@ -28,15 +28,20 @@
   }
   </script>
 
-  <!-- Yandex.Metrica counter -->
-  <script type="text/javascript">
-    (function (m, e, t, r, i, k, a) {
-      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-      m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-    })
-      (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-    ym(XXXXXXX, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
-  </script>
+<!-- Yandex.Metrica (без падения, если ID не задан) Теперь ym вызывается только если ID задан числом. -->
+<script type="text/javascript">
+  (function (m, e, t, r, i, k, a) {
+    m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+    m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+  })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+  // ↓↓↓ ИЗМЕНЕНО: не вызываем ym(...) без реального ID
+  (function () {
+    var YM_ID = null; // поставь реальный номер счётчика или оставь null
+    if (typeof YM_ID === 'number') {
+      ym(YM_ID, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+    }
+  })();
+</script>
   <!-- /Yandex.Metrica counter -->
 
   <!-- Google tag (gtag.js) -->

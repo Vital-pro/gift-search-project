@@ -1,1 +1,1 @@
-export * from './gifts';
+export * from './gifts/index.js';

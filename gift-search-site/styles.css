@@ -137,7 +137,7 @@ body {
 }
 
 .layer-gift {
-  background-image: url("../assets/images/hero-gift.svg");
+  background-image: url("./assets/images/hero-gift.svg");
   background-size: clamp(140px, 16vw, 240px) auto;
   background-repeat: no-repeat;
   background-position: right 8% top 30%;
