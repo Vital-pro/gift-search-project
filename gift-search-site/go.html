@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Открываем магазин…</title>
+
+  <!-- Скрываем реферер для партнёра -->
+  <meta name="referrer" content="no-referrer" />
+  <meta name="robots" content="noindex,nofollow">
+
+  <style>
+    /* :root {
+      --bg: #0b0b12;
+      --fg: #fff;
+      --muted: #a0a0b8;
+      --accent: #6c63ff;
+      --border: rgba(255, 255, 255, .15);
+    } */
+
+    :root {
+      /* Нежная светлая палитра, ближе к твоему основному сайту */
+      --bg: #f8fafc;
+      /* светлый фон */
+      --card: #ffffff;
+      /* карточка */
+      --fg: #0f172a;
+      /* основной текст (почти чёрный) */
+      --muted: #475569;
+      /* приглушённый текст */
+      --accent: #6366f1;
+      /* фиолетовый акцент (как было, но на светлом) */
+      --border: rgba(15, 23, 42, .08);
+      --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+      color: var(--fg);
+      /* background: radial-gradient(1200px 700px at 50% -10%, #1a1a2b 0%, #0b0b12 60%); */
+      background:
+        radial-gradient(900px 400px at 50% -10%, #eef2ff 0%, rgba(238, 242, 255, 0) 60%),
+        radial-gradient(900px 400px at 100% 120%, #e0f2fe 0%, rgba(224, 242, 254, 0) 60%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+    }
+
+    /* .card {
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      max-width: 520px;
+      width: min(90vw, 520px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .35);
+      text-align: center;
+    } */
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: min(92vw, 520px);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    /* h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+    } */
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 8px;
+      letter-spacing: .2px;
+    }
+
+    p {
+      margin: 6px 0 0;
+      color: var(--muted);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      margin: 10px 0 0;
+    }
+
+    /* .spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(255, 255, 255, .25);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    } */
+
+    .spinner {
+      width: 22px;
+      height: 22px;
+      border: 3px solid rgba(99, 102, 241, .18);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 14px;
+    }
+
+    /* .btn {
+      margin-top: 14px;
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #fff;
+      background: var(--accent);
+      border: 1px solid rgba(255, 255, 255, .1);
+    } */
+
+    .btn {
+      margin-top: 14px;
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      color: #fff;
+      background: var(--accent);
+      border: 1px solid rgba(99, 102, 241, .25);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, .25);
+    }
+
+    /* .domain {
+      font-weight: 600;
+      color: #e0e0ff
+    } */
+    .domain {
+      font-weight: 600;
+      color: #4338ca;
+    }
+
+    /* немного темнее акцент */
+  </style>
+
+  <!-- Fallback на случай отключённого JS: метаредирект через 2с (будет заменён скриптом на целевой URL) -->
+  <meta id="meta-refresh" http-equiv="refresh" content="5;url=/" />
+</head>
+
+<body>
+  <div class="card" role="status" aria-live="polite">
+    <div class="row">
+      <div class="spinner" aria-hidden="true"></div>
+      <h1>Открываем магазин…</h1>
+    </div>
+    <p id="shopLine" class="hint">Подготавливаем страницу</p>
+    <a id="directLink" class="btn" href="/" rel="noopener nofollow sponsored">Открыть сразу</a>
+  </div>
+
+  <script>
+    // Читаем ?to=... и СРАЗУ чистим адресную строку (без перезагрузки),
+    // чтобы пользователь не видел параметры партнёрки.
+    const params = new URLSearchParams(location.search);
+    const raw = (() => {
+      if (params.has('to')) return params.get('to');        // поддержка старых ссылок
+      if (!params.has('t')) return "";
+      try {
+        const b = params.get('t').replace(/-/g, '+').replace(/_/g, '/');
+        return atob(b);
+      } catch { return ""; }
+    })();
+
+    // Скрываем параметры из адресной строки (визуально)
+    try { history.replaceState(null, '', location.pathname); } catch { }
+
+    let url;
+    try {
+      url = new URL(raw);
+    } catch {
+      document.getElementById('shopLine').textContent = 'Некорректная ссылка. Возвращаем на главную…';
+      setTimeout(() => location.replace('/'), 800);
+    }
+
+    // [Белый список трекинг-доменов] — минимальная защита от open-redirect
+    const AFF_HOSTS = new Set([
+      'bywiola.com', 'uuwgc.com', 'qwpeg.com', 'xpuvo.com',
+      'admitad.com', 'actionpay.net', 'cityads.com', 'effiliation.com', 'advcake.com'
+    ]);
+
+    if (url) {
+      // Если это известный трекер — показываем домен магазина (из ulp)
+      try {
+        const ulp = url.searchParams.get('ulp');
+        let host = url.hostname;
+        if (ulp) {
+          const target = new URL(decodeURIComponent(ulp));
+          host = target.hostname;
+        }
+        document.getElementById('shopLine').innerHTML = 'Магазин: <span class="domain">' + host + '</span>';
+      } catch { }
+
+      // Блокируем неразрешённые домены (против злоупотреблений параметром ?to=)
+      if (!AFF_HOSTS.has(url.hostname)) {
+        document.getElementById('shopLine').textContent = 'Неразрешённый домен. Возвращаем на главную…';
+        setTimeout(() => location.replace('/'), 800);
+      } else {
+        const a = document.getElementById('directLink');
+        a.href = url.toString();
+
+        const mr = document.getElementById('meta-refresh');
+        if (mr) mr.setAttribute('content', '3;url=' + encodeURI(url.toString()));
+
+        setTimeout(() => {
+          // Прямой переход (без реферера — см. <meta name="referrer" ...>)
+          const tmp = document.createElement('a');
+          tmp.href = url.toString();
+          tmp.rel = 'noopener nofollow sponsored';
+          tmp.target = '_self';
+          tmp.click();
+        }, 80);
+      }
+    }
+  </script>
+
+</body>
+
+</html>

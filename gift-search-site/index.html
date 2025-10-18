@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GiftBot — подбор подарков за 10 секунд</title>
+  <meta name="description" content="GiftBot — Telegram-бот и каталог для подбора подарков по возрасту и бюджету. Найдите идеальный подарок за секунды!">
+
+  <!-- Сохраняем существующие метатеги -->
+  <link rel="canonical" href="https://<username>.github.io/giftbot/">
+  <meta property="og:title" content="GiftBot — подбор подарков">
+  <meta property="og:description" content="Подберём подарок за 10 секунд: укажите кому, возраст и бюджет.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://<username>.github.io/giftbot/">
+  <meta property="og:image" content="https://<username>.github.io/giftbot/og.png">
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"GiftBot",
+    "url":"https://<username>.github.io/giftbot/",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://<username>.github.io/giftbot/?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- Yandex.Metrica counter -->
+  <script type="text/javascript">
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+      m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+    })
+      (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    ym(XXXXXXX, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+  </script>
+  <!-- /Yandex.Metrica counter -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-AB12C3D4E5"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-AB12C3D4E5');
+  </script>
+
+  <!-- Preconnect к частым партнёрским доменам (ускоряет соединение) Добавить, если появятся другие -->
+  <link rel="preconnect" href="https://bywiola.com" crossorigin>
+  <link rel="preconnect" href="https://uuwgc.com" crossorigin>
+  <link rel="preconnect" href="https://qwpeg.com" crossorigin>
+  <link rel="preconnect" href="https://xpuvo.com" crossorigin>
+
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <noscript>
+    <div><img src="https://mc.yandex.ru/watch/XXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
+  </noscript>
+
+  <div class="parallax-container">
+    <div class="parallax-layer layer-bg"></div>
+    <div class="parallax-layer layer-bokeh"></div>
+    <div class="parallax-layer layer-gift"></div>
+  </div>
+
+  <header>
+    <div class="container">
+      <nav class="nav-menu">
+        <a href="#" class="logo">🎁 Что подарить</a>
+        <button class="theme-toggle" aria-label="Переключить тему">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero секция -->
+    <section class="hero compact-hero">
+      <div class="container">
+        <h1 class="hero-title">Найдём идеальный подарок за секунды</h1>
+
+        <div class="search-block glass-effect">
+          <!-- Компактный заголовок (показывается в sticky режиме) -->
+          <div class="search-compact-title">
+            <p>Введите кому возраст бюджет</p>
+          </div>
+
+          <div class="search-hint">
+            <p class="greeting">Привет! 👋</p>
+            <!-- <p class="instruction">Я помогу подобрать подарок для кого скажешь.</p> -->
+            <div class="example-block">
+              <p class="example-title">Просто напиши: <strong>кому возраст бюджет</strong></p>
+              <!-- <p class="example-text">
+                Например, если ищешь подарок сестре, которой 26 лет с бюджетом до 3000 рублей,
+                напиши просто и кратко: <span class="highlight">"сестра 26 3000"</span> — и всё!
+              </p>
+              <p class="example-text">
+                Или: <span class="highlight">"мама 50 8000"</span> — и я всё пойму!
+              </p> -->
+            </div>
+          </div>
+
+          <div class="search-input-group">
+            <input
+              type="text"
+              id="searchInput"
+              class="search-input"
+              placeholder="например: сестре 26 3000"
+              aria-label="Поиск подарка"
+            >
+            <button id="searchBtn" class="search-btn">Найти</button>
+            <button class="help-btn" aria-label="Помощь">?</button>
+          </div>
+
+          <!-- Компактная ссылка на альтернативные контролы (показывается в sticky режиме) -->
+          <div class="search-compact-alt">
+            <a href="#" class="compact-alt-link">Или выберите параметры вручную</a>
+          </div>
+
+          <!-- Альтернативные контролы -->
+          <div class="alternative-controls">
+            <details class="controls-dropdown">
+              <summary>Или выберите параметры вручную</summary>
+              <div class="controls-grid">
+                <div class="control-group">
+                  <label for="recipientSelect">Получатель</label>
+                  <select id="recipientSelect">
+                    <option value="">Выберите...</option>
+                    <option value="мама">Мама</option>
+                    <option value="папа">Папа</option>
+                    <option value="жена">Жена</option>
+                    <option value="муж">Муж</option>
+                    <option value="дочь">Дочь</option>
+                    <option value="сын">Сын</option>
+                    <option value="сестра">Сестра</option>
+                    <option value="брат">Брат</option>
+                    <option value="подруга">Подруга</option>
+                    <option value="друг">Друг</option>
+                    <option value="девушка">Девушка</option>
+                    <option value="парень">Парень</option>
+                    <option value="коллега">Коллега</option>
+                    <option value="начальник">Начальник</option>
+                    <option value="ребенок">Ребёнок</option>
+                    <option value="бабушка">Бабушка</option>
+                    <option value="дедушка">Дедушка</option>
+                  </select>
+                </div>
+                <div class="control-group">
+                  <label for="ageInput">Возраст</label>
+                  <input type="number" id="ageInput" min="1" max="100" placeholder="25">
+                </div>
+                <div class="control-group">
+                  <label for="budgetInput">Бюджет (₽)</label>
+                  <input type="number" id="budgetInput" min="100" max="100000" step="100" placeholder="5000">
+                </div>
+                <button id="altSearchBtn" class="alt-search-btn">Подобрать</button>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ПРОМО / стартовые карточки -->
+    <section class="random-gifts lazy-section">
+      <div class="container">
+        <h2 class="section-title">Подборки подарков</h2>
+        <div id="randomGifts" class="gifts-grid"></div>
+      </div>
+    </section>
+
+    <!-- Каталог (обычные карточки с ленивой подгрузкой) -->
+    <section id="catalogSection" class="catalog-gifts lazy-section">
+      <div class="container">
+        <h2 class="section-title">Случайные подарки для вдохновения</h2>
+    
+        <div id="catalogGifts" class="gifts-grid"></div>
+    
+        <!-- Кнопка пагинации каталога -->
+        <button id="catalogShowMoreBtn" class="load-more-btn hidden">Посмотреть ещё</button>
+    
+        <!-- Баннер после кнопки -->
+        <div id="catalogCTAContainer"></div>
+    
+        <!-- Спиннер загрузки (используем при дозагрузке) -->
+        <div id="catalogLoader" class="loader hidden">
+          <div class="spinner"></div>
+          <p>Загружаем ещё подарки...</p>
+        </div>
+    
+        <!-- Кнопка сброса к началу каталога (опц.) -->
+        <button id="catalogResetBtn" class="load-more-btn hidden">Начать поиск заново</button>
+      </div>
+    </section>
+
+
+
+    <!-- Результаты поиска -->
+    <section id="searchResults" class="search-results hidden">
+      <div class="container">
+        <h2 class="section-title">
+          <span id="resultsTitle">Результаты поиска</span>
+          <span id="resultsCount" class="results-count"></span>
+        </h2>
+    
+        <div id="resultsGrid" class="gifts-grid"></div>
+    
+        <!-- Кнопка пагинации результатов -->
+        <button id="loadMoreBtn" class="load-more-btn hidden">Посмотреть ещё</button>
+    
+        <!-- Баннер после кнопки -->
+        <div id="searchCTAContainer"></div>
+      </div>
+    </section>
+
+
+
+    <!-- Нет результатов -->
+    <section id="noResults" class="no-results hidden">
+      <div class="container">
+        <div class="no-results-content">
+          <span class="no-results-icon">🤔</span>
+          <h3>Ничего не нашлось</h3>
+          <p>Попробуйте изменить параметры поиска или посмотрите случайные подарки выше</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer с акцентом на Telegram-бот -->
+  <footer class="footer">
+    <div class="container">
+      <div class="telegram-cta glass-effect">
+        <div class="telegram-content">
+          <h3 class="telegram-title">🤖 Подарочный помощник в твоём кармане</h3>
+          <p class="telegram-text">
+            Наш чат-бот в Telegram подскажет идеи подарков за секунды — где бы ты ни был
+          </p>
+          <a href="https://t.me/poodarokBot" id="telegramLink" class="telegram-btn">
+            <svg class="telegram-icon" viewBox="0 0 24 24" width="24" height="24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.953l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+            </svg>
+            Перейти в Telegram-бота
+          </a>
+        </div>
+        <div class="telegram-decoration">
+          <span class="decoration-icon">🎁</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2025 GiftBot — Сделано с ❤️ для поиска идеальных подарков</p>
+      </div>
+      <!-- todo обязательно нужно сделать красиво -->
+      <p class="affiliate-disclaimer" style="opacity:.8;font-size:.9rem;margin-top:8px">
+        На сайте используются партнёрские ссылки. Переход по ним не влияет на цену у продавца и помогает поддерживать проект.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Tooltip для помощи -->
+  <div id="tooltip" class="tooltip hidden">
+    <p><strong>Формат ввода:</strong></p>
+    <p class="tooltip-title">получатель возраст бюджет</p>
+    <p class="tooltip-examples">
+      Примеры:<br>
+      • мама 45 8000<br>
+      • начальник 42 5000<br>
+      • ребенок 8 1500
+    </p>
+  </div>
+
+  <!-- Кнопка "Наверх" -->
+  <button id="toTopBtn" class="to-top-btn hidden" aria-label="Вернуться наверх">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- Оверлей «дружелюбного» перехода -->
+  <div id="transitionOverlay" class="transition-overlay hidden" aria-hidden="true">
+    <div class="overlay-box glass-effect">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="overlay-text">Открываем магазин…</p>
+    </div>
+  </div>
+
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

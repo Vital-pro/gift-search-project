@@ -1,0 +1,1 @@
+export const GIFTS_FOR_MEN = [];
