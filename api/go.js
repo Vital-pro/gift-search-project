@@ -1,7 +1,10 @@
 // api/go.js
-// Серверный редирект (302) на Vercel с осторожной проверкой ULP.
-// ВАЖНО: считаем ссылку "мёртвой" ТОЛЬКО при явном 404/410.
-// Любые 200/30x/403/405/timeout/ошибки -> пропускаем (fail-open).
+// Серверный редирект (302) + осторожная проверка ULP + Telegram-уведомления
+// не чаще 2 раз за 24 часа на каждый уникальный ULP (через Upstash Redis).
+//
+// Что считаем "мёртвым": ТОЛЬКО явный 404/410 от магазина (HEAD/GET). Всё остальное — пропускаем (fail-open).
+
+const crypto = require('crypto');
 
 const AFF_HOSTS = new Set([
   'bywiola.com',
@@ -11,6 +14,8 @@ const AFF_HOSTS = new Set([
   'admitad.com',
   'actionpay.net',
   'cityads.com',
+  'effiliation.com',
+  'advcake.com',
 ]);
 
 function b64urlDecode(input) {
@@ -22,7 +27,6 @@ function b64urlDecode(input) {
   }
 }
 
-// Безопасное двойное декодирование ULP (часто бывает дважды закодирован)
 function safeDecodeURIComponent(s) {
   try {
     const once = decodeURIComponent(s);
@@ -36,7 +40,6 @@ function safeDecodeURIComponent(s) {
   }
 }
 
-// Быстрый запрос с таймаутом
 async function timedFetch(url, opts = {}, timeoutMs = 600) {
   const controller = new AbortController();
   const to = setTimeout(() => controller.abort(), timeoutMs);
@@ -48,12 +51,13 @@ async function timedFetch(url, opts = {}, timeoutMs = 600) {
   }
 }
 
-// Проверка ULP: возвращает { dead:boolean, host?:string, status?:number }
+// Проверка ULP: dead = true только при 404/410. Иначе — жив (fail-open).
 async function probeUlp(targetUrl) {
   try {
     const u = new URL(targetUrl);
     const host = u.hostname;
-    // 1) Пробуем HEAD (быстро и дёшево)
+
+    // HEAD
     try {
       const r = await timedFetch(
         targetUrl,
@@ -62,22 +66,19 @@ async function probeUlp(targetUrl) {
       );
       if (r.status === 404 || r.status === 410)
         return { dead: true, host, status: r.status };
-      // Всё остальное (200/30x/403/405/500) -> НЕ считаем сразу мёртвым
       if (r.status !== 405 && r.status !== 403)
         return { dead: false, host, status: r.status };
-      // для 403/405 делаем дополнительный короткий GET
     } catch {
-      // упали на HEAD -> попробуем GET
+      /* попробуем GET */
     }
 
-    // 2) Короткий GET (минимальный заголовок + follow)
+    // GET
     const r2 = await timedFetch(
       targetUrl,
       {
         method: 'GET',
         redirect: 'follow',
         headers: {
-          // Нормальный UA, чтобы не нарваться на антибот
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117 Safari/537.36',
           Accept:
@@ -88,13 +89,83 @@ async function probeUlp(targetUrl) {
     );
     if (r2.status === 404 || r2.status === 410)
       return { dead: true, host, status: r2.status };
-    // Любой другой статус -> живой (даже 403/500 — не рискуем резать рабочие ссылки)
     return { dead: false, host, status: r2.status };
   } catch {
-    // не смогли распарсить URL или иная ошибка — лучше пропустить
     return { dead: false };
   }
 }
+
+// ====== Лимитер через Upstash Redis (<=2 уведомления за 24ч) ======
+
+function sha1(input) {
+  return crypto.createHash('sha1').update(input).digest('hex');
+}
+
+async function incrWithTtl24h(key) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+
+  // INCR
+  const incr = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const incrText = await incr.text();
+  const count = parseInt(incrText.replace(':', ''), 10);
+  if (Number.isNaN(count)) return null;
+
+  // TTL 24ч на первом инкременте
+  if (count === 1) {
+    await fetch(`${url}/expire/${encodeURIComponent(key)}/86400`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }
+  return count;
+}
+
+// ====== Telegram-уведомление ======
+
+async function sendTelegram(message) {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!token || !chatId) return false;
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    }),
+  });
+  return resp.ok;
+}
+
+async function notifyIfNeededTelegram(ulp, shopHost) {
+  const hash = sha1(ulp);
+  const key = `dead:${hash}`;
+  const count = await incrWithTtl24h(key);
+  if (!count) return; // нет Redis — выходим тихо
+  if (count > 2) return; // лимит за 24ч
+
+  const env = process.env.APP_ENV || 'production';
+  const time = new Date().toISOString();
+  const hostLine = shopHost ? `\n<b>Магазин:</b> ${shopHost}` : '';
+  const msg =
+    `<b>[${env}] Товар закончился</b>${hostLine}\n` +
+    `<b>ULP:</b> ${ulp}\n` +
+    `<b>Срабатывание #</b>${count} за 24ч\n` +
+    `<b>Время:</b> ${time}`;
+
+  await sendTelegram(msg);
+}
+
+// ====== Основной обработчик ======
 
 module.exports = async (req, res) => {
   const { t, to } = req.query || {};
@@ -111,7 +182,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Базовая валидация трекера
+  // Базовая валидация партнёрского домена
   const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
   if (!isHttp) {
     res.statusCode = 400;
@@ -126,13 +197,19 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // Пробуем извлечь ULP (финальный URL товара) и аккуратно проверить на явный 404/410
+  // Аккуратная проверка ULP
   const ulpParam = url.searchParams.get('ulp');
   if (ulpParam) {
     const decodedUlp = safeDecodeURIComponent(ulpParam);
     const probe = await probeUlp(decodedUlp);
+
     if (probe.dead) {
-      // Покажем пользователю дружелюбную заглушку вместо "жёсткого" 404 магазина
+      // Телеграм-уведомление (лимит <= 2 за 24ч)
+      try {
+        await notifyIfNeededTelegram(decodedUlp, probe.host);
+      } catch {}
+
+      // Дружелюбная заглушка
       const shopParam = probe.host
         ? `?shop=${encodeURIComponent(probe.host)}`
         : '';
@@ -144,7 +221,6 @@ module.exports = async (req, res) => {
       res.end();
       return;
     }
-    // иначе — считаем ссылку живой и редиректим штатно
   }
 
   // Штатный 302 на партнёрскую ссылку
