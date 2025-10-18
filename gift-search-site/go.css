@@ -1,0 +1,49 @@
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --fg: #0f172a;
+  --muted: #475569;
+  --accent: #6366f1;
+  --border: rgba(15, 23, 42, .08);
+  --shadow: 0 10px 30px rgba(2, 6, 23, .08);
+}
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+  color: var(--fg);
+  background:
+    radial-gradient(900px 400px at 50% -10%, #eef2ff 0%, rgba(238,242,255,0) 60%),
+    radial-gradient(900px 400px at 100% 120%, #e0f2fe 0%, rgba(224,242,254,0) 60%),
+    var(--bg);
+  display: grid;
+  place-items: center;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: min(92vw, 520px);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+h1 { font-size: 20px; margin: 0 0 8px; letter-spacing: .2px; }
+p { margin: 6px 0 0; color: var(--muted); }
+.row { display: flex; gap: 12px; align-items: center; justify-content: center; margin: 10px 0 0; }
+.spinner {
+  width: 22px; height: 22px;
+  border: 3px solid rgba(99, 102, 241, .18);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.hint { font-size: 13px; color: var(--muted); margin-top: 14px; }
+.btn {
+  margin-top: 14px; display: inline-block; padding: 10px 14px;
+  border-radius: 10px; text-decoration: none; color: #fff;
+  background: var(--accent); border: 1px solid rgba(99,102,241,.25);
+  box-shadow: 0 6px 20px rgba(99,102,241,.25);
+}
+.domain { font-weight: 600; color: #4338ca; }
