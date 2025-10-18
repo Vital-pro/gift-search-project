@@ -1,6 +1,6 @@
 // Импорт данных о подарках
-import { GIFTS as GIFTS } from '../data/index.js';
-import { recipientMap } from '../telegram-gift-bot-yc/src/recipient-map.js';
+import { GIFTS as GIFTS } from './data/index.js';
+import { recipientMap } from './vendor/recipient-map.js';
 
 // ===============================
 // Конфиг
