@@ -500,7 +500,10 @@ function createGiftCard(gift) {
   const setAvailable = (partnerUrl) => {
     if (!actions) return;
 
-    const interstitialUrl = `/go.html?t=${b64url(partnerUrl)}`;
+    // const interstitialUrl = `/go.html?t=${b64url(partnerUrl)}`;
+    
+    // ИЗМЕНЕНО: используем серверный редирект вместо фронтовой страницы
+    const interstitialUrl = `/api/go?t=${b64url(partnerUrl)}`;
 
     // 1) Рендерим НАСТОЯЩУЮ ссылку. Пусть браузер сам открывает её (надежнее всего).
     actions.innerHTML = `
