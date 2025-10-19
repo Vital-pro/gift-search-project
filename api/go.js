@@ -51,7 +51,7 @@ async function timedFetch(url, opts = {}, timeoutMs = 600) {
   }
 }
 
-// === ПРОБНИК: HEAD → (если нужно) GET + эвристики ===
+// === ПРОБНИК ULP: считаем dead ТОЛЬКО по 404/410 ===
 async function probeUlp(ulpStr) {
   try {
     const u = new URL(ulpStr);
@@ -63,14 +63,16 @@ async function probeUlp(ulpStr) {
       if ([404, 410].includes(head.status)) {
         return { dead: true, reason: 'http-dead', status: head.status, host };
       }
-    } catch { /* таймаут/сеть — игнорируем */ }
+    } catch {
+      // таймаут/ошибка сети — продолжаем к GET
+    }
 
     // 2) GET — если HEAD не показал dead
     let getResp;
     try {
       getResp = await fetchWithTimeout(ulpStr, { method: 'GET' }, 4500);
     } catch {
-      // сетевые ошибки не считаем dead, чтобы не мешать пользователю
+      // сетевые ошибки НЕ считаем dead — пропускаем пользователя
       return { dead: false, reason: 'probe-error', status: 0, host };
     }
 
@@ -78,21 +80,12 @@ async function probeUlp(ulpStr) {
       return { dead: true, reason: 'http-dead', status: getResp.status, host };
     }
 
-    const ct = getResp.headers.get('content-type') || '';
-    if (/text\/html|application\/xhtml\+xml/i.test(ct)) {
-      const html = await getResp.text(); // проще и стабильнее
-      if (looksOutOfStockHTML(html)) {
-        return { dead: true, reason: 'html-oos', status: getResp.status, host };
-      }
-    }
-
-    // живой товар (или не-HTML) — пропускаем
+    // Любой другой статус — считаем живым (никакого анализа HTML)
     return { dead: false, reason: 'ok', status: getResp.status, host };
   } catch {
     return { dead: false, reason: 'probe-error', status: 0, host: null };
   }
 }
-
 
 
 
@@ -126,48 +119,6 @@ async function incrWithTtl24h(key) {
     });
   }
   return count;
-}
-
-
-// === Хелперы для детекта "нет в наличии" (суженная, без ложных срабатываний) ===
-
-// Только СИЛЬНЫЕ русские признаки, которые обычно показываются пользователю
-const STRONG_OOS_PATTERNS = [
-  /товар\s*распродан/i,
-  /нет\s+в\s+наличии/i,
-  /временно\s+отсутствует/i,
-  /закончился|закончились/i,
-  /нет\s+в\s+продаже/i,
-  /ожидаем\s+поставку|ожидается\s+поставка/i,
-  /сообщить\s+о\s+поступлен/i,     // «Сообщить о поступлении»
-  /уведомить\s+о\s+поступлен/i
-];
-
-// schema.org в JSON-LD или атрибутах
-function looksOutOfStockJSONLD(html) {
-  const head = html.slice(0, 300_000);
-  const blocks = head.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
-  if (!blocks) return false;
-  for (const b of blocks) {
-    if (/https?:\/\/schema\.org\/(OutOfStock|PreOrder)/i.test(b)) return true;
-    if (/"availability"\s*:\s*"(OutOfStock|PreOrder)"/i.test(b)) return true;
-  }
-  return false;
-}
-
-// Удаляем <script> и <style>, чтобы слова из JS/CSS не мешали
-function stripScriptsAndStyles(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '');
-}
-
-function looksOutOfStockHTML(html) {
-  const sampleRaw = html.slice(0, 300_000);
-  const sample = stripScriptsAndStyles(sampleRaw);
-  if (STRONG_OOS_PATTERNS.some(re => re.test(sample))) return true;
-  if (looksOutOfStockJSONLD(sampleRaw)) return true; // JSON-LD ищем в «сырых» данных head
-  return false;
 }
 
 // === Безопасный fetch с таймаутом (HEAD/GET) ===
@@ -353,14 +304,13 @@ async function notifyIfNeededTelegram(
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  // Отправляем в Телеграм
   const tg = await sendTelegram(msg).catch((e) => ({
     ok: false,
     status: null,
     body: String(e),
   }));
 
-  // ЛОГ В ЛЮБОМ СЛУЧАЕ (даже если Telegram вернул ошибку)
+  // ЛОГ В ЛЮБОМ СЛУЧАЕ
   const logKey = `tglog:${hash}:${count}`;
   const logVal = JSON.stringify({
     time,
@@ -414,7 +364,9 @@ module.exports = async (req, res) => {
     if (probe.dead) {
       // Телеграм-уведомление (лимит <= 2 за 24ч)
       try {
-        await notifyIfNeededTelegram(ulp, probe.host, probe.reason, probe.status);
+        await notifyIfNeededTelegram(decodedUlp, probe.host, probe.reason, probe.status);
+//                     ^^^^^^^^^^^^  именно ЭТУ переменную передаём
+
       } catch {}
 
       // Дружелюбная заглушка.
