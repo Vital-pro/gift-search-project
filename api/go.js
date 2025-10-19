@@ -80,7 +80,7 @@ async function probeUlp(ulpStr) {
 
     const ct = getResp.headers.get('content-type') || '';
     if (/text\/html|application\/xhtml\+xml/i.test(ct)) {
-      const html = await getResp.text();        // проще и стабильнее
+      const html = await getResp.text(); // проще и стабильнее
       if (looksOutOfStockHTML(html)) {
         return { dead: true, reason: 'html-oos', status: getResp.status, host };
       }
@@ -92,6 +92,7 @@ async function probeUlp(ulpStr) {
     return { dead: false, reason: 'probe-error', status: 0, host: null };
   }
 }
+
 
 
 
@@ -127,26 +128,22 @@ async function incrWithTtl24h(key) {
   return count;
 }
 
-// === Хелперы для детекта "нет в наличии" ===
-const OUT_OF_STOCK_PATTERNS = [
-  /\bout[-_ ]?of[-_ ]?stock\b/i,
-  /\bsold[-_ ]?out\b/i,
-  /\bunavailable\b/i,
 
+// === Хелперы для детекта "нет в наличии" (суженная, без ложных срабатываний) ===
+
+// Только СИЛЬНЫЕ русские признаки, которые обычно показываются пользователю
+const STRONG_OOS_PATTERNS = [
   /товар\s*распродан/i,
   /нет\s+в\s+наличии/i,
   /временно\s+отсутствует/i,
   /закончился|закончились/i,
-  /недоступен|не\s+доступен/i,
-
-  /сообщить\s+о\s+поступлен/i,
-  /уведомить\s+о\s+поступлен/i,
-  /предзаказ|pre[- ]?order/i,
-
-  /itemprop=["']availability["'][^>]+?(OutOfStock|PreOrder)/i,
-  /content=["']https?:\/\/schema\.org\/(OutOfStock|PreOrder)["']/i
+  /нет\s+в\s+продаже/i,
+  /ожидаем\s+поставку|ожидается\s+поставка/i,
+  /сообщить\s+о\s+поступлен/i,     // «Сообщить о поступлении»
+  /уведомить\s+о\s+поступлен/i
 ];
 
+// schema.org в JSON-LD или атрибутах
 function looksOutOfStockJSONLD(html) {
   const head = html.slice(0, 300_000);
   const blocks = head.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
@@ -158,10 +155,18 @@ function looksOutOfStockJSONLD(html) {
   return false;
 }
 
+// Удаляем <script> и <style>, чтобы слова из JS/CSS не мешали
+function stripScriptsAndStyles(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '');
+}
+
 function looksOutOfStockHTML(html) {
-  const sample = html.slice(0, 300_000);
-  if (OUT_OF_STOCK_PATTERNS.some((re) => re.test(sample))) return true;
-  if (looksOutOfStockJSONLD(sample)) return true;
+  const sampleRaw = html.slice(0, 300_000);
+  const sample = stripScriptsAndStyles(sampleRaw);
+  if (STRONG_OOS_PATTERNS.some(re => re.test(sample))) return true;
+  if (looksOutOfStockJSONLD(sampleRaw)) return true; // JSON-LD ищем в «сырых» данных head
   return false;
 }
 
@@ -184,6 +189,7 @@ async function fetchWithTimeout(url, opts = {}, ms = 4000) {
     clearTimeout(timer);
   }
 }
+
 
 // ====== Telegram-уведомление ======
 
@@ -347,9 +353,14 @@ async function notifyIfNeededTelegram(
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  const tg = await sendTelegram(msg);
+  // Отправляем в Телеграм
+  const tg = await sendTelegram(msg).catch((e) => ({
+    ok: false,
+    status: null,
+    body: String(e),
+  }));
 
-  // Логи отправки в Redis (для диагностики)
+  // ЛОГ В ЛЮБОМ СЛУЧАЕ (даже если Telegram вернул ошибку)
   const logKey = `tglog:${hash}:${count}`;
   const logVal = JSON.stringify({
     time,
@@ -357,9 +368,10 @@ async function notifyIfNeededTelegram(
     ok: !!tg.ok,
     body: tg.body,
   });
-  await upstashSet(logKey, logVal, 86400);
-  await upstashSet(`tglog:last:${hash}`, logVal, 86400);
+  await upstashSet(logKey, logVal, 86400).catch(() => {});
+  await upstashSet(`tglog:last:${hash}`, logVal, 86400).catch(() => {});
 }
+
 
 // ====== Основной обработчик ======
 
