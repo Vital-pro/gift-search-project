@@ -337,24 +337,27 @@ module.exports = async (req, res) => {
         await notifyIfNeededTelegram(decodedUlp, probe.host);
       } catch {}
 
-      // Дружелюбная заглушка (Редиректим НА ПРЯМОЙ ПУТЬ К ФАЙЛУ в репозитории,
-      // чтобы миновать особенности rewrites и кэша на краях CDN)
+      // Дружелюбная заглушка.
+      // Возвращаем «красивый» путь и ВЫРУБАЕМ кэш, чтобы повторные переходы тоже
+      // всегда шли на нашу заглушку (а не на закешированный ответ/404 магазина).
       const shopParam = probe.host
         ? `?shop=${encodeURIComponent(probe.host)}`
         : '';
       res.statusCode = 302;
-      // ✅ ВАЖНО: укажем ПОЛНЫЙ путь к файлу, как он лежит в проекте
-      // (у тебя статика живёт в gift-search-site/)
-      res.setHeader(
-        'Location',
-        `/gift-search-site/out-of-stock.html${shopParam}`
-      );
-      res.setHeader('Referrer-Policy', 'no-referrer');
+      res.setHeader('Location', `/out-of-stock.html${shopParam}`);
+
+      // Анти-кэш на всех уровнях (браузер, CDN)
       res.setHeader(
         'Cache-Control',
         'no-store, no-cache, must-revalidate, max-age=0'
       );
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
+      // Без реферера для партнёров + не индексировать
+      res.setHeader('Referrer-Policy', 'no-referrer');
       res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+
       res.end();
       return;
     }
