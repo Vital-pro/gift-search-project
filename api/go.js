@@ -101,25 +101,27 @@ function sha1(input) {
   return crypto.createHash('sha1').update(input).digest('hex');
 }
 
+// Upstash REST: используем GET и RESP-число вида ":1\r\n"
 async function incrWithTtl24h(key) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
 
-  // INCR
-  const incr = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
+  // INCR (GET)
+  const r1 = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` }
   });
-  const incrText = await incr.text();
-  const count = parseInt(incrText.replace(':', ''), 10);
+  const t1 = await r1.text();                 // например, ":1\r\n"
+  const m = t1.match(/:(\d+)/);               // берём число после двоеточия
+  const count = m ? parseInt(m[1], 10) : Number.NaN;
   if (Number.isNaN(count)) return null;
 
-  // TTL 24ч на первом инкременте
+  // EXPIRE 24h (GET) — только при первом срабатывании
   if (count === 1) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/86400`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` }
     });
   }
   return count;
@@ -190,6 +192,34 @@ function escapeHtml(s) {
 }
 
 // ====== Telegram-уведомление (с подробным результатом) ======
+// ===== Сервисная запись в Upstash для отладки (tglog:...) =====
+async function upstashSet(key, value, ttlSec = null) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return false;
+
+  // SET (GET)
+  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  // EXPIRE (GET)
+  if (ttlSec) {
+    await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+  return true;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+  ));
+}
+
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -226,15 +256,15 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  const result = await sendTelegram(msg);
+  // 1) Пытаемся отправить в Telegram
+  const tg = await sendTelegram(msg);
 
-  // ЛОГ В UPSTASH: tglog:<hash>:<count> и tglog:last:<hash>
+  // 2) В любом случае — логируем ответ в Upstash, чтобы видеть причину
   const logKey = `tglog:${hash}:${count}`;
-  const logVal = JSON.stringify({ time, status: result.status, ok: !!result.ok, body: result.body });
+  const logVal = JSON.stringify({ time, status: tg.status, ok: !!tg.ok, body: tg.body });
   await upstashSet(logKey, logVal, 86400);
   await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
-
 
 
 // ====== Основной обработчик ======
