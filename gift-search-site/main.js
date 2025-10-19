@@ -10,6 +10,15 @@ const INITIAL_BATCH = 15;
 const LOAD_BATCH = 9;
 const PROMO_GIFTS_IDS = [1, 3, 5, 8, 12, 15];
 
+// === БАЗА API для межстраничного редиректа ===
+// В проде используем относительный путь (тот же домен).
+// На localhost прокидываем на прод-домен, где реально работает /api/go.
+const PROD_ORIGIN = 'https://gift-search-project.vercel.app'; // ← если у тебя другой домен — подставь его
+const API_BASE = (typeof location !== 'undefined' && location.hostname === 'localhost')
+  ? PROD_ORIGIN
+  : '';
+
+
 // Состояние приложения
 let currentFilters = { recipient: null, age: null, budget: null };
 let isSearchMode = false;
@@ -65,22 +74,94 @@ function translateCategory(category) {
 // ===============================
 // Оверлей плавного перехода на исходной вкладке
 // ===============================
-function showTransitionOverlay(msg = 'Открываем магазин…', autoHideMs = 1200) {
+// Дружелюбный оверлей перехода + отладка в консоль
+function showTransitionOverlay(msg = 'Переходим в магазин…', autoHideMs = 1200) {
   const el = document.getElementById('transitionOverlay');
-  if (!el) return;
-  const text = el.querySelector('.overlay-text');
-  if (text) text.textContent = msg;
+  if (!el) {
+    console.warn('[overlay] #transitionOverlay не найден в DOM');
+    return;
+  }
 
-  // FIX: фон оверлея не перехватывает клики по ссылкам под ним
-  el.style.pointerEvents = 'none';
+  const textNode = el.querySelector('.overlay-text');
+  if (textNode && typeof msg === 'string') textNode.textContent = msg;
 
+  // показать
   el.classList.remove('hidden');
-  // force reflow
+  // force reflow, чтобы CSS-анимация сработала
   // eslint-disable-next-line no-unused-expressions
   el.offsetHeight;
   el.classList.add('visible');
-  if (autoHideMs > 0) setTimeout(() => hideTransitionOverlay(), autoHideMs);
+  console.log('[overlay] show');
+
+  if (autoHideMs > 0) {
+    setTimeout(() => {
+      el.classList.remove('visible');
+      setTimeout(() => {
+        el.classList.add('hidden');
+        console.log('[overlay] hide');
+      }, 220);
+    }, autoHideMs);
+  }
 }
+
+// *********************
+// === Открытие в новой вкладке с дружелюбным прелоадером (без белого экрана) ===
+// ВАЖНО: вызывать ТОЛЬКО из обработчика клика/keydown (нужен user gesture).
+function openWithPreloader(targetUrl, title = 'Переходим в магазин…', sub = 'Пожалуйста, подождите', delayMs = 80) {
+  const w = window.open('', '_blank');
+  if (!w) return; // блокировщик попапов — выходим тихо
+
+  const html = `<!DOCTYPE html><html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title>
+<meta name="referrer" content="no-referrer">
+<style>
+:root{--bg:#f7f9ff;--fg:#0f1b2e;--muted:#5b6b85;--accent:#6c63ff;--card:#ffffff;--border:rgba(10,30,60,.10)}
+html,body{height:100%}body{margin:0;background:radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.8) 0%, rgba(247,249,255,.9) 60%, rgba(247,249,255,.95) 100%);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,system-ui,sans-serif;display:grid;place-items:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 18px;width:min(92vw,520px);box-shadow:0 10px 40px rgba(0,0,0,.08);display:flex;align-items:center;gap:12px}
+.spinner{width:20px;height:20px;border:3px solid rgba(15,27,46,.18);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
+h1{margin:0 0 2px;font-size:16px;line-height:1.4}
+p{margin:0;color:var(--muted);font-size:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0b0f18;--fg:#e7ecf7;--muted:#a9b3c8;--card:#1a1f2c;--border:rgba(255,255,255,.08)}
+  body{background:radial-gradient(1200px 700px at 50% -10%, rgba(20,24,36,.55) 0%, rgba(20,24,36,.45) 60%, rgba(20,24,36,.35) 100%), rgba(10,12,20,.85)}
+}
+</style></head><body>
+<div class="card">
+  <div class="spinner" aria-hidden="true"></div>
+  <div><h1>${title}</h1><p>${sub}</p></div>
+</div>
+<script>
+  try{ window.opener = null; }catch(e){}
+  setTimeout(function(){
+    try{ window.location.replace(${JSON.stringify(targetUrl)}); }
+    catch(_){ window.location.href = ${JSON.stringify(targetUrl)}; }
+  }, ${Math.max(0, delayMs)|0});
+</script>
+</body></html>`;
+
+  try {
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  } catch {
+    // Если document.write заблочен — запасной путь без прелоадера
+    try { w.location = targetUrl; } catch {}
+  }
+}
+
+// *************************
+
+// Отладка: Shift+O покажет оверлей. И окно window.__overlayTest()
+window.__overlayTest = () => showTransitionOverlay('Переходим в магазин…', 1200);
+document.addEventListener('keydown', (e) => {
+  if (e.shiftKey && (e.key === 'O' || e.key === 'О')) {
+    window.__overlayTest();
+  }
+});
+
+
 
 function hideTransitionOverlay() {
   const el = document.getElementById('transitionOverlay');
@@ -500,10 +581,11 @@ function createGiftCard(gift) {
   const setAvailable = (partnerUrl) => {
     if (!actions) return;
 
-    // const interstitialUrl = `/go.html?t=${b64url(partnerUrl)}`;
-    
     // ИЗМЕНЕНО: используем серверный редирект вместо фронтовой страницы
-    const interstitialUrl = `/api/go?t=${b64url(partnerUrl)}`;
+    // const interstitialUrl = `/api/go?t=${b64url(partnerUrl)}`;
+
+    const interstitialUrl = `${API_BASE}/api/go?t=${b64url(partnerUrl)}`;
+    //                      ^ добавили базу: '' в проде, полный прод-URL на localhost
 
     // 1) Рендерим НАСТОЯЩУЮ ссылку. Пусть браузер сам открывает её (надежнее всего).
     actions.innerHTML = `
@@ -515,15 +597,23 @@ function createGiftCard(gift) {
   `;
     const linkEl = actions.querySelector('.gift-buy-btn');
 
-    // Показываем оверлей до клика — НО не блокируем событие.
-    // linkEl.addEventListener('mousedown', () => showTransitionOverlay(), {
-    //   passive: true,
-    // });
+linkEl.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isPrimary = e.button === 0;
+  const hasMods = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+  if (isPrimary && !hasMods) {
+    e.preventDefault();
+    showTransitionOverlay('Переходим в магазин…', 1200); // старый таб — красивый оверлей
+    openWithPreloader(
+      linkEl.href,
+      'Открываем магазин…',
+      'Это займёт несколько секунд',
+      100
+    ); // новая вкладка — лоадер
+  }
+});
 
-    // Важно: НЕ делаем preventDefault. Только остановим всплытие, чтобы карточка не открыла вторую вкладку.
-    linkEl.addEventListener('click', (e) => {
-      e.stopPropagation(); // не даём событию «дойти» до обработчика карточки
-    });
+
 
     // 2) Карточка: клик по пустому месту — открыть межстраницу в НОВОЙ вкладке.
     card.style.cursor = 'pointer';
@@ -532,20 +622,34 @@ function createGiftCard(gift) {
     card.setAttribute('aria-label', `Открыть товар: ${gift.name}`);
 
     // Только ЛКМ без модификаторов — открываем одну новую вкладку.
-    card.addEventListener('click', (e) => {
-      const isPrimary = e.button === 0;
-      const hasMods = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
-      if (!isPrimary || hasMods) return;
-      window.open(interstitialUrl, '_blank', 'noopener'); // без фолбэка на текущую вкладку
-    });
+card.addEventListener('click', (e) => {
+  if (e.target && e.target.closest && e.target.closest('.gift-buy-btn')) return;
+  showTransitionOverlay('Переходим в магазин…', 1200);
+  openWithPreloader(
+    interstitialUrl,
+    'Открываем магазин…',
+    'Пожалуйста, подождите',
+    100
+  );
+});
+
+
 
     // Доступность: Enter/Space
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        window.open(interstitialUrl, '_blank', 'noopener');
-      }
-    });
+card.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    showTransitionOverlay('Переходим в магазин…', 1200);
+    openWithPreloader(
+      interstitialUrl,
+      'Открываем магазин…',
+      'Пожалуйста, подождите',
+      100
+    );
+  }
+});
+
+
   };
 
   if (!partnerUrl) {

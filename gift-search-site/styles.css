@@ -1533,3 +1533,95 @@ section {
 #transitionOverlay .overlay-box {
   pointer-events: auto;
 }
+
+/* ====== Transition Overlay (светлый, дружелюбный) ====== */
+.transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.45) 0%, rgba(255,255,255,.25) 60%, rgba(255,255,255,.15) 100%),
+    rgba(240, 244, 255, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  opacity: 0;
+  pointer-events: none;            /* не перехватывает клики */
+  transition: opacity .25s ease;
+}
+
+/* ВНИМАНИЕ: мы не используем display:none здесь — только прозрачность */
+.transition-overlay.hidden { opacity: 0; }
+/* Исключение: для оверлея .hidden НЕ должен прятать display, только прозрачность */
+.transition-overlay.hidden { display: grid; }
+
+.transition-overlay.visible { opacity: 1; }
+
+.transition-overlay .overlay-box {
+  width: min(92vw, 520px);
+  border-radius: 16px;
+  padding: 18px 16px;
+
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(10, 30, 60, .10);
+  box-shadow: 0 10px 40px rgba(0,0,0,.12);
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  transform: translateY(6px);
+  transition: transform .25s ease, opacity .25s ease;
+  opacity: .98;
+}
+.transition-overlay.visible .overlay-box {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.transition-overlay .overlay-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #0f1b2e;
+}
+
+.transition-overlay .spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(15, 27, 46, .18);
+  border-top-color: #6c63ff;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  flex: 0 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Тёмная тема */
+[data-theme="dark"] .transition-overlay {
+  background:
+    radial-gradient(1200px 700px at 50% -10%, rgba(20,24,36,.55) 0%, rgba(20,24,36,.45) 60%, rgba(20,24,36,.35) 100%),
+    rgba(10, 12, 20, 0.65);
+}
+[data-theme="dark"] .transition-overlay .overlay-box {
+  background: rgba(24, 26, 34, .95);
+  border-color: rgba(255, 255, 255, .08);
+  box-shadow: 0 10px 40px rgba(0,0,0,.35);
+}
+[data-theme="dark"] .transition-overlay .overlay-text { color: #e7ecf7; }
+[data-theme="dark"] .transition-overlay .spinner {
+  border-color: rgba(231, 236, 247, .25);
+  border-top-color: #8a84ff;
+}
+
+/* Уважение к предпочтениям анимации */
+@media (prefers-reduced-motion: reduce) {
+  .transition-overlay,
+  .transition-overlay .overlay-box {
+    transition: none !important;
+    animation: none !important;
+  }
+}

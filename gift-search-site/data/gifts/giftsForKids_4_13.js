@@ -1,5 +1,28 @@
 ﻿export const GIFTS_FOR_KIDS_4_13 = [
   {
+    id: 121312313132,
+    name: 'ПРОСТО УДАЛИТЬ!!  Ручка 3D Lanson Toys «Космическое путешествие»',
+    price: 100,
+    recipientTags: ['ребёнок', 'сын', 'дочь'],
+    ageRange: [7, 13],
+    description:
+      'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
+    category: 'creativity',
+    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchcheskoe-puteshestvie-v-assortimente%2F',
+  },
+  {
+    id: 27879878798,
+    name: 'ПРОСТО УДАЛИТЬ!!  Игровой набор раций Lanson Toys 2шт',
+    price: 150,
+    recipientTags: ['ребёнок', 'сын', 'дочь'],
+    ageRange: [4, 14],
+    description:
+      'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
+    category: 'toys',
+    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
+  },
+  {
     id: 1,
     name: 'Ручка 3D Lanson Toys «Космическое путешествие»',
     price: 1899,
@@ -8,7 +31,7 @@
     description:
       'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
     category: 'creativity',
-    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchcheskoe-puteshestvie-v-assortimente%2F',
+    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchka-3d-kosmicheskoe-puteshestvie-v-assortimente%2F',
   },
   {
     id: 2,
@@ -19,8 +42,7 @@
     description:
       'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
     category: 'toys',
-    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
-    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
+    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
   },
   {
     id: 3,
