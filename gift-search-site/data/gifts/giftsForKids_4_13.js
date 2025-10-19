@@ -19,7 +19,8 @@
     description:
       'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
     category: 'toys',
-    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
   },
   {
     id: 3,

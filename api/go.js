@@ -127,6 +127,47 @@ async function incrWithTtl24h(key) {
   return count;
 }
 
+// === [НОВОЕ] : эвристики "нет в наличии" в HTML ===
+const OUT_OF_STOCK_PATTERNS = [
+  /out[-_ ]?of[-_ ]?stock/i,
+  /нет\s+в\s+наличии/i,
+  /товар[^\n]{0,40}нет[^\n]{0,20}налич/i,
+  /нет\s+доступен|недоступен|распродан/i,
+  /ожидаем\s+поставку|ожидается\s+поставка/i,
+  /sold\s*out/i,
+  /unavailable/i,
+  // schema.org
+  /itemprop=["']availability["'][^>]+?(OutOfStock|PreOrder)/i,
+  /content=["']https?:\/\/schema\.org\/(OutOfStock|PreOrder)["']/i,
+];
+
+function looksOutOfStockHTML(html) {
+  const sample = html.slice(0, 150_000);      // читаем максимум 150 КБ
+  return OUT_OF_STOCK_PATTERNS.some((re) => re.test(sample));
+}
+
+// Универсальный GET с таймаутом
+async function fetchWithTimeout(url, opts = {}, ms = 3500) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), ms);
+  try {
+    const resp = await fetch(url, {
+      redirect: 'follow',
+      headers: {
+        'user-agent':
+          'Mozilla/5.0 (compatible; GiftBot-Probe/1.0; +https://example)',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      },
+      signal: ac.signal,
+      ...opts,
+    });
+    return resp;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+
 // ====== Telegram-уведомление ======
 
 function escapeHtml(s) {
