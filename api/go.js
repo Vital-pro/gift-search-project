@@ -110,10 +110,10 @@ async function incrWithTtl24h(key) {
   // INCR (GET)
   const r1 = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
     method: 'GET',
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
-  const t1 = await r1.text();                 // например, ":1\r\n"
-  const m = t1.match(/:(\d+)/);               // берём число после двоеточия
+  const t1 = await r1.text(); // например, ":1\r\n"
+  const m = t1.match(/:(\d+)/); // берём число после двоеточия
   const count = m ? parseInt(m[1], 10) : Number.NaN;
   if (Number.isNaN(count)) return null;
 
@@ -121,7 +121,7 @@ async function incrWithTtl24h(key) {
   if (count === 1) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/86400`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
   return count;
@@ -146,24 +146,31 @@ async function upstashSet(key, value, ttlSec = null) {
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return false;
   // SET
-  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  await fetch(
+    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   // EXPIRE (если нужен TTL)
   if (ttlSec) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
   return true;
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => (
-    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
-  ));
+  return String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        c
+      ])
+  );
 }
 
 // ====== Telegram-уведомление (возвращаем подробный результат) ======
@@ -172,23 +179,30 @@ async function upstashSet(key, value, ttlSec = null) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return false;
-  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  await fetch(
+    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   if (ttlSec) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
   return true;
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => (
-    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
-  ));
+  return String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        c
+      ])
+  );
 }
 
 // ====== Telegram-уведомление (с подробным результатом) ======
@@ -199,42 +213,50 @@ async function upstashSet(key, value, ttlSec = null) {
   if (!url || !token) return false;
 
   // SET (GET)
-  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  await fetch(
+    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
+    {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
 
   // EXPIRE (GET)
   if (ttlSec) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     });
   }
   return true;
 }
 
 function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => (
-    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
-  ));
+  return String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        c
+      ])
+  );
 }
 
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return { ok:false, status:null, body:'missing env' };
+  if (!token || !chatId)
+    return { ok: false, status: null, body: 'missing env' };
 
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const resp = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type':'application/json' },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: chatId,
       text: escapeHtml(message),
       parse_mode: 'HTML',
-      disable_web_page_preview: true
-    })
+      disable_web_page_preview: true,
+    }),
   });
   const body = await resp.text();
   return { ok: resp.ok, status: resp.status, body };
@@ -244,8 +266,8 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
   const hash = sha1(ulp);
   const key = `dead:${hash}`;
   const count = await incrWithTtl24h(key);
-  if (!count) return;     // нет Redis — тихо выходим
-  if (count > 2) return;  // лимит за 24ч
+  if (!count) return; // нет Redis — тихо выходим
+  if (count > 2) return; // лимит за 24ч
 
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
@@ -261,11 +283,15 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
 
   // 2) В любом случае — логируем ответ в Upstash, чтобы видеть причину
   const logKey = `tglog:${hash}:${count}`;
-  const logVal = JSON.stringify({ time, status: tg.status, ok: !!tg.ok, body: tg.body });
+  const logVal = JSON.stringify({
+    time,
+    status: tg.status,
+    ok: !!tg.ok,
+    body: tg.body,
+  });
   await upstashSet(logKey, logVal, 86400);
   await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
-
 
 // ====== Основной обработчик ======
 
@@ -311,14 +337,23 @@ module.exports = async (req, res) => {
         await notifyIfNeededTelegram(decodedUlp, probe.host);
       } catch {}
 
-      // Дружелюбная заглушка
+      // Дружелюбная заглушка (Редиректим НА ПРЯМОЙ ПУТЬ К ФАЙЛУ в репозитории,
+      // чтобы миновать особенности rewrites и кэша на краях CDN)
       const shopParam = probe.host
         ? `?shop=${encodeURIComponent(probe.host)}`
         : '';
       res.statusCode = 302;
-      res.setHeader('Location', `/out-of-stock.html${shopParam}`);
+      // ✅ ВАЖНО: укажем ПОЛНЫЙ путь к файлу, как он лежит в проекте
+      // (у тебя статика живёт в gift-search-site/)
+      res.setHeader(
+        'Location',
+        `/gift-search-site/out-of-stock.html${shopParam}`
+      );
       res.setHeader('Referrer-Policy', 'no-referrer');
-      res.setHeader('Cache-Control', 'no-store');
+      res.setHeader(
+        'Cache-Control',
+        'no-store, no-cache, must-revalidate, max-age=0'
+      );
       res.setHeader('X-Robots-Tag', 'noindex, nofollow');
       res.end();
       return;
