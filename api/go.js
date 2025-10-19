@@ -138,10 +138,37 @@ function escapeHtml(s) {
 }
 
 // ====== Telegram-уведомление (с логами ошибок) ======
+// ===== ВСПОМОГАТЕЛЬНО: запись в Upstash для отладки (новое) =====
+async function upstashSet(key, value, ttlSec = null) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return false;
+  // SET
+  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  // EXPIRE (если нужен TTL)
+  if (ttlSec) {
+    await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+  return true;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+  ));
+}
+
+// ====== Telegram-уведомление (возвращаем подробный результат) ======
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return { ok: false, reason: 'missing env' };
+  if (!token || !chatId) return { ok:false, reason:'missing env' };
 
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const resp = await fetch(url, {
@@ -151,25 +178,20 @@ async function sendTelegram(message) {
       chat_id: chatId,
       text: escapeHtml(message),
       parse_mode: 'HTML',
-      disable_web_page_preview: true,
-    }),
+      disable_web_page_preview: true
+    })
   });
-  const body = await resp.text();
 
-  if (!resp.ok) {
-    // Лог в Vercel -> можно посмотреть в Project → Functions → Logs
-    console.error('Telegram sendMessage failed', { status: resp.status, body });
-    return { ok: false, status: resp.status, body };
-  }
-  return { ok: true };
+  const body = await resp.text();
+  return { ok: resp.ok, status: resp.status, body };
 }
 
 async function notifyIfNeededTelegram(ulp, shopHost) {
   const hash = sha1(ulp);
   const key = `dead:${hash}`;
   const count = await incrWithTtl24h(key);
-  if (!count) return; // нет Redis — тихо выходим
-  if (count > 2) return; // лимит за 24ч
+  if (!count) return;     // нет Redis — тихо выходим
+  if (count > 2) return;  // лимит за 24ч
 
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
@@ -180,12 +202,23 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
+  // === ОТПРАВКА
   const result = await sendTelegram(msg);
-  if (!result.ok) {
-    // Доп. лог — чтобы точно увидеть причину
-    console.error('notifyIfNeededTelegram error', result);
-  }
+
+  // === НОВОЕ: сохраним ответ TG в Upstash для отладки (видно в Data Browser)
+  const logKey = `tglog:${hash}:${count}`;
+  const logVal = JSON.stringify({
+    time,
+    status: result.status ?? null,
+    ok: !!result.ok,
+    body: result.body ?? null
+  });
+  await upstashSet(logKey, logVal, 86400); // хранить сутки
+
+  // (опц.) если хочешь ещё «последний ответ» без счётчика:
+  await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
+
 
 // ====== Основной обработчик ======
 
