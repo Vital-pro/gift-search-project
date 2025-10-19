@@ -165,15 +165,40 @@ function escapeHtml(s) {
 }
 
 // ====== Telegram-уведомление (возвращаем подробный результат) ======
+// ===== ВСПОМОГАТЕЛЬНО: запись в Upstash для отладки (tglog:...) =====
+async function upstashSet(key, value, ttlSec = null) {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return false;
+  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (ttlSec) {
+    await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+  return true;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => (
+    { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+  ));
+}
+
+// ====== Telegram-уведомление (с подробным результатом) ======
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return { ok:false, reason:'missing env' };
+  if (!token || !chatId) return { ok:false, status:null, body:'missing env' };
 
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const resp = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({
       chat_id: chatId,
       text: escapeHtml(message),
@@ -181,7 +206,6 @@ async function sendTelegram(message) {
       disable_web_page_preview: true
     })
   });
-
   const body = await resp.text();
   return { ok: resp.ok, status: resp.status, body };
 }
@@ -202,22 +226,15 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  // === ОТПРАВКА
   const result = await sendTelegram(msg);
 
-  // === НОВОЕ: сохраним ответ TG в Upstash для отладки (видно в Data Browser)
+  // ЛОГ В UPSTASH: tglog:<hash>:<count> и tglog:last:<hash>
   const logKey = `tglog:${hash}:${count}`;
-  const logVal = JSON.stringify({
-    time,
-    status: result.status ?? null,
-    ok: !!result.ok,
-    body: result.body ?? null
-  });
-  await upstashSet(logKey, logVal, 86400); // хранить сутки
-
-  // (опц.) если хочешь ещё «последний ответ» без счётчика:
+  const logVal = JSON.stringify({ time, status: result.status, ok: !!result.ok, body: result.body });
+  await upstashSet(logKey, logVal, 86400);
   await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
+
 
 
 // ====== Основной обработчик ======
