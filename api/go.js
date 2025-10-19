@@ -51,23 +51,28 @@ async function timedFetch(url, opts = {}, timeoutMs = 600) {
   }
 }
 
-// Проверка целевого ULP на «мертвость» (404/410) и «живой 200, но нет в наличии»
+// === ПРОБНИК: HEAD → (если нужно) GET + эвристики ===
 async function probeUlp(ulpStr) {
   try {
     const u = new URL(ulpStr);
     const host = u.hostname;
 
-    // 1) Быстрый HEAD
-    let head;
+    // 1) HEAD — быстрый статус
     try {
-      head = await fetchWithTimeout(ulpStr, { method: 'HEAD' }, 2500);
-      if (head && [404, 410].includes(head.status)) {
+      const head = await fetchWithTimeout(ulpStr, { method: 'HEAD' }, 2500);
+      if ([404, 410].includes(head.status)) {
         return { dead: true, reason: 'http-dead', status: head.status, host };
       }
-    } catch {}
+    } catch { /* таймаут/сеть — игнорируем */ }
 
-    // 2) GET (если HEAD не дал мёртвый код)
-    const getResp = await fetchWithTimeout(ulpStr, { method: 'GET' }, 4500);
+    // 2) GET — если HEAD не показал dead
+    let getResp;
+    try {
+      getResp = await fetchWithTimeout(ulpStr, { method: 'GET' }, 4500);
+    } catch {
+      // сетевые ошибки не считаем dead, чтобы не мешать пользователю
+      return { dead: false, reason: 'probe-error', status: 0, host };
+    }
 
     if ([404, 410].includes(getResp.status)) {
       return { dead: true, reason: 'http-dead', status: getResp.status, host };
@@ -75,21 +80,19 @@ async function probeUlp(ulpStr) {
 
     const ct = getResp.headers.get('content-type') || '';
     if (/text\/html|application\/xhtml\+xml/i.test(ct)) {
-      const buf = await getResp.arrayBuffer();
-      const html = new TextDecoder('utf-8', { fatal: false }).decode(buf);
-
+      const html = await getResp.text();        // проще и стабильнее
       if (looksOutOfStockHTML(html)) {
         return { dead: true, reason: 'html-oos', status: getResp.status, host };
       }
     }
 
-    // Живой товар / не-HTML / не смогли определить — пропускаем
+    // живой товар (или не-HTML) — пропускаем
     return { dead: false, reason: 'ok', status: getResp.status, host };
   } catch {
-    // Ошибки сети не считаем «мертвым товаром», чтобы не мешать пользователю
     return { dead: false, reason: 'probe-error', status: 0, host: null };
   }
 }
+
 
 
 // ====== Лимитер через Upstash Redis (<=2 уведомления за 24ч) ======
@@ -124,44 +127,33 @@ async function incrWithTtl24h(key) {
   return count;
 }
 
-// === Эвристики "нет в наличии" в HTML/JSON-LD (обновлено) ===
-
-// 1) Явные текстовые признаки в серверном HTML (которые часто отдают сразу, без JS)
+// === Хелперы для детекта "нет в наличии" ===
 const OUT_OF_STOCK_PATTERNS = [
-  // EN
   /\bout[-_ ]?of[-_ ]?stock\b/i,
   /\bsold[-_ ]?out\b/i,
   /\bunavailable\b/i,
 
-  // RU — чаще всего встречающиеся варианты
   /товар\s*распродан/i,
   /нет\s+в\s+наличии/i,
   /временно\s+отсутствует/i,
   /закончился|закончились/i,
-  /нет\s+в\s+продаже/i,
-  /нет\s+в\s+интернет[- ]?магазине/i,
   /недоступен|не\s+доступен/i,
 
-  // Кнопки/CTA, которые показывают отсутствие
-  /сообщить\s+о\s+поступлен/i,         // «Сообщить о поступлении»
+  /сообщить\s+о\s+поступлен/i,
   /уведомить\s+о\s+поступлен/i,
   /предзаказ|pre[- ]?order/i,
 
-  // Разметка schema.org в атрибутах
   /itemprop=["']availability["'][^>]+?(OutOfStock|PreOrder)/i,
   /content=["']https?:\/\/schema\.org\/(OutOfStock|PreOrder)["']/i
 ];
 
-// 2) JSON-LD: "availability": "https://schema.org/OutOfStock"
 function looksOutOfStockJSONLD(html) {
-  // читаем только верх документа (быстрее)
   const head = html.slice(0, 300_000);
-  // быстрый поиск <script type="application/ld+json"> ... availability ...
-  const ldBlocks = head.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
-  if (!ldBlocks) return false;
-  for (const block of ldBlocks) {
-    if (/https?:\/\/schema\.org\/(OutOfStock|PreOrder)/i.test(block)) return true;
-    if (/"availability"\s*:\s*"(OutOfStock|PreOrder)"/i.test(block)) return true;
+  const blocks = head.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+  if (!blocks) return false;
+  for (const b of blocks) {
+    if (/https?:\/\/schema\.org\/(OutOfStock|PreOrder)/i.test(b)) return true;
+    if (/"availability"\s*:\s*"(OutOfStock|PreOrder)"/i.test(b)) return true;
   }
   return false;
 }
@@ -173,16 +165,15 @@ function looksOutOfStockHTML(html) {
   return false;
 }
 
-// Универсальный GET/HEAD с таймаутом
-async function fetchWithTimeout(url, opts = {}, ms = 3500) {
+// === Безопасный fetch с таймаутом (HEAD/GET) ===
+async function fetchWithTimeout(url, opts = {}, ms = 4000) {
   const ac = new AbortController();
-  const t = setTimeout(() => ac.abort(), ms);
+  const timer = setTimeout(() => ac.abort(), ms);
   try {
     const resp = await fetch(url, {
       redirect: 'follow',
       headers: {
-        'user-agent':
-          'Mozilla/5.0 (compatible; GiftBot-Probe/1.0; +https://example)',
+        'user-agent': 'Mozilla/5.0 (compatible; GiftBot-Probe/1.0)',
         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
       },
       signal: ac.signal,
@@ -190,10 +181,9 @@ async function fetchWithTimeout(url, opts = {}, ms = 3500) {
     });
     return resp;
   } finally {
-    clearTimeout(t);
+    clearTimeout(timer);
   }
 }
-
 
 // ====== Telegram-уведомление ======
 
@@ -344,6 +334,7 @@ async function notifyIfNeededTelegram(
 
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
+
   const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
   const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
   const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
@@ -358,7 +349,7 @@ async function notifyIfNeededTelegram(
 
   const tg = await sendTelegram(msg);
 
-  // Лог результата Telegram в Redis (как раньше)
+  // Логи отправки в Redis (для диагностики)
   const logKey = `tglog:${hash}:${count}`;
   const logVal = JSON.stringify({
     time,
@@ -369,7 +360,6 @@ async function notifyIfNeededTelegram(
   await upstashSet(logKey, logVal, 86400);
   await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
-
 
 // ====== Основной обработчик ======
 
@@ -413,7 +403,6 @@ module.exports = async (req, res) => {
       // Телеграм-уведомление (лимит <= 2 за 24ч)
       try {
         await notifyIfNeededTelegram(ulp, probe.host, probe.reason, probe.status);
-
       } catch {}
 
       // Дружелюбная заглушка.
