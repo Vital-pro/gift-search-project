@@ -51,49 +51,46 @@ async function timedFetch(url, opts = {}, timeoutMs = 600) {
   }
 }
 
-// Проверка ULP: dead = true только при 404/410. Иначе — жив (fail-open).
-async function probeUlp(targetUrl) {
+// Проверка целевого ULP на «мертвость» (404/410) и «живой 200, но нет в наличии»
+async function probeUlp(ulpStr) {
   try {
-    const u = new URL(targetUrl);
+    const u = new URL(ulpStr);
     const host = u.hostname;
 
-    // HEAD
+    // 1) Быстрый HEAD
+    let head;
     try {
-      const r = await timedFetch(
-        targetUrl,
-        { method: 'HEAD', redirect: 'follow' },
-        600
-      );
-      if (r.status === 404 || r.status === 410)
-        return { dead: true, host, status: r.status };
-      if (r.status !== 405 && r.status !== 403)
-        return { dead: false, host, status: r.status };
-    } catch {
-      /* попробуем GET */
+      head = await fetchWithTimeout(ulpStr, { method: 'HEAD' }, 2500);
+      if (head && [404, 410].includes(head.status)) {
+        return { dead: true, reason: 'http-dead', status: head.status, host };
+      }
+    } catch {}
+
+    // 2) GET (если HEAD не дал мёртвый код)
+    const getResp = await fetchWithTimeout(ulpStr, { method: 'GET' }, 4500);
+
+    if ([404, 410].includes(getResp.status)) {
+      return { dead: true, reason: 'http-dead', status: getResp.status, host };
     }
 
-    // GET
-    const r2 = await timedFetch(
-      targetUrl,
-      {
-        method: 'GET',
-        redirect: 'follow',
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117 Safari/537.36',
-          Accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        },
-      },
-      700
-    );
-    if (r2.status === 404 || r2.status === 410)
-      return { dead: true, host, status: r2.status };
-    return { dead: false, host, status: r2.status };
+    const ct = getResp.headers.get('content-type') || '';
+    if (/text\/html|application\/xhtml\+xml/i.test(ct)) {
+      const buf = await getResp.arrayBuffer();
+      const html = new TextDecoder('utf-8', { fatal: false }).decode(buf);
+
+      if (looksOutOfStockHTML(html)) {
+        return { dead: true, reason: 'html-oos', status: getResp.status, host };
+      }
+    }
+
+    // Живой товар / не-HTML / не смогли определить — пропускаем
+    return { dead: false, reason: 'ok', status: getResp.status, host };
   } catch {
-    return { dead: false };
+    // Ошибки сети не считаем «мертвым товаром», чтобы не мешать пользователю
+    return { dead: false, reason: 'probe-error', status: 0, host: null };
   }
 }
+
 
 // ====== Лимитер через Upstash Redis (<=2 уведомления за 24ч) ======
 
@@ -127,26 +124,56 @@ async function incrWithTtl24h(key) {
   return count;
 }
 
-// === [НОВОЕ] : эвристики "нет в наличии" в HTML ===
+// === Эвристики "нет в наличии" в HTML/JSON-LD (обновлено) ===
+
+// 1) Явные текстовые признаки в серверном HTML (которые часто отдают сразу, без JS)
 const OUT_OF_STOCK_PATTERNS = [
-  /out[-_ ]?of[-_ ]?stock/i,
+  // EN
+  /\bout[-_ ]?of[-_ ]?stock\b/i,
+  /\bsold[-_ ]?out\b/i,
+  /\bunavailable\b/i,
+
+  // RU — чаще всего встречающиеся варианты
+  /товар\s*распродан/i,
   /нет\s+в\s+наличии/i,
-  /товар[^\n]{0,40}нет[^\n]{0,20}налич/i,
-  /нет\s+доступен|недоступен|распродан/i,
-  /ожидаем\s+поставку|ожидается\s+поставка/i,
-  /sold\s*out/i,
-  /unavailable/i,
-  // schema.org
+  /временно\s+отсутствует/i,
+  /закончился|закончились/i,
+  /нет\s+в\s+продаже/i,
+  /нет\s+в\s+интернет[- ]?магазине/i,
+  /недоступен|не\s+доступен/i,
+
+  // Кнопки/CTA, которые показывают отсутствие
+  /сообщить\s+о\s+поступлен/i,         // «Сообщить о поступлении»
+  /уведомить\s+о\s+поступлен/i,
+  /предзаказ|pre[- ]?order/i,
+
+  // Разметка schema.org в атрибутах
   /itemprop=["']availability["'][^>]+?(OutOfStock|PreOrder)/i,
-  /content=["']https?:\/\/schema\.org\/(OutOfStock|PreOrder)["']/i,
+  /content=["']https?:\/\/schema\.org\/(OutOfStock|PreOrder)["']/i
 ];
 
-function looksOutOfStockHTML(html) {
-  const sample = html.slice(0, 150_000);      // читаем максимум 150 КБ
-  return OUT_OF_STOCK_PATTERNS.some((re) => re.test(sample));
+// 2) JSON-LD: "availability": "https://schema.org/OutOfStock"
+function looksOutOfStockJSONLD(html) {
+  // читаем только верх документа (быстрее)
+  const head = html.slice(0, 300_000);
+  // быстрый поиск <script type="application/ld+json"> ... availability ...
+  const ldBlocks = head.match(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
+  if (!ldBlocks) return false;
+  for (const block of ldBlocks) {
+    if (/https?:\/\/schema\.org\/(OutOfStock|PreOrder)/i.test(block)) return true;
+    if (/"availability"\s*:\s*"(OutOfStock|PreOrder)"/i.test(block)) return true;
+  }
+  return false;
 }
 
-// Универсальный GET с таймаутом
+function looksOutOfStockHTML(html) {
+  const sample = html.slice(0, 300_000);
+  if (OUT_OF_STOCK_PATTERNS.some((re) => re.test(sample))) return true;
+  if (looksOutOfStockJSONLD(sample)) return true;
+  return false;
+}
+
+// Универсальный GET/HEAD с таймаутом
 async function fetchWithTimeout(url, opts = {}, ms = 3500) {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), ms);
@@ -156,10 +183,10 @@ async function fetchWithTimeout(url, opts = {}, ms = 3500) {
       headers: {
         'user-agent':
           'Mozilla/5.0 (compatible; GiftBot-Probe/1.0; +https://example)',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
       },
       signal: ac.signal,
-      ...opts,
+      ...opts
     });
     return resp;
   } finally {
@@ -303,26 +330,35 @@ async function sendTelegram(message) {
   return { ok: resp.ok, status: resp.status, body };
 }
 
-async function notifyIfNeededTelegram(ulp, shopHost) {
+async function notifyIfNeededTelegram(
+  ulp,
+  shopHost,
+  reason = 'unknown',
+  status = null
+) {
   const hash = sha1(ulp);
   const key = `dead:${hash}`;
   const count = await incrWithTtl24h(key);
-  if (!count) return; // нет Redis — тихо выходим
-  if (count > 2) return; // лимит за 24ч
+  if (!count) return;
+  if (count > 2) return;
 
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
   const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
+  const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
+  const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
+
   const msg =
-    `<b>[${escapeHtml(env)}] Товар закончился</b>${hostLine}\n` +
+    `<b>[${escapeHtml(
+      env
+    )}] Товар закончился</b>${hostLine}${statusLine}${reasonLine}\n` +
     `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  // 1) Пытаемся отправить в Telegram
   const tg = await sendTelegram(msg);
 
-  // 2) В любом случае — логируем ответ в Upstash, чтобы видеть причину
+  // Лог результата Telegram в Redis (как раньше)
   const logKey = `tglog:${hash}:${count}`;
   const logVal = JSON.stringify({
     time,
@@ -333,6 +369,7 @@ async function notifyIfNeededTelegram(ulp, shopHost) {
   await upstashSet(logKey, logVal, 86400);
   await upstashSet(`tglog:last:${hash}`, logVal, 86400);
 }
+
 
 // ====== Основной обработчик ======
 
@@ -375,7 +412,8 @@ module.exports = async (req, res) => {
     if (probe.dead) {
       // Телеграм-уведомление (лимит <= 2 за 24ч)
       try {
-        await notifyIfNeededTelegram(decodedUlp, probe.host);
+        await notifyIfNeededTelegram(ulp, probe.host, probe.reason, probe.status);
+
       } catch {}
 
       // Дружелюбная заглушка.
