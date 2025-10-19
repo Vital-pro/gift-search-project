@@ -127,10 +127,21 @@ async function incrWithTtl24h(key) {
 
 // ====== Telegram-уведомление ======
 
+function escapeHtml(s) {
+  return String(s).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
+        c
+      ])
+  );
+}
+
+// ====== Telegram-уведомление (с логами ошибок) ======
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId) return false;
+  if (!token || !chatId) return { ok: false, reason: 'missing env' };
 
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const resp = await fetch(url, {
@@ -138,31 +149,42 @@ async function sendTelegram(message) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       chat_id: chatId,
-      text: message,
+      text: escapeHtml(message),
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     }),
   });
-  return resp.ok;
+  const body = await resp.text();
+
+  if (!resp.ok) {
+    // Лог в Vercel -> можно посмотреть в Project → Functions → Logs
+    console.error('Telegram sendMessage failed', { status: resp.status, body });
+    return { ok: false, status: resp.status, body };
+  }
+  return { ok: true };
 }
 
 async function notifyIfNeededTelegram(ulp, shopHost) {
   const hash = sha1(ulp);
   const key = `dead:${hash}`;
   const count = await incrWithTtl24h(key);
-  if (!count) return; // нет Redis — выходим тихо
+  if (!count) return; // нет Redis — тихо выходим
   if (count > 2) return; // лимит за 24ч
 
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
-  const hostLine = shopHost ? `\n<b>Магазин:</b> ${shopHost}` : '';
+  const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
   const msg =
-    `<b>[${env}] Товар закончился</b>${hostLine}\n` +
-    `<b>ULP:</b> ${ulp}\n` +
+    `<b>[${escapeHtml(env)}] Товар закончился</b>${hostLine}\n` +
+    `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
     `<b>Срабатывание #</b>${count} за 24ч\n` +
     `<b>Время:</b> ${time}`;
 
-  await sendTelegram(msg);
+  const result = await sendTelegram(msg);
+  if (!result.ok) {
+    // Доп. лог — чтобы точно увидеть причину
+    console.error('notifyIfNeededTelegram error', result);
+  }
 }
 
 // ====== Основной обработчик ======
