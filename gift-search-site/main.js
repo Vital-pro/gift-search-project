@@ -14,10 +14,10 @@ const PROMO_GIFTS_IDS = [1, 3, 5, 8, 12, 15];
 // В проде используем относительный путь (тот же домен).
 // На localhost прокидываем на прод-домен, где реально работает /api/go.
 const PROD_ORIGIN = 'https://gift-search-project.vercel.app'; // ← если у тебя другой домен — подставь его
-const API_BASE = (typeof location !== 'undefined' && location.hostname === 'localhost')
-  ? PROD_ORIGIN
-  : '';
-
+const API_BASE =
+  typeof location !== 'undefined' && location.hostname === 'localhost'
+    ? PROD_ORIGIN
+    : '';
 
 // Состояние приложения
 let currentFilters = { recipient: null, age: null, budget: null };
@@ -75,7 +75,7 @@ function translateCategory(category) {
 // Оверлей плавного перехода на исходной вкладке
 // ===============================
 // Дружелюбный оверлей перехода + отладка в консоль
-function showTransitionOverlay(msg = 'Переходим в магазин…', autoHideMs = 1200) {
+function showTransitionOverlay(msg = 'Подбираем подарки…', autoHideMs = 1800) {
   const el = document.getElementById('transitionOverlay');
   if (!el) {
     console.warn('[overlay] #transitionOverlay не найден в DOM');
@@ -105,74 +105,158 @@ function showTransitionOverlay(msg = 'Переходим в магазин…', 
 }
 
 // *********************
+// *********************
 // === Открытие в новой вкладке с дружелюбным прелоадером (без белого экрана) ===
 // ВАЖНО: вызывать ТОЛЬКО из обработчика клика/keydown (нужен user gesture).
-function openWithPreloader(targetUrl, title = 'Переходим в магазин…', sub = 'Пожалуйста, подождите', delayMs = 80) {
-  const w = window.open('', '_blank');
-  if (!w) return; // блокировщик попапов — выходим тихо
+function openWithPreloader(
+  targetUrl,
+  title = 'Подбираем подарки…',
+  sub = 'Скоро откроем магазин',
+  delayMs = 1800
+) {
+  const htmlContent = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <meta name="referrer" content="no-referrer">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f9fbff;
+      color: #0f1b2e;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      display: grid;
+      place-items: center;
+    }
+    .card {
+      background: white;
+      border: 1px solid rgba(10, 30, 60, 0.1);
+      border-radius: 16px;
+      padding: 20px 18px;
+      width: min(92vw, 520px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .card { transition: none; }
+    }
+    .card.fading {
+      opacity: 0;
+    }
+    .logo {
+      font-size: 24px;
+      flex: 0 0 auto;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(15, 27, 46, 0.18);
+      border-top-color: #6c63ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex: 0 0 auto;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: #0f1b2e;
+      overflow-wrap: break-word;
+    }
+    p {
+      margin: 0;
+      color: #5b6b85;
+      font-size: 14px;
+      line-height: 1.4;
+      overflow-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="logo" aria-hidden="true">🎁</div>
+    <div class="spinner" aria-hidden="true"></div>
+    <div class="content">
+      <h1 id="title">${title}</h1>
+      <p id="subtitle">${sub}</p>
+    </div>
+  </div>
+  <script>
+    try { window.opener = null; } catch (e) {}
+    const card = document.getElementById('card');
+    const titleEl = document.getElementById('title');
+    const subtitleEl = document.getElementById('subtitle');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let hasNavigated = false;
 
-  const html = `<!DOCTYPE html><html lang="ru"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
-<meta name="referrer" content="no-referrer">
-<style>
-:root{--bg:#f7f9ff;--fg:#0f1b2e;--muted:#5b6b85;--accent:#6c63ff;--card:#ffffff;--border:rgba(10,30,60,.10)}
-html,body{height:100%}body{margin:0;background:radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.8) 0%, rgba(247,249,255,.9) 60%, rgba(247,249,255,.95) 100%);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,system-ui,sans-serif;display:grid;place-items:center}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 18px;width:min(92vw,520px);box-shadow:0 10px 40px rgba(0,0,0,.08);display:flex;align-items:center;gap:12px}
-.spinner{width:20px;height:20px;border:3px solid rgba(15,27,46,.18);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;flex:0 0 auto}
-h1{margin:0 0 2px;font-size:16px;line-height:1.4}
-p{margin:0;color:var(--muted);font-size:14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-color-scheme:dark){
-  :root{--bg:#0b0f18;--fg:#e7ecf7;--muted:#a9b3c8;--card:#1a1f2c;--border:rgba(255,255,255,.08)}
-  body{background:radial-gradient(1200px 700px at 50% -10%, rgba(20,24,36,.55) 0%, rgba(20,24,36,.45) 60%, rgba(20,24,36,.35) 100%), rgba(10,12,20,.85)}
-}
-</style></head><body>
-<div class="card">
-  <div class="spinner" aria-hidden="true"></div>
-  <div><h1>${title}</h1><p>${sub}</p></div>
-</div>
-<script>
-  try{ window.opener = null; }catch(e){}
-  setTimeout(function(){
-    try{ window.location.replace(${JSON.stringify(targetUrl)}); }
-    catch(_){ window.location.href = ${JSON.stringify(targetUrl)}; }
-  }, ${Math.max(0, delayMs)|0});
-</script>
-</body></html>`;
+    function navigate() {
+      if (hasNavigated) return;
+      hasNavigated = true;
+      try { window.location.replace(${JSON.stringify(targetUrl)}); }
+      catch (e) { window.location.href = ${JSON.stringify(targetUrl)}; }
+    }
 
-  try {
-    w.document.open();
-    w.document.write(html);
-    w.document.close();
-  } catch {
-    // Если document.write заблочен — запасной путь без прелоадера
-    try { w.location = targetUrl; } catch {}
+    function fadeAndNavigate() {
+      if (prefersReducedMotion || !card) {
+        navigate();
+        return;
+      }
+      card.classList.add('fading');
+      setTimeout(navigate, 300);
+    }
+
+    // Основной таймер перехода
+    setTimeout(fadeAndNavigate, ${Math.max(0, delayMs) | 0});
+
+    // Таймер "медленной загрузки" — срабатывает через 3500 мс, если ещё не ушли
+    setTimeout(() => {
+      if (!hasNavigated && titleEl && subtitleEl) {
+        titleEl.textContent = 'Сеть замедлилась';
+        subtitleEl.textContent = 'Ищем подарки дольше обычного…';
+      }
+    }, 3500);
+  </script>
+</body>
+</html>`;
+
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const w = window.open(url, '_blank');
+  if (!w) {
+    showTransitionOverlay('Подбираем подарки…', 2000);
+    setTimeout(() => {
+      try {
+        window.location.href = targetUrl;
+      } catch (e) {}
+    }, 100);
+    return;
   }
+  w.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
 }
-
-// *************************
 
 // Отладка: Shift+O покажет оверлей. И окно window.__overlayTest()
-window.__overlayTest = () => showTransitionOverlay('Переходим в магазин…', 1200);
+window.__overlayTest = () => showTransitionOverlay('Подбираем подарки…', 1200);
 document.addEventListener('keydown', (e) => {
   if (e.shiftKey && (e.key === 'O' || e.key === 'О')) {
     window.__overlayTest();
   }
 });
-
-
-
-function hideTransitionOverlay() {
-  const el = document.getElementById('transitionOverlay');
-  if (!el) return;
-  el.classList.remove('visible');
-  setTimeout(() => {
-    el.classList.add('hidden');
-    // Чистим на всякий случай, чтобы не «прилипло»
-    el.style.pointerEvents = '';
-  }, 220);
-}
 
 // ===============================
 // Валидация партнёрских ссылок (без сети)
@@ -597,23 +681,20 @@ function createGiftCard(gift) {
   `;
     const linkEl = actions.querySelector('.gift-buy-btn');
 
-linkEl.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const isPrimary = e.button === 0;
-  const hasMods = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
-  if (isPrimary && !hasMods) {
-    e.preventDefault();
-    showTransitionOverlay('Переходим в магазин…', 1200); // старый таб — красивый оверлей
-    openWithPreloader(
-      linkEl.href,
-      'Открываем магазин…',
-      'Это займёт несколько секунд',
-      100
-    ); // новая вкладка — лоадер
-  }
-});
-
-
+    linkEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isPrimary = e.button === 0;
+      const hasMods = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+      if (isPrimary && !hasMods) {
+        e.preventDefault();
+        showTransitionOverlay('Подбираем подарки…', 2000); // старый таб — красивый оверлей
+        openWithPreloader(
+          linkEl.href,
+          'Подбираем подарки…',
+          'Это займёт несколько секунд'
+        ); // новая вкладка — лоадер
+      }
+    });
 
     // 2) Карточка: клик по пустому месту — открыть межстраницу в НОВОЙ вкладке.
     card.style.cursor = 'pointer';
@@ -622,34 +703,29 @@ linkEl.addEventListener('click', (e) => {
     card.setAttribute('aria-label', `Открыть товар: ${gift.name}`);
 
     // Только ЛКМ без модификаторов — открываем одну новую вкладку.
-card.addEventListener('click', (e) => {
-  if (e.target && e.target.closest && e.target.closest('.gift-buy-btn')) return;
-  showTransitionOverlay('Переходим в магазин…', 1200);
-  openWithPreloader(
-    interstitialUrl,
-    'Открываем магазин…',
-    'Пожалуйста, подождите',
-    100
-  );
-});
-
-
+    card.addEventListener('click', (e) => {
+      if (e.target && e.target.closest && e.target.closest('.gift-buy-btn'))
+        return;
+      showTransitionOverlay('Подбираем подарки…', 2000);
+      openWithPreloader(
+        interstitialUrl,
+        'Подбираем подарки…',
+        'Пожалуйста, подождите'        
+      );
+    });
 
     // Доступность: Enter/Space
-card.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    showTransitionOverlay('Переходим в магазин…', 1200);
-    openWithPreloader(
-      interstitialUrl,
-      'Открываем магазин…',
-      'Пожалуйста, подождите',
-      100
-    );
-  }
-});
-
-
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        showTransitionOverlay('Подбираем подарки…', 2000);
+        openWithPreloader(
+          interstitialUrl,
+          'Подбираем подарки…',
+          'Пожалуйста, подождите'
+        );
+      }
+    });
   };
 
   if (!partnerUrl) {
@@ -677,18 +753,24 @@ function fetchGiftsBatch(allItems, offset, limit) {
   });
 }
 
-// ===============================
-// ПРОМО
+// =====ПРОМО==========================
 function renderPromoGifts() {
+  const grid = document.getElementById('randomGifts');
+  if (!grid) return;
+
+  grid.innerHTML = '';
+
   const promoGifts = GIFTS.filter((g) => PROMO_GIFTS_IDS.includes(g.id)).slice(
     0,
     6
   );
-  const grid = document.getElementById('randomGifts');
-  if (!grid) return;
-  grid.innerHTML = '';
   promoGifts.forEach((gift) => grid.appendChild(createGiftCard(gift)));
+
+  // Скрываем спиннер ТОЛЬКО ПОСЛЕ рендера
+  const loader = document.getElementById('promoLoader');
+  if (loader) loader.classList.add('hidden');
 }
+
 
 // ===============================
 // Каталог
@@ -717,12 +799,15 @@ function initCatalogList() {
   catalogCTAContainer.innerHTML = '';
   catalogCTAContainer.appendChild(createTelegramCTA());
 
-  catalogLoader?.classList.remove('hidden');
+  const catalogInitialLoader = document.getElementById('catalogInitialLoader');
+  catalogInitialLoader?.classList.remove('hidden');
+  catalogLoader?.classList.add('hidden'); // скрываем пагинационный спиннер
   fetchGiftsBatch(shuffledCatalogGifts, catalogOffset, INITIAL_BATCH).then(
     (batch) => {
       batch.forEach((g) => catalogGrid.appendChild(createGiftCard(g)));
       catalogOffset += batch.length;
-      catalogLoader?.classList.add('hidden');
+      catalogInitialLoader?.classList.add('hidden');
+      // catalogLoader?.classList.add('hidden');
 
       if (catalogOffset < shuffledCatalogGifts.length) {
         catalogShowMoreBtn.classList.remove('hidden');
@@ -1131,6 +1216,12 @@ function resetSearch() {
 // ===============================
 // Инициализация
 function init() {
+  // Показываем спиннеры ДО загрузки
+  const promoLoader = document.getElementById('promoLoader');
+  const catalogInitialLoader = document.getElementById('catalogInitialLoader');
+  if (promoLoader) promoLoader.classList.remove('hidden');
+  if (catalogInitialLoader) catalogInitialLoader.classList.remove('hidden');
+
   renderPromoGifts();
   initCatalogList();
 

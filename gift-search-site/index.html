@@ -24,7 +24,7 @@
   <meta name="description"
     content="Что подарить идеи по любому поводу, по любому случаю. Подберите идеальный подарок быстро и удобно благодаря нашему сервису Gift Search Project. Легко находите лучшие варианты для близких и друзей всего за пару шагов." />
 
-  <link rel="canonical" href="https://gift-search-project.vercel.app/" />
+  <link rel="canonical" href="https://gift-search-project.vercel.app/"/>
   <link rel="icon" href="./favicon.ico">
 
   <script type="application/ld+json">
@@ -114,13 +114,6 @@
             <!-- <p class="instruction">Я помогу подобрать подарок для кого скажешь.</p> -->
             <div class="example-block">
               <p class="example-title">Просто напиши: <strong>кому возраст бюджет</strong></p>
-              <!-- <p class="example-text">
-                Например, если ищешь подарок сестре, которой 26 лет с бюджетом до 3000 рублей,
-                напиши просто и кратко: <span class="highlight">"сестра 26 3000"</span> — и всё!
-              </p>
-              <p class="example-text">
-                Или: <span class="highlight">"мама 50 8000"</span> — и я всё пойму!
-              </p> -->
             </div>
           </div>
 
@@ -186,10 +179,14 @@
     </section>
 
     <!-- ПРОМО / стартовые карточки -->
-    <section class="random-gifts lazy-section">
+    <section class="random-gifts">
       <div class="container">
         <h2 class="section-title">Подборки подарков</h2>
         <div id="randomGifts" class="gifts-grid"></div>
+        <div id="promoLoader" class="loader">
+          <div class="spinner"></div>
+          <p>Подбираем подарки…</p>
+        </div>
       </div>
     </section>
 
@@ -199,6 +196,10 @@
         <h2 class="section-title">Случайные подарки для вдохновения</h2>
     
         <div id="catalogGifts" class="gifts-grid"></div>
+        <div id="catalogInitialLoader" class="loader hidden">
+          <div class="spinner"></div>
+          <p>Загружаем вдохновение…</p>
+        </div>
     
         <!-- Кнопка пагинации каталога -->
         <button id="catalogShowMoreBtn" class="load-more-btn hidden">Посмотреть ещё</button>
