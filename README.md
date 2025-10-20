@@ -1,7 +1,7 @@
 # Gift Search
 
 ## Структура
-- `/gift-search-site` — сайт (index.html, styles.css, main.js, go.html, go.css)
+- `/gift-search-site` — сайт (index.html, styles.css, main.js)
 - `/data` — данные (export const GIFTS = [...])
 
 ## Локально
