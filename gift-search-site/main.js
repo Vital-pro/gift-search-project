@@ -1,7 +1,6 @@
 // Импорт данных о подарках
 import { GIFTS as GIFTS } from './data/index.js';
 import { recipientMap } from './vendor/recipient-map.js';
-import './styles.css'
 
 // ===============================
 // Конфиг
