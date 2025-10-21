@@ -9,9 +9,8 @@
 
 ## Деплой на Vercel
 - Project Root: репозиторий
-- Output Directory: `gift-search-site`
+- Output Directory: `dist`
 - Framework: Other
-- (опц.) vercel.json — заголовки для go.html
 
 # site:
 
