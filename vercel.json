@@ -3,8 +3,8 @@
     { "source": "/api/(.*)", "destination": "/api/$1" },
     {
       "source": "/out-of-stock.html",
-      "destination": "/gift-search-site/out-of-stock.html"
+      "destination": "/dist/gift-search-site/out-of-stock.html"
     },
-    { "source": "/(.*)", "destination": "/gift-search-site/$1" }
+    { "source": "/(.*)", "destination": "/dist/gift-search-site/$1" }
   ]
 }
