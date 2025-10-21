@@ -1,14 +1,11 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
-// === НОВОЕ: импорт для копирования файлов ===
 import { copyFileSync } from 'fs';
 
 export default defineConfig({
-  // Корнем фронта будет gift-search-site/
   root: resolve(__dirname, 'gift-search-site'),
 
   server: {
-    // Разрешаем читать файлы выше корня (для импорта ../data/index.js)
     fs: {
       allow: [__dirname],
     },
@@ -16,13 +13,18 @@ export default defineConfig({
     open: true,
   },
 
-  // Билд (на будущее): сложим собранное в /dist в корне
   build: {
     outDir: resolve(__dirname, 'dist'),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/[name].[hash].js`,
+        chunkFileNames: `assets/[name].[hash].js`,
+        assetFileNames: `assets/[name].[hash].[ext]`,
+      },
+    },
   },
 
-  // === НОВОЕ: плагин для копирования out-of-stock.html ===
   plugins: [
     {
       name: 'copy-out-of-stock',

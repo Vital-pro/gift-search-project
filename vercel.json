@@ -1,35 +1,10 @@
 {
-  "routes": [
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "source": "/out-of-stock.html",
+      "destination": "/dist/out-of-stock.html"
     },
-    {
-      "src": "/out-of-stock.html",
-      "dest": "/dist/out-of-stock.html",
-      "headers": {
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        "Referrer-Policy": "no-referrer",
-        "X-Robots-Tag": "noindex, nofollow"
-      }
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/dist/assets/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*)\\.(css|js|ico|png|jpg|jpeg|svg|webp)$",
-      "dest": "/dist/$1",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable"
-      }
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/$1"
-    }
+    { "source": "/(.*)", "destination": "/dist/$1" }
   ]
 }
