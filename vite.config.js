@@ -28,12 +28,7 @@ export default defineConfig({
       name: 'copy-out-of-stock',
       writeBundle() {
         const src = resolve(__dirname, 'gift-search-site', 'out-of-stock.html');
-        const dest = resolve(
-          __dirname,
-          'dist',
-          'gift-search-site',
-          'out-of-stock.html'
-        );
+        const dest = resolve(__dirname, 'dist', 'out-of-stock.html');
         try {
           copyFileSync(src, dest);
           console.log('✅ out-of-stock.html copied to dist/');
