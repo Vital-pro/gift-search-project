@@ -984,88 +984,32 @@ function handleSearchLoadMore() {
 
 // ===============================
 // Прочие UI-фичи
-// function initParallax() {
-//   const layers = document.querySelectorAll('.parallax-layer');
-//   let ticking = false,
-//     mouseX = 0,
-//     mouseY = 0;
-
-//   function updateParallax() {
-//     const scrolled = window.pageYOffset;
-//     const windowHeight = window.innerHeight;
-//     const scrollProgress = Math.min(scrolled / Math.max(windowHeight, 1), 1);
-
-//     layers.forEach((layer, index) => {
-//       const speed = 0.55 * (index + 1);
-//       const yPos = -(scrolled * speed);
-//       const mouseEffect = 36;
-//       const mouseXOffset =
-//         ((mouseX - window.innerWidth / 2) / window.innerWidth) *
-//         mouseEffect *
-//         (index + 1);
-//       const mouseYOffset =
-//         ((mouseY - window.innerHeight / 2) / window.innerHeight) *
-//         mouseEffect *
-//         (index + 1);
-//       layer.style.transform = `translate(${mouseXOffset}px, ${
-//         yPos + mouseYOffset
-//       }px) scale(${1 + scrollProgress * 0.12})`;
-//     });
-//     ticking = false;
-//   }
-//   function requestTick() {
-//     if (!ticking) {
-//       window.requestAnimationFrame(updateParallax);
-//       ticking = true;
-//     }
-//   }
-//   const prefersReducedMotion = window.matchMedia(
-//     '(prefers-reduced-motion: reduce)'
-//   ).matches;
-//   if (!prefersReducedMotion) {
-//     window.addEventListener('scroll', requestTick);
-//     window.addEventListener('resize', requestTick);
-//     window.addEventListener('mousemove', (e) => {
-//       mouseX = e.clientX;
-//       mouseY = e.clientY;
-//       requestTick();
-//     });
-//   }
-// }
-
-
-// [parallax] Включаем только на десктопе и когда hero во вьюпорте
 function initParallax() {
   const layers = document.querySelectorAll('.parallax-layer');
-  const hero = document.querySelector('.hero');
-  if (!layers.length || !hero) return;
-
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (isMobile || prefersReducedMotion) return;
-
-  let active = false;
-  let ticking = false, mouseX = 0, mouseY = 0;
-
-  const io = new IntersectionObserver((entries) => {
-    active = entries.some(e => e.isIntersecting);
-  }, { threshold: 0.05 });
-  io.observe(hero);
+  let ticking = false,
+    mouseX = 0,
+    mouseY = 0;
 
   function updateParallax() {
-    if (!active) { ticking = false; return; }
-
     const scrolled = window.pageYOffset;
     const windowHeight = window.innerHeight;
     const scrollProgress = Math.min(scrolled / Math.max(windowHeight, 1), 1);
 
     layers.forEach((layer, index) => {
-      const speed = 0.35 * (index + 1);       // было 0.55 — делаем мягче
+      const speed = 0.55 * (index + 1);
       const yPos = -(scrolled * speed);
-      const mouseEffect = 20;                 // было 36 — аккуратнее
-      const mouseXOffset = ((mouseX - window.innerWidth / 2) / window.innerWidth) * mouseEffect * (index + 1);
-      const mouseYOffset = ((mouseY - window.innerHeight / 2) / window.innerHeight) * mouseEffect * (index + 1);
-      layer.style.transform = `translate(${mouseXOffset}px, ${yPos + mouseYOffset}px) scale(${1 + scrollProgress * 0.08})`;
+      const mouseEffect = 36;
+      const mouseXOffset =
+        ((mouseX - window.innerWidth / 2) / window.innerWidth) *
+        mouseEffect *
+        (index + 1);
+      const mouseYOffset =
+        ((mouseY - window.innerHeight / 2) / window.innerHeight) *
+        mouseEffect *
+        (index + 1);
+      layer.style.transform = `translate(${mouseXOffset}px, ${
+        yPos + mouseYOffset
+      }px) scale(${1 + scrollProgress * 0.12})`;
     });
     ticking = false;
   }
@@ -1075,14 +1019,19 @@ function initParallax() {
       ticking = true;
     }
   }
-  window.addEventListener('scroll', requestTick, { passive: true });
-  window.addEventListener('resize', requestTick);
-  window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX; mouseY = e.clientY; requestTick();
-  });
-  requestTick();
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+  if (!prefersReducedMotion) {
+    window.addEventListener('scroll', requestTick);
+    window.addEventListener('resize', requestTick);
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      requestTick();
+    });
+  }
 }
-
 
 function initLazySections() {
   const sections = document.querySelectorAll('.lazy-section');
@@ -1159,130 +1108,38 @@ function setTelegramLink() {
   }
 }
 
-// function initStickySearch() {
-//   const searchBlock = document.querySelector('.search-block');
-//   const hero = document.querySelector('.hero');
-//   if (!searchBlock || !hero) return;
-
-//   let ticking = false;
-//   function updateStickyState() {
-//     const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-//     const heroHeight = hero.offsetHeight;
-//     const headerHeight = 60;
-//     const stickyPoint = heroHeight - headerHeight - 70;
-//     const details = document.querySelector('.controls-dropdown');
-
-//     if (scrolled > stickyPoint) {
-//       searchBlock.classList.add('sticky');
-//       if (details) details.open = !true;
-//     } else {
-//       searchBlock.classList.remove('sticky');
-//       if (details) details.open = false;
-//     }
-//     ticking = false;
-//   }
-//   function requestTick() {
-//     if (!ticking) {
-//       window.requestAnimationFrame(updateStickyState);
-//       ticking = true;
-//     }
-//   }
-//   window.addEventListener('scroll', requestTick);
-//   window.addEventListener('resize', requestTick);
-//   updateStickyState();
-// }
-
-
-// [sticky] Переписано: без "прыжка", с классом на <body> и закрытием summary
-
-
-// [floating-search] Абсолютно без «прыжков»: создаём плавающую копию панели
 function initStickySearch() {
-  const original = document.querySelector('.search-block');   // исходная панель внутри hero
+  const searchBlock = document.querySelector('.search-block');
   const hero = document.querySelector('.hero');
-  if (!original || !hero) return;
+  if (!searchBlock || !hero) return;
 
-  // 1) Создаём контейнер плавающей панели (в body)
-  const floatHost = document.createElement('div');
-  floatHost.className = 'search-float'; // стили в CSS
-  // Копируем HTML, но аккуратно: удалим дублирующиеся id в копии
-  const clone = original.cloneNode(true);
-  // Очистим ID у полей/кнопок, чтобы не было дублей
-  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-  // Вставляем копию внутрь хоста
-  floatHost.appendChild(clone);
-  document.body.appendChild(floatHost);
-
-  // 2) Ссылки на элементы оригинала и копии
-  const oSearchInput = original.querySelector('#searchInput');
-  const cSearchInput = clone.querySelector('input[type="text"]');
-  const oSearchBtn   = original.querySelector('#searchBtn');
-  const cSearchBtn   = clone.querySelector('button.search-btn');
-  const oAltBtn      = original.querySelector('#altSearchBtn');
-  const cAltBtn      = clone.querySelector('.alt-search-btn');
-  const detailsOrig  = original.querySelector('.controls-dropdown');
-
-  // 3) Подписки: кнопки и Enter должны работать и в копии
-  if (cSearchBtn) cSearchBtn.addEventListener('click', () => performSearch());
-  if (cSearchInput) cSearchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
-  });
-  if (cAltBtn) cAltBtn.addEventListener('click', () => performAlternativeSearch());
-
-  // 4) Двусторонняя синхронизация значения input (оригинал ↔ копия)
-  if (oSearchInput && cSearchInput) {
-    // копия ← оригинал
-    oSearchInput.addEventListener('input', () => { cSearchInput.value = oSearchInput.value; });
-    // оригинал ← копия
-    cSearchInput.addEventListener('input', () => { oSearchInput.value = cSearchInput.value; });
-    // стартовое выравнивание
-    cSearchInput.value = oSearchInput.value || '';
-  }
-
-  // 5) Порог, когда показывать копию
-  const headerHeight = 60;
-  const stickyPoint = () => hero.offsetHeight - headerHeight - 70;
-
-  // 6) Рендер состояния — только плавное появление/исчезновение
-  let visible = false;
-  function renderState(show) {
-    if (show === visible) return;
-    visible = show;
-
-    if (visible) {
-      floatHost.classList.add('visible');            // проявляем копию
-      original.classList.add('search-original-hidden'); // прячем оригинал без сдвига
-      document.body.classList.add('has-floating-search'); // скрыть длинный текст логотипа
-      // Закрываем details, чтобы копия была компактной
-      if (detailsOrig) detailsOrig.open = false;
-    } else {
-      floatHost.classList.remove('visible');         // плавно скрываем копию
-      original.classList.remove('search-original-hidden'); // показываем оригинал
-      document.body.classList.remove('has-floating-search');
-    }
-  }
-
-  // 7) Логика скролла
   let ticking = false;
-  function update() {
+  function updateStickyState() {
     const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-    const show = scrolled > stickyPoint();
-    renderState(show);
+    const heroHeight = hero.offsetHeight;
+    const headerHeight = 60;
+    const stickyPoint = heroHeight - headerHeight - 70;
+    const details = document.querySelector('.controls-dropdown');
+
+    if (scrolled > stickyPoint) {
+      searchBlock.classList.add('sticky');
+      if (details) details.open = !true;
+    } else {
+      searchBlock.classList.remove('sticky');
+      if (details) details.open = false;
+    }
     ticking = false;
   }
   function requestTick() {
     if (!ticking) {
+      window.requestAnimationFrame(updateStickyState);
       ticking = true;
-      window.requestAnimationFrame(update);
     }
   }
-
-  window.addEventListener('scroll', requestTick, { passive: true });
+  window.addEventListener('scroll', requestTick);
   window.addEventListener('resize', requestTick);
-  update(); // первичная инициализация
+  updateStickyState();
 }
-
-
 
 function initToTopButton() {
   const toTopBtn = document.getElementById('toTopBtn');

@@ -24,27 +24,64 @@
   --parallax-opacity: 0.6;
 }
 
-/* Темная тема */
+/* [dark] Более чистая и контрастная тёмная палитра */
 [data-theme="dark"] {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #1a1a1a;
-  --bg-tertiary: #252525;
-  --text-primary: #f0f0f0;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
-  --accent: #8b80ff;
+  --bg-primary: #0e0f12;
+  --bg-secondary: #151821;
+  --bg-tertiary: #1b1f2a;
+  --text-primary: #eef1f7;
+  --text-secondary: #b6bfd6;
+  --text-muted: #7a86a8;
+  --accent: #8a84ff;
   --accent-hover: #7a6fff;
-  --accent-light: #2a2555;
-  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --border: #333333;
-  --shadow-sm: 0 2px 8px rgba(139, 128, 255, 0.15);
-  --shadow-md: 0 8px 24px rgba(139, 128, 255, 0.2);
-  --shadow-lg: 0 16px 48px rgba(139, 128, 255, 0.3);
-  --shadow-xl: 0 24px 64px rgba(139, 128, 255, 0.4);
-  --glass-bg: rgba(10, 10, 10, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --parallax-opacity: 0.3;
+  --accent-light: #2a2f55;
+  --border: #2a2f3a;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.35);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.55);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.65);
+  --glass-bg: rgba(18, 20, 28, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --parallax-opacity: 0.25;
 }
+
+/* [dark][glass] Темное стекло без «грязного серого», чуть глубже тени */
+[data-theme="dark"] .glass-effect,
+[data-theme="dark"] .search-float .search-block {
+  background: color-mix(in oklab, var(--glass-bg) 92%, transparent);
+  border-color: rgba(255,255,255,.06);
+  backdrop-filter: saturate(120%) blur(12px);
+  -webkit-backdrop-filter: saturate(120%) blur(12px);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.45),
+    0 1px 0 rgba(255,255,255,.03) inset;
+}
+
+/* [dark][cards] Чуть выше контраст карточек и аккуратный hover */
+[data-theme="dark"] .gift-card {
+  background: #141822;            /* немного темнее твоего --bg-secondary */
+  border-color: #2a2f3a;
+  box-shadow: var(--shadow-sm);
+}
+[data-theme="dark"] .gift-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+[data-theme="dark"] .gift-tag {
+  background: #23283a;
+  color: var(--text-secondary);
+}
+
+/* [dark][buttons] Кнопки читаются лучше, но не «кричат» */
+[data-theme="dark"] .search-btn,
+[data-theme="dark"] .telegram-btn,
+[data-theme="dark"] .telegram-cta-btn,
+[data-theme="dark"] .alt-search-btn,
+[data-theme="dark"] .load-more-btn:hover {
+  filter: brightness(1.02) saturate(1.02);
+}
+
+
+
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -76,9 +113,7 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', system-ui, sans-serif;
@@ -98,28 +133,45 @@ body {
   padding: 0 20px;
 }
 
+/* [theme-smooth] Мягкая смена темы без мерцаний */
+header,
+.glass-effect,
+.search-block,
+.search-float .search-block,
+.gift-card,
+.telegram-cta,
+.telegram-cta-inline,
+.footer,
+.controls-grid,
+.load-more-btn,
+.no-results-content {
+  transition:
+    background-color .25s ease,
+    color .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease,
+    backdrop-filter .25s ease,
+    -webkit-backdrop-filter .25s ease;
+}
+
+
 /* Parallax фон */
 .parallax-container {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   z-index: -1;
   pointer-events: none;
 }
 
 .parallax-layer {
   position: absolute;
-  width: 110%;
-  height: 110%;
-  left: -5%;
-  top: -5%;
+  width: 110%; height: 110%;
+  left: -5%; top: -5%;
   background-size: 100% 100%;
   will-change: transform;
   transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
 
 /* ==== Новый parallax ==== */
 .layer-bg {
@@ -127,28 +179,32 @@ body {
   opacity: 1;
 }
 
+/* [parallax] Мягкое боке, без ярких пятен */
 .layer-bokeh {
   background-image:
-    radial-gradient(circle at 18% 22%, rgba(255, 205, 255, 0.45) 0%, transparent 42%),
-    radial-gradient(circle at 72% 38%, rgba(160, 205, 255, 0.35) 0%, transparent 50%),
-    radial-gradient(circle at 42% 78%, rgba(255, 255, 210, 0.35) 0%, transparent 44%);
-  opacity: 0.85;
-  animation: floatBokeh 26s infinite alternate ease-in-out;
+    radial-gradient(80vw 40vw at 20% 25%, rgba(160, 205, 255, 0.22), transparent 60%),
+    radial-gradient(60vw 30vw at 75% 40%, rgba(255, 205, 255, 0.18), transparent 60%),
+    radial-gradient(70vw 35vw at 45% 80%, rgba(255, 255, 210, 0.15), transparent 60%);
+  opacity: 0.6;
+  animation: floatBokeh 28s ease-in-out infinite;
 }
 
+
+/* [parallax] Подарок — аккуратнее по масштабу/позиции */
 .layer-gift {
   background-image: url("./assets/images/hero-gift.svg");
-  background-size: clamp(140px, 16vw, 240px) auto;
+  background-size: clamp(120px, 14vw, 220px) auto;
   background-repeat: no-repeat;
-  background-position: right 8% top 30%;
-  opacity: 0.6;
-  animation: floatGift 16s infinite alternate ease-in-out;
+  background-position: right 6% top 28%;
+  opacity: 0.55;
+  animation: floatGift 18s ease-in-out infinite;
 }
+
 
 /* Более компактный hero — чтобы был виден первый ряд карточек */
 .compact-hero {
   padding: 2rem 0 0.75rem;
-  min-height: 54vh; /* меньше, чем было */
+  min-height: 54vh;
   display: flex;
   align-items: flex-start;
 }
@@ -173,21 +229,23 @@ body {
 }
 .alt-search-btn { padding: 0.7rem 1.2rem; border-radius: 10px; }
 
-/* Sentinel для бесконечной прокрутки */
-.scroll-sentinel { width: 100%; height: 1px; }
+/* Sentinel для бесконечной прокрутки — [dedup] единый блок */
+.scroll-sentinel {
+  width: 100%;
+  height: 1px;
+  visibility: hidden;
+  pointer-events: none;
+}
 
 /* Анимации слоёв */
 @keyframes floatBokeh {
-  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
   50%  { transform: translate3d(0, -42px, 0) scale(1.08); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
 }
 @keyframes floatGift {
-  0%   { transform: translate3d(0, 0, 0) rotate(0deg); }
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0); }
   50%  { transform: translate3d(-16px, -26px, 0) rotate(6deg); }
-  100% { transform: translate3d(0, 0, 0) rotate(0deg); }
 }
-
 
 @keyframes morphing1 {
   0%, 100% {
@@ -199,7 +257,6 @@ body {
     background: radial-gradient(circle at 30% 60%, rgba(102, 126, 234, 0.4) 0%, transparent 55%);
   }
 }
-
 @keyframes morphing2 {
   0%, 100% {
     transform: translateY(0) scale(1);
@@ -210,7 +267,6 @@ body {
     background: radial-gradient(circle at 70% 30%, rgba(118, 75, 162, 0.35) 0%, transparent 55%);
   }
 }
-
 @keyframes morphing3 {
   0%, 100% {
     transform: translateY(0) scale(1);
@@ -248,10 +304,7 @@ header {
   text-decoration: none;
   transition: transform 0.2s ease;
 }
-
-.logo:hover {
-  transform: scale(1.05);
-}
+.logo:hover { transform: scale(1.05); }
 
 .theme-toggle {
   background: var(--bg-tertiary);
@@ -262,7 +315,6 @@ header {
   font-size: 1.2rem;
   transition: all 0.3s ease;
 }
-
 .theme-toggle:hover {
   background: var(--accent-light);
   transform: rotate(20deg);
@@ -270,15 +322,21 @@ header {
 
 /* HERO компактнее — чтобы первый ряд карточек был виден сразу */
 .hero {
-  padding: 2.25rem 0 0.75rem;         /* было 4rem 0 2rem */
-  min-height: 50vh;                   /* было 70vh */
+  padding: 2.25rem 0 0.75rem;
+  min-height: 50vh;
   display: flex;
-  align-items: flex-start;            /* было center */
+  align-items: flex-start;
   transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* [cls] Резерв под sticky-поиск, чтобы не перекрывать H1 и не было скачка */
+.hero::after {
+  content:"";
+  display:block;
+  height: 72px; /* подстрой под реальную высоту sticky-панели */
 }
 
 @media (min-width: 1024px) {
-  .hero { min-height: 46vh; }         /* ещё компактнее на десктопе */
+  .hero { min-height: 46vh; }
 }
 
 .hero.compact {
@@ -287,8 +345,8 @@ header {
 }
 
 .hero-title {
-  font-size: clamp(1.9rem, 4.2vw, 3rem); /* немного меньше максимум */
-  margin-bottom: 1.1rem;                 /* было 3rem */
+  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  margin-bottom: 1.1rem;
   line-height: 1.15;
 }
 
@@ -299,11 +357,16 @@ header {
 
 /* Поисковый блок чуть компактнее */
 .search-block {
-  max-width: 860px;
+  max-width: 990px;
   margin: 0.5rem auto 0;
-  padding: 1.1rem 1.1rem 0.9rem;
+  padding: 1rem 1rem 1.5rem;
   border-radius: 18px;
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* [sticky-controls] В compact не скрываем alternative-controls */
+.search-block.compact .alternative-controls {
+  display: block;
 }
 
 /* Скрываем компактные элементы по умолчанию */
@@ -314,135 +377,146 @@ header {
   transition: opacity 0.3s ease;
 }
 
-/* Sticky режим для search-block */
-.search-block.sticky {
+
+
+
+/* [sticky] В липком режиме убираем длинный текст логотипа рядом с эмодзи */
+body.is-sticky .logo .logo-text {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  position: absolute;
+  white-space: nowrap;
+}
+
+/* [floating-search] Плавающая копия строки поиска — без рывков и «прыжков» */
+.search-float {
   position: fixed;
-  /* top: 70px; */
-  top: 10px; /* Под хедером */
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 40px);
-  max-width: 900px;
+  max-width: 990px;
   z-index: 998;
+  opacity: 0;
+  pointer-events: none;              /* пока скрыто — не ловим клики */
+  transition: opacity .22s ease;     /* мягкое проявление/затухание */
+}
+
+/* Внешний вид копии — тот же, что у search-block */
+.search-float .search-block {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
   padding: 1rem 1.5rem;
-  margin: 0;
   box-shadow: var(--shadow-xl);
-  animation: slideDownSticky 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-@keyframes slideDownSticky {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
+/* Показываем копию */
+.search-float.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* В sticky режиме скрываем только подсказку */
-.search-block.sticky .search-hint {
-  display: none;
+/* Пока видна копия — оригинал «прозрачно скрыт», чтобы не мигал */
+.search-original-hidden {
+  visibility: hidden;                /* место сохраняем, но не видно */
 }
 
-/* В sticky режиме показываем компактные элементы */
-.search-block.sticky .search-compact-title {
+/* Компактный заголовок показываем только в копии (вверху) */
+.search-float .search-compact-title {
   display: block;
   opacity: 1;
   text-align: center;
-  margin-bottom: 0.75rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.6rem;
+  font-size: .9rem;
   color: var(--text-secondary);
   font-weight: 500;
 }
+/* А подсказки внутри копии — прячем, чтобы панель была компактней */
+.search-float .search-hint {
+  display: none !important;
+}
 
-/* В sticky режиме показываем альтернативные контролы */
-.search-block.sticky .alternative-controls {
+/* [floating-controls] Показываем alternative-controls в плавающей панели */
+.search-float .alternative-controls {
   display: block;
-  margin-top: 1rem;
+  margin-top: .6rem;
 }
 
-.search-block.sticky .controls-dropdown {
-  border: none;
-  padding: 0;
+/* Сжимаем summary в плавающей панели */
+.search-float .controls-dropdown { border: none; padding: 0; }
+.search-float .controls-dropdown summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: .9rem;
+  padding: .25rem .25rem;
+  user-select: none;
 }
+.search-float .controls-dropdown[open] summary { color: var(--accent); }
 
-.search-block.sticky .controls-dropdown summary {
-  /* display: none; */
-}
-
-.search-block.sticky .controls-dropdown[open] summary {
-  /* display: none; */
-}
-
-.search-block.sticky .controls-grid {
+/* Компактная сетка внутри раскрытия */
+.search-float .controls-grid {
   display: grid;
-  opacity: 1;
-  max-height: none;
-  background: transparent;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .6rem;
+  padding: .6rem;
+  background: transparent;  /* стекло уже у .search-block */
   border: none;
-  padding: 0;
-  gap: 1rem;
   box-shadow: none;
 }
 
-.search-block.sticky .control-group input,
-.search-block.sticky .control-group select {
-  background: var(--bg-primary);
-  border: 2px solid var(--border);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+/* Поля — чуть ниже и уже */
+.search-float .control-group label { font-size: .78rem; }
+.search-float .control-group input,
+.search-float .control-group select {
+  padding: .5rem .6rem;
+  font-size: .95rem;
+  border-radius: 10px;
 }
 
-.search-block.sticky .alt-search-btn {
-  margin-top: 0.5rem;
+/* Ограничиваем высоту раскрытия, добавляем прокрутку */
+.search-float .controls-dropdown[open] .controls-grid {
+  max-height: 260px;   /* можно 220–320px по вкусу */
+  overflow: auto;
 }
 
-/* Скрываем компактную ссылку в sticky режиме */
-.search-block.sticky .search-compact-alt {
-  display: none;
+/* Кнопка "Подобрать" — компактнее */
+.search-float .alt-search-btn {
+  padding: .6rem 1rem;
+  border-radius: 10px;
 }
 
-/* Старые стили для compact (при поиске) */
-.search-block.compact {
-  max-width: 600px;
-  padding: 1rem;
+
+/* Когда плавающая панель видна — прячем длинный текст рядом с логотипом */
+body.has-floating-search .logo .logo-text {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  position: absolute;
+  white-space: nowrap;
 }
 
-.search-block.compact .search-hint,
-.search-block.compact .alternative-controls {
-  display: none;
-}
 
-.search-block.compact .hero-title {
-  display: none;
-}
-
+/* [glass] Чище стекло, меньше «мыла» */
 .glass-effect {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: saturate(112%) blur(14px);
+  -webkit-backdrop-filter: saturate(112%) blur(14px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow-lg);
 }
 
-.search-hint {
-  margin-bottom: 2rem;
-  text-align: center;
-}
+
+.search-hint { margin-bottom: 2rem; text-align: center; }
 
 .greeting {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
+  font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);
 }
 
-.instruction {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-}
+.instruction { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1rem; }
 
 .example-block {
   background: var(--bg-tertiary);
@@ -451,43 +525,22 @@ header {
   margin-top: 1rem;
 }
 
-.example-title {
-  font-size: 1.2rem;
-  /* margin-bottom: 0.5rem; */
-  color: var(--text-secondary);
-}
-
-.example-text {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  margin: 0.5rem 0;
-  line-height: 1.7;
-}
+.example-title { font-size: 1.2rem; color: var(--text-secondary); }
+.example-text  { font-size: 0.95rem; color: var(--text-secondary); margin: 0.5rem 0; line-height: 1.7; }
 
 .highlight {
-  background: var(--accent-light);
-  color: var(--accent);
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-weight: 600;
-  white-space: nowrap;
+  background: var(--accent-light); color: var(--accent);
+  padding: 2px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;
 }
 
-.search-input-group {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;            /* было 1rem */
-}
-
+.search-input-group { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
 
 .search-input {
   flex: 1;
-  padding: 0.85rem 1rem;             /* было 1rem 1.25rem */
-  font-size: 1rem;                   /* было 1.1rem */
-  border-radius: 14px;               /* было 16px */
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  border-radius: 14px;
 }
-
-
 .search-input:focus {
   outline: none;
   border-color: var(--accent);
@@ -496,71 +549,44 @@ header {
 }
 
 .search-btn {
-  padding: 0.85rem 1.4rem;           /* было 1rem 2rem */
-  font-size: 1rem;                   /* было 1.1rem */
-  border-radius: 14px;               /* было 16px */
+  padding: 0.85rem 1.4rem;
+  font-size: 1rem;
+  border-radius: 14px;
 }
-
-
 .search-btn:hover {
   background: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
+.search-btn:active { transform: translateY(0); }
 
-.search-btn:active {
-  transform: translateY(0);
-}
-
-.help-btn {
-  width: 42px;                       /* было 48px */
-  height: 42px; 
-  font-size: 1.05rem;                /* было 1.2rem */
-}
-
-
-/* Чуть сократим отступ у первой секции с карточками */
-.random-gifts.section,
-.random-gifts {
-  padding-top: 1.25rem;              /* было 3rem через общий section */
-}
-
-/* Общие секции — оставим как было, но верх у первой смягчили выше */
-section {
-  padding: 3rem 0;
-}
-
-
+.help-btn { width: 42px; height: 42px; font-size: 1.05rem; }
 .help-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
   transform: rotate(15deg);
 }
 
+/* Чуть сократим отступ у первой секции с карточками */
+.random-gifts.section,
+.random-gifts { padding-top: 1.25rem; }
+
+/* Общие секции — [dedup] оставляем одно определение */
+section { padding: 3rem 0; }
+
 /* Альтернативные контролы */
-.alternative-controls {
-  margin-top: 1rem;
-}
+.alternative-controls { margin-top: 1rem; }
 
 .controls-dropdown summary {
   cursor: pointer;
-  /* color: var(--text-secondary); */
-  color: #b02727;
-  /* font-size: 0.95rem; */
+  color: #b02727; /* (можно заменить на var(--accent) для контраста) */
   font-size: 1.06rem;
   padding: 0.5rem;
   transition: color 0.2s ease;
   user-select: none;
 }
-
-.controls-dropdown summary:hover {
-  color: var(--accent);
-}
-
-.controls-dropdown[open] summary {
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
+.controls-dropdown summary:hover { color: var(--accent); }
+.controls-dropdown[open] summary { color: var(--accent); margin-bottom: 1rem; }
 
 .controls-grid {
   display: grid;
@@ -574,18 +600,11 @@ section {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
+.control-group { display: flex; flex-direction: column; gap: 0.5rem; }
 
 .control-group label {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 0.875rem; color: var(--text-secondary); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
 }
 
 .control-group input,
@@ -612,7 +631,6 @@ section {
   background-size: 1.25rem;
   padding-right: 2.75rem;
 }
-
 /* Темная тема - изменение цвета стрелки */
 [data-theme="dark"] .control-group select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238b80ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -624,7 +642,6 @@ section {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(108, 99, 255, 0.15);
 }
-
 .control-group input:focus,
 .control-group select:focus {
   outline: none;
@@ -634,27 +651,15 @@ section {
 }
 
 /* Плейсхолдер */
-.control-group input::placeholder {
-  color: var(--text-muted);
-  opacity: 0.7;
-}
+.control-group input::placeholder { color: var(--text-muted); opacity: 0.7; }
 
 /* Стили для числовых инпутов */
-.control-group input[type="number"] {
-  font-variant-numeric: tabular-nums;
-}
-
+.control-group input[type="number"] { font-variant-numeric: tabular-nums; }
 /* Убираем стрелки у number input в Chrome, Safari, Edge */
 .control-group input[type="number"]::-webkit-outer-spin-button,
-.control-group input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
+.control-group input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 /* Убираем стрелки у number input в Firefox */
-.control-group input[type="number"] {
-  -moz-appearance: textfield;
-}
+.control-group input[type="number"] { -moz-appearance: textfield; }
 
 .alt-search-btn {
   grid-column: 1 / -1;
@@ -672,53 +677,23 @@ section {
   position: relative;
   overflow: hidden;
 }
-
 .alt-search-btn::before {
   content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s ease;
 }
-
-.alt-search-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(108, 99, 255, 0.4);
-}
-
-.alt-search-btn:hover::before {
-  left: 100%;
-}
-
-.alt-search-btn:active {
-  transform: translateY(0) scale(0.98);
-  box-shadow: 0 2px 12px rgba(108, 99, 255, 0.3);
-}
+.alt-search-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(108, 99, 255, 0.4); }
+.alt-search-btn:hover::before { left: 100%; }
+.alt-search-btn:active { transform: translateY(0) scale(0.98); box-shadow: 0 2px 12px rgba(108, 99, 255, 0.3); }
 
 /* Секции */
-section {
-  padding: 3rem 0;
-}
-
 .section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  text-align: center;
-  position: relative;
-  display: inline-block;
-  width: 100%;
+  font-size: 2rem; font-weight: 700; margin-bottom: 2rem; text-align: center;
+  position: relative; display: inline-block; width: 100%;
 }
-
-.results-count {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  font-weight: 400;
-  margin-left: 1rem;
-}
+.results-count { font-size: 1rem; color: var(--text-secondary); font-weight: 400; margin-left: 1rem; }
 
 /* Сетка подарков */
 .gifts-grid {
@@ -726,6 +701,8 @@ section {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
+  /* [feature] Включаем контейнер-квери, чтобы заработал @container */
+  container-type: inline-size;
 }
 
 /* Карточка подарка */
@@ -739,337 +716,120 @@ section {
   position: relative;
   animation: fadeInUp 0.5s ease-out;
   animation-fill-mode: both;
-}
 
+  /* [perf] Ускоряем рендер длинных списков */
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 420px;
+  contain: content;
+}
 .gift-card::before {
   content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: absolute; inset: 0;
   background: var(--accent-gradient);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  z-index: 0;
-  pointer-events: none;
+  opacity: 0; transition: opacity 0.4s ease; z-index: 0; pointer-events: none;
 }
-
-.gift-card:hover {
-  transform: translateY(-12px) scale(1.03);
-  box-shadow: var(--shadow-xl);
-  border-color: transparent;
-}
-
-.gift-card:hover::before {
-  opacity: 0.05;
-}
+.gift-card:hover { transform: translateY(-12px) scale(1.03); box-shadow: var(--shadow-xl); border-color: transparent; }
+.gift-card:hover::before { opacity: 0.05; }
 
 .gift-card-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background: var(--bg-tertiary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 4rem;
-  color: var(--text-muted);
-  position: relative;
-  overflow: hidden;
+  width: 100%; height: 200px; object-fit: cover; background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem; color: var(--text-muted); position: relative; overflow: hidden;
 }
+.gift-card-image img { width: 100%; height: 100%; object-fit: cover; }
+.gift-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.gift-card:hover .gift-card-img { transform: scale(1.05); }
+.gift-card-image { position: relative; z-index: 1; }
 
-.gift-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.gift-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.gift-card:hover .gift-card-img {
-  transform: scale(1.05);
-}
-
-.gift-card-image {
-  position: relative;
-  z-index: 1;
-}
-
-.gift-card-body {
-  padding: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.gift-card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-  line-height: 1.4;
-}
-
+.gift-card-body { padding: 1.5rem; position: relative; z-index: 1; }
+.gift-card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); line-height: 1.4; }
 .gift-card-description {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
+.gift-card-price { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 1rem; }
 
-.gift-card-price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent);
-  margin-bottom: 1rem;
-}
-
-.gift-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
+.gift-card-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
 .gift-tag {
-  padding: 4px 10px;
-  background: var(--accent-light);
-  color: var(--accent);
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: 4px 10px; background: var(--accent-light); color: var(--accent);
+  border-radius: 20px; font-size: 0.85rem; font-weight: 500;
 }
-
 .gift-card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 1rem; border-top: 1px solid var(--border);
 }
-
-.age-range {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
+.age-range { font-size: 0.9rem; color: var(--text-secondary); }
 .category-badge {
-  padding: 4px 12px;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  padding: 4px 12px; background: var(--bg-tertiary); border-radius: 8px;
+  font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;
 }
 
 /* Кнопка "Показать ещё" */
 .load-more-btn {
-  display: block;
-  margin: 2rem auto;
-  padding: 1rem 3rem;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  display: block; margin: 2rem auto; padding: 1rem 3rem;
+  background: var(--bg-tertiary); color: var(--text-primary);
+  border: 2px solid var(--border); border-radius: 12px;
+  font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
 }
-
 .load-more-btn:hover {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background: var(--accent); color: white; border-color: var(--accent);
+  transform: translateY(-2px); box-shadow: var(--shadow-md);
 }
 
 /* Нет результатов */
-.no-results {
-  padding: 4rem 0;
-}
-
+.no-results { padding: 4rem 0; }
 .no-results-content {
-  text-align: center;
-  padding: 3rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  max-width: 500px;
-  margin: 0 auto;
+  text-align: center; padding: 3rem; background: var(--bg-secondary);
+  border-radius: 16px; max-width: 500px; margin: 0 auto;
 }
-
-.no-results-icon {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 1rem;
-}
-
-.no-results h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.no-results p {
-  color: var(--text-secondary);
-}
+.no-results-icon { font-size: 4rem; display: block; margin-bottom: 1rem; }
+.no-results h3 { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-primary); }
+.no-results p  { color: var(--text-secondary); }
 
 /* Footer */
-.footer {
-  margin-top: 4rem;
-  padding: 3rem 0 2rem;
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-}
+.footer { margin-top: 4rem; padding: 3rem 0 2rem; background: var(--bg-secondary); border-top: 1px solid var(--border); }
 
 .telegram-cta {
-  padding: 3rem;
-  border-radius: 24px;
-  margin-bottom: 2rem;
-  position: relative;
-  overflow: hidden;
+  padding: 3rem; border-radius: 24px; margin-bottom: 2rem; position: relative; overflow: hidden;
   background: linear-gradient(135deg, var(--accent-light), transparent);
 }
-
-.telegram-content {
-  position: relative;
-  z-index: 2;
-}
-
-.telegram-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.telegram-text {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
-  max-width: 600px;
-}
-
+.telegram-content { position: relative; z-index: 2; }
+.telegram-title { font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-primary); }
+.telegram-text { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem; max-width: 600px; }
 .telegram-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: var(--accent);
-  color: white;
-  text-decoration: none;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
+  display: inline-flex; align-items: center; gap: 0.75rem; padding: 1rem 2rem;
+  background: var(--accent); color: white; text-decoration: none; border-radius: 12px;
+  font-size: 1.1rem; font-weight: 600; transition: all 0.3s ease; box-shadow: var(--shadow-md);
 }
-
-.telegram-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-}
-
-.telegram-icon {
-  fill: currentColor;
-}
-
+.telegram-btn:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.telegram-icon { fill: currentColor; }
 .telegram-decoration {
-  position: absolute;
-  right: 3rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 6rem;
-  opacity: 0.2;
-  animation: float 6s ease-in-out infinite;
+  position: absolute; right: 3rem; top: 50%; transform: translateY(-50%);
+  font-size: 6rem; opacity: 0.2; animation: float 6s ease-in-out infinite;
 }
-
-@keyframes float {
-  0%, 100% { transform: translateY(-50%) translateX(0); }
-  50% { transform: translateY(-55%) translateX(-10px); }
-}
+@keyframes float { 0%,100% { transform: translateY(-50%) translateX(0); } 50% { transform: translateY(-55%) translateX(-10px); } }
 
 /* Inline CTA блок (вставляется между карточками) */
 .telegram-cta-inline {
-  grid-column: 1 / -1; /* Занимает всю ширину грида */
-  padding: 2.5rem;
-  border-radius: 20px;
-  margin: 2rem 0;
-  position: relative;
-  overflow: hidden;
+  grid-column: 1 / -1;
+  padding: 2.5rem; border-radius: 20px; margin: 2rem 0; position: relative; overflow: hidden;
   background: linear-gradient(135deg, var(--accent-light), transparent);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 2rem;
 }
-
-.telegram-cta-content {
-  position: relative;
-  z-index: 2;
-  flex: 1;
-}
-
-.telegram-cta-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: var(--text-primary);
-}
-
-.telegram-cta-text {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
-  max-width: 500px;
-  line-height: 1.5;
-}
-
+.telegram-cta-content { position: relative; z-index: 2; flex: 1; }
+.telegram-cta-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); }
+.telegram-cta-text  { font-size: 1rem; color: var(--text-secondary); margin-bottom: 1.5rem; max-width: 500px; line-height: 1.5; }
 .telegram-cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.75rem;
-  background: var(--accent);
-  color: white;
-  text-decoration: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
+  display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 1.75rem;
+  background: var(--accent); color: white; text-decoration: none; border-radius: 12px;
+  font-size: 1rem; font-weight: 600; transition: all 0.3s ease; box-shadow: var(--shadow-md);
 }
-
-.telegram-cta-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.telegram-cta-decoration {
-  position: relative;
-  font-size: 5rem;
-  opacity: 0.15;
-  animation: float 6s ease-in-out infinite;
-}
+.telegram-cta-btn:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.telegram-cta-decoration { position: relative; font-size: 5rem; opacity: 0.15; animation: float 6s ease-in-out infinite; }
 
 .footer-bottom {
-  text-align: center;
-  padding-top: 2rem;
-  border-top: 1px solid var(--border);
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+  text-align: center; padding-top: 2rem; border-top: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 0.95rem;
 }
 
 /* Tooltip */
@@ -1084,523 +844,163 @@ section {
   max-width: 250px;
   animation: fadeIn 0.2s ease-out;
 }
-
-.tooltip-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.tooltip p {
-  margin: 0.5rem 0;
-  font-size: 0.9rem;
-}
-
-.tooltip strong {
-  color: var(--accent);
-}
-
-.tooltip-examples {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
+.tooltip-title { font-size: 1.1rem; font-weight: 600; }
+.tooltip p { margin: 0.5rem 0; font-size: 0.9rem; }
+.tooltip strong { color: var(--accent); }
+.tooltip-examples { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
 /* Утилиты */
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 /* Ленивая загрузка секций */
-.lazy-section {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.lazy-section.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.lazy-section { opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.lazy-section.visible { opacity: 1; transform: translateY(0); }
 
 /* Анимации */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Поддержка reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-
-  .parallax-layer {
-    display: none;
-  }
+  .parallax-layer { display: none; }
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .search-block {
-    padding: 1.5rem;
-  }
-
-  .search-input-group {
-    flex-wrap: wrap;
-  }
-
-  .search-input {
-    width: 100%;
-  }
-
-  .search-btn {
-    flex: 1;
-  }
-
-  .help-btn {
-    width: auto;
-    flex: 0 0 auto;
-  }
-
-  .controls-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 1.25rem;
-  }
-
-  .control-group label {
-    font-size: 0.8rem;
-  }
-
-  .control-group input,
-  .control-group select {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.95rem;
-  }
-
-  .alt-search-btn {
-    padding: 0.875rem 1.25rem;
-    font-size: 0.95rem;
-  }
-
-  .gifts-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .telegram-decoration {
-    display: none;
-  }
-
-  .telegram-cta {
-    padding: 2rem;
-  }
-
-  .telegram-title {
-    font-size: 1.5rem;
-  }
-
-  /* Inline CTA адаптив для планшетов */
-  .telegram-cta-inline {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem;
-  }
-
-  .telegram-cta-decoration {
-    display: none;
-  }
-
-  .telegram-cta-title {
-    font-size: 1.3rem;
-  }
-
-  .telegram-cta-text {
-    max-width: 100%;
-    font-size: 0.95rem;
-  }
+  .hero-title { font-size: 2rem; }
+  .search-block { padding: 1.5rem; }
+  .search-input-group { flex-wrap: wrap; }
+  .search-input { width: 100%; }
+  .search-btn { flex: 1; }
+  .help-btn { width: auto; flex: 0 0 auto; }
+  .controls-grid { grid-template-columns: 1fr; gap: 1rem; padding: 1.25rem; }
+  .control-group label { font-size: 0.8rem; }
+  .control-group input, .control-group select { padding: 0.75rem 0.875rem; font-size: 0.95rem; }
+  .alt-search-btn { padding: 0.875rem 1.25rem; font-size: 0.95rem; }
+  .gifts-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .telegram-decoration { display: none; }
+  .telegram-cta { padding: 2rem; }
+  .telegram-title { font-size: 1.5rem; }
+  .telegram-cta-inline { flex-direction: column; text-align: center; padding: 2rem; }
+  .telegram-cta-decoration { display: none; }
+  .telegram-cta-title { font-size: 1.3rem; }
+  .telegram-cta-text { max-width: 100%; font-size: 0.95rem; }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 15px;
-  }
-
-  .hero {
-    padding: 2rem 0 1rem;
-    min-height: auto;
-  }
-
-  .search-hint {
-    text-align: left;
-  }
-
-  .example-block {
-    padding: 1rem;
-  }
-
-  .gift-card {
-    border-radius: 12px;
-  }
-
-  .gift-card-body {
-    padding: 1rem;
-  }
-
-  /* Inline CTA адаптив для мобильных */
-  .telegram-cta-inline {
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-  }
-
-  .telegram-cta-title {
-    font-size: 1.2rem;
-  }
-
-  .telegram-cta-text {
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-  }
-
-  .telegram-cta-btn {
-    padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
-  }
+  .container { padding: 0 15px; }
+  .hero { padding: 2rem 0 1rem; min-height: auto; }
+  .search-hint { text-align: left; }
+  .example-block { padding: 1rem; }
+  .gift-card { border-radius: 12px; }
+  .gift-card-body { padding: 1rem; }
+  .telegram-cta-inline { padding: 1.5rem; margin: 1.5rem 0; }
+  .telegram-cta-title { font-size: 1.2rem; }
+  .telegram-cta-text { font-size: 0.9rem; margin-bottom: 1rem; }
+  .telegram-cta-btn { padding: 0.75rem 1.5rem; font-size: 0.95rem; }
 }
 
 /* Поддержка высоких контрастов */
 @media (prefers-contrast: high) {
-  :root {
-    --border: var(--text-primary);
-  }
-
-  .search-input,
-  .control-group input,
-  .control-group select {
-    border-width: 2px;
-  }
+  :root { --border: var(--text-primary); }
+  .search-input, .control-group input, .control-group select { border-width: 2px; }
 }
 
-/* Фокус для клавиатурной навигации */
+/* [a11y] Более мягкий фокус с подсветкой (и в dark приятно выглядит) */
 *:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--accent) 22%, transparent);
 }
+
 
 /* Современные CSS фичи */
-@supports (backdrop-filter: blur(10px)) {
-  .glass-effect {
-    background: var(--glass-bg);
-  }
-}
+@supports (backdrop-filter: blur(10px)) { .glass-effect { background: var(--glass-bg); } }
 
 /* Container queries для карточек */
 @container (min-width: 400px) {
-  .gift-card {
-    grid-template-columns: 150px 1fr;
-  }
+  .gift-card { grid-template-columns: 150px 1fr; }
 }
 
 /* Динамический диапазон для HDR дисплеев */
 @media (dynamic-range: high) {
-  :root {
-    --accent: color(display-p3 0.42 0.39 1);
-  }
+  :root { --accent: color(display-p3 0.42 0.39 1); }
 }
 
 /* CSS :has() для интерактивности */
 .gifts-grid:has(.gift-card:hover) .gift-card:not(:hover) {
-  opacity: 0.7;
-  transform: scale(0.98);
+  opacity: 0.7; transform: scale(0.98);
 }
 
-/* Sentinel для ленивой подгрузки */
-.scroll-sentinel {
-  height: 1px;
-  width: 100%;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-/* Спиннер загрузки */
+/* Спиннер загрузки (глобальный) */
 .loader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
-  margin: 2rem 0;
-  opacity: 1;
-  transition: opacity 0.3s ease;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1rem; padding: 2rem; margin: 2rem 0; opacity: 1; transition: opacity 0.3s ease;
 }
-
-.loader.hidden {
-  display: none;
-}
-
-.loader p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-/* Спиннер анимация */
+.loader.hidden { display: none; }
+.loader p { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; }
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid var(--border);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  width: 48px; height: 48px;
+  border: 4px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
 }
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Адаптив для спиннера */
+@keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 768px) {
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border-width: 3px;
-  }
-
-  .loader p {
-    font-size: 0.875rem;
-  }
+  .spinner { width: 40px; height: 40px; border-width: 3px; }
+  .loader p { font-size: 0.875rem; }
 }
 
-/* ==== Дружелюбный переход (оверлей) ==== */
+/* ==== Дружелюбный переход (оверлей) — оставлена одна, улучшенная версия ==== */
+/* [fix] Убрана старая дублирующаяся версия .transition-overlay, чтобы не конфликтовала */
 .transition-overlay {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  z-index: 2000;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .2s ease;
-}
-.transition-overlay.visible {
-  opacity: 1;
-  pointer-events: all;
-}
-.transition-overlay .overlay-box {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: 14px;
-  pointer-events: auto;
-}
-.transition-overlay .overlay-text {
-  font-weight: 600;
-}
-
-
-/* Кнопка "Наверх" */
-.to-top-btn {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 56px;
-  height: 56px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-lg);
-  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  z-index: 999;
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.to-top-btn.hidden {
-  opacity: 0;
-  transform: translateY(20px) scale(0.8);
-  pointer-events: none;
-}
-
-.to-top-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-4px) scale(1.05);
-  box-shadow: var(--shadow-xl);
-}
-
-.to-top-btn:active {
-  transform: translateY(-2px) scale(0.98);
-}
-
-.to-top-btn svg {
-  width: 24px;
-  height: 24px;
-}
-
-/* Адаптив для кнопки to-top */
-@media (max-width: 768px) {
-  .to-top-btn {
-    width: 48px;
-    height: 48px;
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
-
-  .to-top-btn svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .to-top-btn {
-    width: 44px;
-    height: 44px;
-    bottom: 1rem;
-    right: 1rem;
-  }
-}
-
-
-/* *************************** */
-.gift-buy-btn{
-  display:inline-block;
-  padding:.6rem 1rem;
-  border-radius:12px;
-  font-weight:600;
-  text-decoration:none;
-  border:1px solid rgba(0,0,0,.08);
-  box-shadow:0 2px 6px rgba(0,0,0,.06);
-}
-[gift-buy-btn]:focus, .gift-buy-btn:focus{
-  outline:2px solid rgba(0,0,0,.2);
-  outline-offset:2px;
-}
-
-/* === FIX: оверлей не должен перехватывать клики по странице === */
-#transitionOverlay {
-  pointer-events: none;           /* фон прозрачный для указателя */
-}
-
-/* Внутреннюю коробку можно кликать (на будущее), но она маленькая */
-#transitionOverlay .overlay-box {
-  pointer-events: auto;
-}
-
-/* ====== Transition Overlay (светлый, дружелюбный) ====== */
-.transition-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: grid;
-  place-items: center;
-
+  position: fixed; inset: 0; z-index: 9999;
+  display: grid; place-items: center;
   background:
     radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.45) 0%, rgba(255,255,255,.25) 60%, rgba(255,255,255,.15) 100%),
     rgba(240, 244, 255, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  opacity: 0;
-  pointer-events: none;            /* не перехватывает клики */
-  transition: opacity .25s ease;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none; transition: opacity .25s ease;
 }
-
-/* ВНИМАНИЕ: мы не используем display:none здесь — только прозрачность */
-.transition-overlay.hidden { opacity: 0; }
-/* Исключение: для оверлея .hidden НЕ должен прятать display, только прозрачность */
-.transition-overlay.hidden { display: grid; }
-
+/* ВНИМАНИЕ: не используем display:none — только прозрачность */
+.transition-overlay.hidden { opacity: 0; display: grid; }
 .transition-overlay.visible { opacity: 1; }
 
 .transition-overlay .overlay-box {
   width: min(92vw, 520px);
   border-radius: 16px;
   padding: 18px 16px;
-
   background: rgba(255,255,255,.92);
   border: 1px solid rgba(10, 30, 60, .10);
   box-shadow: 0 10px 40px rgba(0,0,0,.12);
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
+  display: flex; align-items: center; gap: 12px;
   transform: translateY(6px);
   transition: transform .25s ease, opacity .25s ease;
   opacity: .98;
 }
-.transition-overlay.visible .overlay-box {
-  transform: translateY(0);
-  opacity: 1;
-}
-
+.transition-overlay.visible .overlay-box { transform: translateY(0); opacity: 1; }
 .transition-overlay .overlay-text {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.45;
-  color: #0f1b2e;
+  margin: 0; font-size: 16px; line-height: 1.45; color: #0f1b2e;
 }
 
-.transition-overlay .spinner {
-  width: 20px;
-  height: 20px;
+/* [fix] Спиннер оверлея использует отдельные keyframes, не конфликтует с глобальными */
+.transition-overlay .spinner { /* селектор оставлен под текущий HTML */
+  width: 20px; height: 20px;
   border: 3px solid rgba(15, 27, 46, .18);
   border-top-color: #6c63ff;
   border-radius: 50%;
-  animation: spin .8s linear infinite;
+  animation: overlaySpin .8s linear infinite;
   flex: 0 0 auto;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes overlaySpin { to { transform: rotate(360deg); } }
 
-/* Тёмная тема */
+/* Тёмная тема оверлея */
 [data-theme="dark"] .transition-overlay {
   background:
     radial-gradient(1200px 700px at 50% -10%, rgba(20,24,36,.55) 0%, rgba(20,24,36,.45) 60%, rgba(20,24,36,.35) 100%),
@@ -1625,3 +1025,39 @@ section {
     animation: none !important;
   }
 }
+
+/* Кнопка "Наверх" */
+.to-top-btn {
+  position: fixed; bottom: 2rem; right: 2rem;
+  width: 56px; height: 56px; background: var(--accent); color: white;
+  border: none; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 999; opacity: 1; transform: translateY(0) scale(1);
+}
+.to-top-btn.hidden { opacity: 0; transform: translateY(20px) scale(0.8); pointer-events: none; }
+.to-top-btn:hover { background: var(--accent-hover); transform: translateY(-4px) scale(1.05); box-shadow: var(--shadow-xl); }
+.to-top-btn:active { transform: translateY(-2px) scale(0.98); }
+.to-top-btn svg { width: 24px; height: 24px; }
+
+@media (max-width: 768px) {
+  .to-top-btn { width: 48px; height: 48px; bottom: 1.5rem; right: 1.5rem; }
+  .to-top-btn svg { width: 20px; height: 20px; }
+}
+@media (max-width: 480px) {
+  .to-top-btn { width: 44px; height: 44px; bottom: 1rem; right: 1rem; }
+}
+
+/* *************************** */
+.gift-buy-btn{
+  display:inline-block; padding:.6rem 1rem; border-radius:12px; font-weight:600;
+  text-decoration:none; border:1px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+[gift-buy-btn]:focus, .gift-buy-btn:focus{ outline:2px solid rgba(0,0,0,.2); outline-offset:2px; }
+
+/* === FIX: оверлей не должен перехватывать клики по странице === */
+#transitionOverlay { pointer-events: none; }
+#transitionOverlay .overlay-box { pointer-events: auto; }
+
+/* Тёмная тема уже покрыта выше для .transition-overlay */
