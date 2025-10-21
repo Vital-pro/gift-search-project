@@ -110,130 +110,9 @@ function showTransitionOverlay(msg = 'Подбираем подарки…', aut
 //   sub = 'Скоро откроем магазин',
 //   delayMs = 1800
 // ) {
-//   const htmlContent = `<!DOCTYPE html>
-// <html lang="ru">
-// <head>
-//   <meta charset="utf-8">
-//   <meta name="viewport" content="width=device-width, initial-scale=1">
-//   <title>${title}</title>
-//   <meta name="referrer" content="no-referrer">
-//   <style>
-//     html, body {
-//       height: 100%;
-//       margin: 0;
-//       padding: 0;
-//       background: #f9fbff;
-//       color: #0f1b2e;
-//       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-//       display: grid;
-//       place-items: center;
-//     }
-//     .card {
-//       background: white;
-//       border: 1px solid rgba(10, 30, 60, 0.1);
-//       border-radius: 16px;
-//       padding: 20px 18px;
-//       width: min(92vw, 520px);
-//       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-//       display: flex;
-//       align-items: center;
-//       gap: 12px;
-//       opacity: 1;
-//       transition: opacity 0.3s ease;
-//     }
-//     @media (prefers-reduced-motion: reduce) {
-//       .card { transition: none; }
-//     }
-//     .card.fading {
-//       opacity: 0;
-//     }
-//     .logo {
-//       font-size: 24px;
-//       flex: 0 0 auto;
-//     }
-//     .spinner {
-//       width: 20px;
-//       height: 20px;
-//       border: 3px solid rgba(15, 27, 46, 0.18);
-//       border-top-color: #6c63ff;
-//       border-radius: 50%;
-//       animation: spin 0.8s linear infinite;
-//       flex: 0 0 auto;
-//     }
-//     @keyframes spin {
-//       to { transform: rotate(360deg); }
-//     }
-//     .content {
-//       flex: 1;
-//       min-width: 0;
-//     }
-//     h1 {
-//       margin: 0 0 4px;
-//       font-size: 18px;
-//       font-weight: 600;
-//       line-height: 1.3;
-//       color: #0f1b2e;
-//       overflow-wrap: break-word;
-//     }
-//     p {
-//       margin: 0;
-//       color: #5b6b85;
-//       font-size: 14px;
-//       line-height: 1.4;
-//       overflow-wrap: break-word;
-//     }
-//   </style>
-// </head>
-// <body>
-//   <div class="card" id="card">
-//     <div class="logo" aria-hidden="true">🎁</div>
-//     <div class="spinner" aria-hidden="true"></div>
-//     <div class="content">
-//       <h1 id="title">${title}</h1>
-//       <p id="subtitle">${sub}</p>
-//     </div>
-//   </div>
-//   <script>
-//     try { window.opener = null; } catch (e) {}
-//     const card = document.getElementById('card');
-//     const titleEl = document.getElementById('title');
-//     const subtitleEl = document.getElementById('subtitle');
-//     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-//     let hasNavigated = false;
-
-//     function navigate() {
-//       if (hasNavigated) return;
-//       hasNavigated = true;
-//       // ИСПРАВЛЕНИЕ: используем window.open + close вместо location.replace
-//       window.open(${JSON.stringify(targetUrl)}, '_self');
-//     }
-
-//     function fadeAndNavigate() {
-//       if (prefersReducedMotion || !card) {
-//         navigate();
-//         return;
-//       }
-//       card.classList.add('fading');
-//       setTimeout(navigate, 300);
-//     }
-
-//     setTimeout(fadeAndNavigate, ${Math.max(0, delayMs) | 0});
-
-//     setTimeout(() => {
-//       if (!hasNavigated && titleEl && subtitleEl) {
-//         titleEl.textContent = 'Сеть замедлилась';
-//         subtitleEl.textContent = 'Ищем подарки дольше обычного…';
-//       }
-//     }, 3500);
-//   </script>
-// </body>
-// </html>`;
-
-//   const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-//   const url = URL.createObjectURL(blob);
-//   const w = window.open(url, '_blank');
+//   const w = window.open('', '_blank');
 //   if (!w) {
-//     showTransitionOverlay('Подбираем подарки…', 2000);
+//     showTransitionOverlay('Попапы заблокированы. Открываем здесь…', 2000);
 //     setTimeout(() => {
 //       try {
 //         window.location.href = targetUrl;
@@ -241,7 +120,53 @@ function showTransitionOverlay(msg = 'Подбираем подарки…', aut
 //     }, 100);
 //     return;
 //   }
-//   w.addEventListener('load', () => URL.revokeObjectURL(url), { once: true });
+
+//   const html = `<!DOCTYPE html><html lang="ru"><head>
+// <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+// <title>${title}</title>
+// <meta name="referrer" content="no-referrer">
+// <style>
+// html,body{margin:0;background:#f9fbff;color:#0f1b2e;font-family:system-ui,sans-serif;display:grid;place-items:center;height:100%}
+// .card{background:white;border:1px solid rgba(10,30,60,.1);border-radius:16px;padding:20px 18px;width:min(92vw,520px);display:flex;align-items:center;gap:12px}
+// .logo{font-size:24px}
+// .spinner{width:20px;height:20px;border:3px solid rgba(15,27,46,.18);border-top-color:#6c63ff;border-radius:50%;animation:spin .8s linear infinite}
+// @keyframes spin{to{transform:rotate(360deg)}}
+// .content{flex:1;min-width:0}
+// h1{margin:0 0 4px;font-size:18px;font-weight:600;color:#0f1b2e}
+// p{margin:0;color:#5b6b85;font-size:14px}
+// </style></head><body>
+// <div class="card">
+//   <div class="logo">🎁</div>
+//   <div class="spinner"></div>
+//   <div class="content">
+//     <h1>${title}</h1>
+//     <p>${sub}</p>
+//   </div>
+// </div>
+// <script>
+//   try{ window.opener = null; }catch(e){}
+//   let done = false;
+//   function go() {
+//     if (done) return;
+//     done = true;
+//     window.location.href = ${JSON.stringify(targetUrl)};
+//   }
+//   setTimeout(go, ${Math.max(0, delayMs) | 0});
+//   // Резерв: если через 5 сек не ушли — идём принудительно
+//   setTimeout(go, 5000);
+// </script>
+// </body></html>`;
+
+//   try {
+//     w.document.open();
+//     w.document.write(html);
+//     w.document.close();
+//   } catch (e) {
+//     // Если document.write заблокирован — сразу идём
+//     try {
+//       w.location.href = targetUrl;
+//     } catch {}
+//   }
 // }
 
 function openWithPreloader(
@@ -266,14 +191,87 @@ function openWithPreloader(
 <title>${title}</title>
 <meta name="referrer" content="no-referrer">
 <style>
-html,body{margin:0;background:#f9fbff;color:#0f1b2e;font-family:system-ui,sans-serif;display:grid;place-items:center;height:100%}
-.card{background:white;border:1px solid rgba(10,30,60,.1);border-radius:16px;padding:20px 18px;width:min(92vw,520px);display:flex;align-items:center;gap:12px}
-.logo{font-size:24px}
-.spinner{width:20px;height:20px;border:3px solid rgba(15,27,46,.18);border-top-color:#6c63ff;border-radius:50%;animation:spin .8s linear infinite}
+/* ОСНОВНЫЕ ИЗМЕНЕНИЯ В СТИЛЯХ: */
+html,body{
+  margin:0;
+  padding:0;
+  background:#f9fbff;
+  color:#0f1b2e;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
+  /* ЗАМЕНА: flex вместо grid для лучшей поддержки */
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  height:100%;
+  /* ДОБАВЛЕНО: предотвращение скролла */
+  overflow:hidden;
+}
+.card{
+  /* УЛУЧШЕНО: тени и границы для современного вида */
+  background:white;
+  border-radius:20px;
+  padding:24px;
+  width:min(90vw, 480px);
+  /* ЗАМЕНА: flex-direction для лучшего расположения */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  /* ДОБАВЛЕНО: тень */
+  box-shadow:0 10px 30px rgba(15,27,46,0.12);
+  gap:20px;
+}
+.logo{
+  font-size:28px;
+  /* ДОБАВЛЕНО: анимация появления */
+  animation:fadeIn 0.3s ease-out;
+}
+.spinner{
+  width:24px;
+  height:24px;
+  border:3px solid rgba(15,27,46,0.15);
+  border-top-color:#6c63ff;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  /* ДОБАВЛЕНО: центрирование */
+  margin:0 auto;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.content{flex:1;min-width:0}
-h1{margin:0 0 4px;font-size:18px;font-weight:600;color:#0f1b2e}
-p{margin:0;color:#5b6b85;font-size:14px}
+/* ДОБАВЛЕНО: плавное появление */
+@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.content{
+  flex:1;
+  min-width:0;
+  /* ДОБАВЛЕНО: максимальная ширина для лучшей читаемости */
+  max-width:100%;
+}
+h1{
+  margin:0 0 8px;
+  font-size:20px;
+  font-weight:600;
+  color:#0f1b2e;
+  line-height:1.3;
+  /* ДОБАВЛЕНО: плавное появление */
+  animation:fadeIn 0.4s ease-out 0.1s both;
+}
+p{
+  margin:0;
+  color:#5b6b85;
+  font-size:15px;
+  line-height:1.5;
+  /* ДОБАВЛЕНО: плавное появление */
+  animation:fadeIn 0.4s ease-out 0.2s both;
+}
+/* ДОБАВЛЕНО: адаптивность для мобильных */
+@media (max-width: 480px) {
+  .card {
+    padding:20px;
+    width:95vw;
+  }
+  h1 { font-size:18px; }
+  p { font-size:14px; }
+}
 </style></head><body>
 <div class="card">
   <div class="logo">🎁</div>
