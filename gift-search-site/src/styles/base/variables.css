@@ -1,0 +1,70 @@
+/* CSS переменные - вынесены из основного styles.css */
+:root {
+  /* Цвета для светлой темы */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #f0f2f5;
+  --text-primary: #1a1a1a;
+  --text-secondary: #6c757d;
+  --text-muted: #999999;
+  --accent: #6c63ff;
+  --accent-hover: #5a52d5;
+  --accent-light: #e8e7ff;
+  --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --success: #10b981;
+  --error: #ef4444;
+  --border: #e5e7eb;
+  --shadow-sm: 0 2px 8px rgba(108, 99, 255, 0.08);
+  --shadow-md: 0 8px 24px rgba(108, 99, 255, 0.12);
+  --shadow-lg: 0 16px 48px rgba(108, 99, 255, 0.18);
+  --shadow-xl: 0 24px 64px rgba(108, 99, 255, 0.25);
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --hero-title: #9b3fb5fa;
+  --parallax-opacity: 0.6;
+}
+
+/* Темная тема */
+[data-theme="dark"] {
+  --bg-primary: #0e0f12;
+  --bg-secondary: #151821;
+  --bg-tertiary: #1b1f2a;
+  --text-primary: #eef1f7;
+  --text-secondary: #b6bfd6;
+  --text-muted: #7a86a8;
+  --accent: #8a84ff;
+  --accent-hover: #7a6fff;
+  --accent-light: #2a2f55;
+  --border: #2a2f3a;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.35);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.45);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.55);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.65);
+  --glass-bg: rgba(18, 20, 28, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --parallax-opacity: 0.25;
+}
+
+/* Автоопределение темной темы */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --bg-tertiary: #252525;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --accent: #8b80ff;
+    --accent-hover: #7a6fff;
+    --accent-light: #2a2555;
+    --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --border: #333333;
+    --shadow-sm: 0 2px 8px rgba(139, 128, 255, 0.15);
+    --shadow-md: 0 8px 24px rgba(139, 128, 255, 0.2);
+    --shadow-lg: 0 16px 48px rgba(139, 128, 255, 0.3);
+    --shadow-xl: 0 24px 64px rgba(139, 128, 255, 0.4);
+    --glass-bg: rgba(10, 10, 10, 0.85);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --parallax-opacity: 0.3;
+  }
+}

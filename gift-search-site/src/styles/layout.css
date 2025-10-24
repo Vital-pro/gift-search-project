@@ -1,0 +1,143 @@
+/* === gift-search-site/src/styles/layout.css === */
+/* Основные layout-элементы сайта: header, hero, footer, search-block */
+
+/* Header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+.nav-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  padding: 4rem 0 3rem;
+}
+.hero-title {
+  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  line-height: 1.15;
+
+  font-weight: 700;
+  /* ! Какой оставить ???? */
+  color: var(--text-primary);
+  color: var(--hero-title);
+
+  margin-bottom: 1rem;
+}
+
+/* Search block (базовые стили) */
+.search-block {
+  background: var(--bg-secondary);
+  border-radius: 24px;
+  box-shadow: var(--shadow-md);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.search-input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.search-input {
+  font-size: 1rem;
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.search-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 14px;
+  font-size: 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.search-btn:active {
+  transform: translateY(0);
+}
+
+/* Footer */
+.footer {
+  background: var(--bg-secondary);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  margin-top: 4rem;
+}
+.footer-bottom {
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+  /* margin-top: 1.5rem; */
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Telegram CTA (в подвале) */
+.telegram-cta {
+  position: relative;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  /* ! Какой оставить ???? */
+  background: var(--bg-tertiary);
+  background: linear-gradient(135deg, var(--accent-light), transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+.telegram-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: #fff;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+.telegram-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}

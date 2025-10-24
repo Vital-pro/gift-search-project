@@ -1,0 +1,120 @@
+/* gift-search-site/src/styles/components/search-bar.css */
+/* Стили только для липкого/плавающего поиска + вспомогательных классов */
+
+/* Показываем компактный заголовок в копии */
+.search-compact-title,
+.search-compact-alt {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.search-float {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 990px;
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease;
+}
+/* Внешний вид копии — тот же, что у search-block */
+.search-float .search-block {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 1rem 1.5rem;
+  box-shadow: var(--shadow-xl);
+}
+.search-float.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* пока копия видна — оригинал не мигает */
+.search-original-hidden {
+  visibility: hidden;
+}
+
+/* компактный заголовок — только в копии */
+.search-float .search-compact-title {
+  display: block;
+  opacity: 1;
+  text-align: center;
+  margin-bottom: 0.6rem;
+  font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1.1rem);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.search-float .search-compact-title strong {
+  font-size: clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
+}
+
+/* подсказки внутри копии прячем */
+.search-float .search-hint {
+  display: none !important;
+}
+
+/* альтернативные контролы показываем и в копии */
+.search-float .alternative-controls {
+  display: block;
+  margin-top: .6rem;
+}
+
+/* компактные отступы внутри раскрытия */
+.search-float .controls-dropdown { border: none; padding: 0; }
+.search-float .controls-dropdown summary {
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: .9rem;
+  padding: .25rem .25rem;
+  user-select: none;
+}
+.search-float .controls-dropdown[open] summary { color: var(--accent); }
+
+/* компактная сетка */
+.search-float .controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: .6rem;
+  padding: .6rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+/* поля — чуть ниже и уже */
+.search-float .control-group label { font-size: .78rem; }
+.search-float .control-group input,
+.search-float .control-group select {
+  padding: .5rem .6rem;
+  font-size: .95rem;
+  border-radius: 10px;
+}
+
+/* ограничение высоты раскрытия */
+.search-float .controls-dropdown[open] .controls-grid {
+  max-height: 260px;
+  overflow: auto;
+}
+
+/* кнопка «Подобрать» компактнее */
+.search-float .alt-search-btn {
+  padding: .6rem 1rem;
+  border-radius: 10px;
+}
+
+/* когда плавающая панель видна — скрыть длинный текст лого */
+body.has-floating-search .logo .logo-text {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  position: absolute;
+  white-space: nowrap;
+}
+
+.search-block { padding: 1rem 1.1rem; border-radius: 18px; }

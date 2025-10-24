@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Нет подключения</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      color: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #6c757d;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #151821;
+        color: #eef1f7;
+      }
+
+      .btn {
+        background: #8a84ff;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="icon">📶</div>
+  <h1>Нет подключения к интернету</h1>
+  <p>Попробуйте обновить страницу позже. А пока — вспомните, кому вы хотели подарить что-то классное!</p>
+  <a href="/" class="btn" onclick="window.location.reload(); return false;">Повторить</a>
+</body>
+
+</html>

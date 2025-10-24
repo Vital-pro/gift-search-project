@@ -1,0 +1,53 @@
+/* Спиннер загрузки (глобальный) — современный, как в оверлее */
+.loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  margin: 2rem 0;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+.loader.hidden {
+  display: none;
+}
+.loader p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* Единый современный спиннер для всего сайта */
+.spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #ff7e5f;    /* оранжевый */
+  border-right-color: #00c9ff;  /* голубой */
+  border-bottom-color: #6c63ff; /* фиолетовый */
+  animation: spinSmooth 1.4s linear infinite, glowPulse 3s ease-in-out infinite alternate;
+}
+
+/* Анимации спиннера */
+@keyframes spinSmooth {
+  to { transform: rotate(360deg); }
+}
+@keyframes glowPulse {
+  from { filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.15)); }
+  to   { filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.4)); }
+}
+
+/* Адаптивность спиннеров */
+@media (max-width: 768px) {
+  .spinner {
+    width: 52px;
+    height: 52px;
+    border-width: 3px;
+  }
+  .loader p {
+    font-size: 0.875rem;
+  }
+}

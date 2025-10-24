@@ -1,0 +1,112 @@
+/* gift-search-site/src/styles/overlay.css */
+/* === Современный вау-оверлей: стеклянный, лёгкий, 2025 === */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+.overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Лёгкий внутренний отблеск для глубины */
+.overlay::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.overlay-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  color: var(--text-primary);
+  animation: fadeInUpOverlay 0.6s ease both;
+  max-width: 90vw;
+  padding: 24px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Современный многоцветный спиннер (использует ГЛОБАЛЬНЫЕ keyframes spinSmooth/glowPulse) */
+.overlay .spinner {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid transparent;
+  border-top-color: #ff7e5f;    /* оранжевый */
+  border-right-color: #00c9ff;  /* голубой */
+  border-bottom-color: #6c63ff; /* фиолетовый */
+  animation: spinSmooth 1.4s linear infinite, glowPulse 3s ease-in-out infinite alternate;
+}
+
+.overlay-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  opacity: 0.92;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+/* Оставляем только уникальную для оверлея анимацию */
+@keyframes fadeInUpOverlay {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Тёмная тема */
+[data-theme="dark"] .overlay {
+  background: rgba(0, 0, 0, 0.14);
+}
+[data-theme="dark"] .overlay-content {
+  background: rgba(20, 22, 34, 0.06);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.2);
+}
+[data-theme="dark"] .overlay-text {
+  color: var(--text-primary);
+}
+
+/* Уважение к предпочтениям анимации */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlay .overlay-content {
+    transition: none !important;
+    animation: none !important;
+  }
+}

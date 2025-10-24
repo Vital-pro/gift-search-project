@@ -1,0 +1,21 @@
+/* Кнопка "Показать ещё" */
+.load-more-btn {
+  display: block; 
+  margin: 2rem auto; 
+  padding: 1rem 3rem;
+  background: var(--bg-tertiary); 
+  color: var(--text-primary);
+  border: 2px solid var(--border); 
+  border-radius: 12px;
+  font-size: 1rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.3s ease;
+}
+.load-more-btn:hover {
+  background: var(--accent); 
+  color: white; 
+  border-color: var(--accent);
+  transform: translateY(-2px); 
+  box-shadow: var(--shadow-md);
+}

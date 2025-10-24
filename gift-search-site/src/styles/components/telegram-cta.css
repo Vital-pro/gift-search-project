@@ -1,0 +1,91 @@
+/* Telegram CTA блоки */
+.telegram-content { 
+  position: relative; 
+  z-index: 2; 
+}
+.telegram-title { 
+  font-size: 1.8rem; 
+  font-weight: 700; 
+  margin-bottom: 1rem; 
+  color: var(--text-primary); 
+}
+.telegram-text { 
+  font-size: 1.1rem; 
+  color: var(--text-secondary); 
+  margin-bottom: 2rem; 
+  max-width: 600px; 
+}
+.telegram-icon { 
+  fill: currentColor; 
+}
+.telegram-decoration {
+  position: absolute; 
+  right: 3rem; 
+  top: 50%; 
+  transform: translateY(-50%);
+  font-size: 6rem; 
+  opacity: 0.2; 
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float { 
+  0%,100% { transform: translateY(-50%) translateX(0); } 
+  50% { transform: translateY(-55%) translateX(-10px); } 
+}
+
+/* Inline CTA блок (вставляется между карточками) */
+.telegram-cta-inline {
+  grid-column: 1 / -1;
+  padding: 2.5rem; 
+  border-radius: 20px; 
+  margin: 2rem 0; 
+  position: relative; 
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent-light), transparent);
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 2rem;
+}
+.telegram-cta-content { 
+  position: relative; 
+  z-index: 2; 
+  flex: 1; 
+}
+.telegram-cta-title { 
+  font-size: 1.5rem; 
+  font-weight: 700; 
+  margin-bottom: 0.75rem; 
+  color: var(--text-primary); 
+}
+.telegram-cta-text  { 
+  font-size: 1rem; 
+  color: var(--text-secondary); 
+  margin-bottom: 1.5rem; 
+  max-width: 500px; 
+  line-height: 1.5; 
+}
+.telegram-cta-btn {
+  display: inline-flex; 
+  align-items: center; 
+  gap: 0.5rem; 
+  padding: 0.875rem 1.75rem;
+  background: var(--accent); 
+  color: white; 
+  text-decoration: none; 
+  border-radius: 12px;
+  font-size: 1rem; 
+  font-weight: 600; 
+  transition: all 0.3s ease; 
+  box-shadow: var(--shadow-md);
+}
+.telegram-cta-btn:hover { 
+  background: var(--accent-hover); 
+  transform: translateY(-2px); 
+  box-shadow: var(--shadow-lg); 
+}
+.telegram-cta-decoration { 
+  position: relative; 
+  font-size: 5rem; 
+  opacity: 0.15; 
+  animation: float 6s ease-in-out infinite; 
+}

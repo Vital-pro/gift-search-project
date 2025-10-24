@@ -1,0 +1,86 @@
+/* gift-search-site/src/styles/components/gift-card.css */
+/* === Сетка и карточки подарков — 1:1 из текущего styles.css === */
+
+/* Сетка подарков */
+.gifts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  /* [feature] Включаем контейнер-квери, чтобы заработал @container */
+  container-type: inline-size;
+}
+
+/* Карточка подарка */
+.gift-card {
+  background: var(--bg-secondary);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  position: relative;
+  animation: fadeInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* [perf] Ускоряем рендер длинных списков */
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 420px;
+  contain: content;
+}
+.gift-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--accent-gradient);
+  opacity: 0; transition: opacity 0.4s ease; z-index: 0; pointer-events: none;
+}
+.gift-card:hover { transform: translateY(-12px) scale(1.03); box-shadow: var(--shadow-xl); border-color: transparent; }
+.gift-card:hover::before { opacity: 0.05; }
+
+.gift-card-image {
+  width: 100%; height: 200px; object-fit: cover; background: var(--bg-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem; color: var(--text-muted); position: relative; overflow: hidden;
+}
+.gift-card-image img { width: 100%; height: 100%; object-fit: cover; }
+.gift-card-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.gift-card:hover .gift-card-img { transform: scale(1.05); }
+.gift-card-image { position: relative; z-index: 1; }
+
+.gift-card-body { padding: 1.5rem; position: relative; z-index: 1; }
+.gift-card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary); line-height: 1.4; }
+.gift-card-description {
+  font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.gift-card-price { font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 1rem; }
+
+.gift-card-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+.gift-tag {
+  padding: 4px 10px; background: var(--accent-light); color: var(--accent);
+  border-radius: 20px; font-size: 0.85rem; font-weight: 500;
+}
+
+.gift-card-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 1rem; border-top: 1px solid var(--border);
+}
+.age-range { font-size: 0.9rem; color: var(--text-secondary); }
+.category-badge {
+  padding: 4px 12px; background: var(--bg-tertiary); border-radius: 8px;
+  font-size: 0.85rem; color: var(--text-secondary); font-weight: 500;
+}
+
+/* Кнопка покупки внутри карточек */
+.gift-buy-btn{
+  display:inline-block; padding:.6rem 1rem; border-radius:12px; font-weight:600;
+  text-decoration:none; border:1px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+[gift-buy-btn]:focus, .gift-buy-btn:focus{ outline:2px solid rgba(0,0,0,.2); outline-offset:2px; }
+
+/* Container queries для карточек */
+@container (min-width: 400px) {
+  .gift-card { grid-template-columns: 150px 1fr; }
+}
+
+/* Чуть сократим отступ у первой секции с карточками */
+.random-gifts.section,
+.random-gifts { padding-top: 1.25rem; }

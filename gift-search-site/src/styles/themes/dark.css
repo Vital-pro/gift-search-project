@@ -1,0 +1,32 @@
+/* Дополнительные стили для темной темы */
+[data-theme="dark"] .glass-effect,
+[data-theme="dark"] .search-float .search-block {
+  background: color-mix(in oklab, var(--glass-bg) 92%, transparent);
+  border-color: rgba(255,255,255,.06);
+  backdrop-filter: saturate(120%) blur(12px);
+  -webkit-backdrop-filter: saturate(120%) blur(12px);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.45),
+    0 1px 0 rgba(255,255,255,.03) inset;
+}
+
+[data-theme="dark"] .gift-card {
+  background: #141822;
+  border-color: #2a2f3a;
+  box-shadow: var(--shadow-sm);
+}
+[data-theme="dark"] .gift-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+[data-theme="dark"] .gift-tag {
+  background: #23283a;
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .search-btn,
+[data-theme="dark"] .telegram-btn,
+[data-theme="dark"] .telegram-cta-btn,
+[data-theme="dark"] .alt-search-btn,
+[data-theme="dark"] .load-more-btn:hover {
+  filter: brightness(1.02) saturate(1.02);
+}

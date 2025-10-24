@@ -1,0 +1,26 @@
+.search-hint { margin-bottom: 2rem; text-align: center; }
+
+.greeting {
+  font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);
+}
+
+.instruction { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1rem; }
+
+.example-block {
+  background: var(--bg-tertiary);
+  border-radius: 16px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.example-title { font-size: 1.2rem; color: var(--text-secondary); }
+.example-text  { font-size: 0.95rem; color: var(--text-secondary); margin: 0.5rem 0; line-height: 1.7; }
+
+.highlight {
+  background: var(--accent-light); color: var(--accent);
+  padding: 2px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;
+}
+
+.search-hint { margin-bottom: 0.75rem; }
+.example-block { padding: 0.9rem; border-radius: 12px; }
+.example-text { font-size: 0.92rem; line-height: 1.5; }

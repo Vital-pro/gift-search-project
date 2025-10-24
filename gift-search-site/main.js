@@ -1,6 +1,18 @@
+/* eslint-env browser */
+/* global window, document, URLSearchParams, location */
+
 // Импорт данных о подарках
 import { GIFTS as GIFTS } from './data/index.js';
-import { recipientMap } from './vendor/recipient-map.js';
+import { parseQuery } from './src/domain/parseQuery.js';
+import { filterGifts } from './src/domain/filterGifts.js';
+import { createTelegramCTA } from './src/ui/components/TelegramCTA.js';
+import { createGiftCard } from './src/ui/components/GiftCard.js';
+import { showTransitionOverlay } from './src/ui/components/Overlay.js';
+import { initStickySearch } from './src/ui/stickySearch.js';
+
+
+import { registerServiceWorker } from './src/services/sw-register.js';
+
 
 // ===============================
 // Конфиг
@@ -15,9 +27,7 @@ const PROMO_GIFTS_IDS = [1, 3, 5, 8, 12, 15];
 // На localhost прокидываем на прод-домен, где реально работает /api/go.
 const PROD_ORIGIN = 'https://gift-search-project.vercel.app'; // ← если у тебя другой домен — подставь его
 const API_BASE =
-  typeof location !== 'undefined' && location.hostname === 'localhost'
-    ? PROD_ORIGIN
-    : '';
+  typeof location !== 'undefined' && location.hostname === 'localhost' ? PROD_ORIGIN : '';
 
 // Состояние приложения
 let currentFilters = { recipient: null, age: null, budget: null };
@@ -71,171 +81,147 @@ function translateCategory(category) {
   return translations[category] || category;
 }
 
-// ===============================
-// Оверлей плавного перехода на исходной вкладке
-// ===============================
-// Дружелюбный оверлей перехода + отладка в консоль
-function showTransitionOverlay(msg = 'Подбираем подарки…', autoHideMs = 1800) {
-  const el = document.getElementById('transitionOverlay');
-  if (!el) {
-    console.warn('[overlay] #transitionOverlay не найден в DOM');
-    return;
-  }
-
-  const textNode = el.querySelector('.overlay-text');
-  if (textNode && typeof msg === 'string') textNode.textContent = msg;
-
-  // показать
-  el.classList.remove('hidden');
-  // force reflow, чтобы CSS-анимация сработала
-  // eslint-disable-next-line no-unused-expressions
-  el.offsetHeight;
-  el.classList.add('visible');
-  console.log('[overlay] show');
-
-  if (autoHideMs > 0) {
-    setTimeout(() => {
-      el.classList.remove('visible');
-      setTimeout(() => {
-        el.classList.add('hidden');
-        console.log('[overlay] hide');
-      }, 220);
-    }, autoHideMs);
-  }
-}
 
 function openWithPreloader(
   targetUrl,
   title = 'Подбираем подарки…',
   sub = 'Скоро откроем магазин',
-  delayMs = 1800
+  delayMs = 1600,
 ) {
   const w = window.open('', '_blank');
   if (!w) {
-    showTransitionOverlay('Попапы заблокированы. Открываем здесь…', 2000);
+    // попапы заблокированы — показываем наш оверлей в текущей вкладке и идём в ту же
+    if (typeof window.showTransitionOverlay === 'function') {
+      window.showTransitionOverlay('Открываем магазин…', 1800);
+    }
     setTimeout(() => {
-      try {
-        window.location.href = targetUrl;
-      } catch (e) {}
+      window.location.href = targetUrl;
     }, 100);
     return;
   }
 
   const html = `<!DOCTYPE html><html lang="ru"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${title}</title>
 <meta name="referrer" content="no-referrer">
+<title>${title}</title>
 <style>
-/* ОСНОВНЫЕ ИЗМЕНЕНИЯ В СТИЛЯХ: */
-html,body{
-  margin:0;
-  padding:0;
-  background:#f9fbff;
-  color:#0f1b2e;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,system-ui,sans-serif;
-  /* ЗАМЕНА: flex вместо grid для лучшей поддержки */
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  height:100%;
-  /* ДОБАВЛЕНО: предотвращение скролла */
-  overflow:hidden;
-}
-.card{
-  /* УЛУЧШЕНО: тени и границы для современного вида */
-  background:white;
-  border-radius:20px;
-  padding:24px;
-  width:min(90vw, 480px);
-  /* ЗАМЕНА: flex-direction для лучшего расположения */
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-  /* ДОБАВЛЕНО: тень */
-  box-shadow:0 10px 30px rgba(15,27,46,0.12);
-  gap:20px;
-}
-.logo{
-  font-size:28px;
-  /* ДОБАВЛЕНО: анимация появления */
-  animation:fadeIn 0.3s ease-out;
-}
-.spinner{
-  width:24px;
-  height:24px;
-  border:3px solid rgba(15,27,46,0.15);
-  border-top-color:#6c63ff;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  /* ДОБАВЛЕНО: центрирование */
-  margin:0 auto;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-/* ДОБАВЛЕНО: плавное появление */
-@keyframes fadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-.content{
-  flex:1;
-  min-width:0;
-  /* ДОБАВЛЕНО: максимальная ширина для лучшей читаемости */
-  max-width:100%;
-}
-h1{
-  margin:0 0 8px;
-  font-size:20px;
-  font-weight:600;
-  color:#0f1b2e;
-  line-height:1.3;
-  /* ДОБАВЛЕНО: плавное появление */
-  animation:fadeIn 0.4s ease-out 0.1s both;
-}
-p{
-  margin:0;
-  color:#5b6b85;
-  font-size:15px;
-  line-height:1.5;
-  /* ДОБАВЛЕНО: плавное появление */
-  animation:fadeIn 0.4s ease-out 0.2s both;
-}
-/* ДОБАВЛЕНО: адаптивность для мобильных */
-@media (max-width: 480px) {
-  .card {
-    padding:20px;
-    width:95vw;
+  body {
+    margin: 0;
+    background: transparent;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
-  h1 { font-size:18px; }
-  p { font-size:14px; }
-}
-</style></head><body>
-<div class="card">
-  <div class="logo">🎁</div>
-  <div class="spinner"></div>
-  <div class="content">
-    <h1>${title}</h1>
-    <p>${sub}</p>
+  .overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(14px) saturate(130%);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .overlay::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .overlay-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    color: #ffffff;
+    animation: fadeInUpOverlay 0.6s ease both;
+    max-width: 90vw;
+    padding: 24px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 20px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+  }
+  .spinner {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #ff7e5f;
+    border-right-color: #00c9ff;
+    border-bottom-color: #6c63ff;
+    animation: spinSmooth 1.4s linear infinite, glowPulse 3s ease-in-out infinite alternate;
+  }
+  .overlay-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    opacity: 0.92;
+    line-height: 1.4;
+    color: #ffffff;
+  }
+  @keyframes spinSmooth { to { transform: rotate(360deg); } }
+  @keyframes glowPulse {
+    from { filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.15)); }
+    to   { filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.4)); }
+  }
+  @keyframes fadeInUpOverlay {
+    from {
+      opacity: 0;
+      transform: translateY(24px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="overlay show" role="status" aria-live="polite">
+    <div class="overlay-content" aria-label="${title}">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="overlay-text">${title}</div>
+      <div class="overlay-text" style="opacity:.7; font-size:.95rem;">${sub}</div>
+    </div>
   </div>
-</div>
-<script>
-  try{ window.opener = null; }catch(e){}
-  let done = false;
-  function go() {
-    if (done) return;
-    done = true;
-    window.location.href = ${JSON.stringify(targetUrl)};
-  }
-  setTimeout(go, ${Math.max(0, delayMs) | 0});
-  // Резерв: если через 5 сек не ушли — идём принудительно
-  setTimeout(go, 5000);
-</script>
-</body></html>`;
+
+  <script>
+    try { window.opener = null; } catch(e){}
+    let moved = false;
+    function go(){
+      if (moved) return; moved = true;
+      location.href = ${JSON.stringify(targetUrl)};
+    }
+    // основной таймер
+    setTimeout(go, ${Math.max(0, delayMs) | 0});
+    // страховка
+    setTimeout(go, 5000);
+  </script>
+  <noscript><meta http-equiv="refresh" content="0; url=${targetUrl}"></noscript>
+</body>
+</html>`;
 
   try {
     w.document.open();
     w.document.write(html);
     w.document.close();
-  } catch (e) {
-    // Если document.write заблокирован — сразу идём
+  } catch {
     try {
       w.location.href = targetUrl;
     } catch {}
@@ -243,7 +229,9 @@ p{
 }
 
 // Отладка: Shift+O покажет оверлей. И окно window.__overlayTest()
-window.__overlayTest = () => showTransitionOverlay('Подбираем подарки…', 1200);
+// [ИЗМЕНЕНО] тест тоже показывает новый текст
+window.__overlayTest = () => showTransitionOverlay('🎁 Подбираем лучший подарок для вас...', 1200);
+
 document.addEventListener('keydown', (e) => {
   if (e.shiftKey && (e.key === 'O' || e.key === 'О')) {
     window.__overlayTest();
@@ -258,16 +246,14 @@ function resolveGiftUrl(gift) {
     const first = gift.link.find(Boolean);
     if (first && /^https?:\/\//i.test(first)) return first;
   }
-  if (typeof gift.link === 'string' && /^https?:\/\//i.test(gift.link))
-    return gift.link;
+  if (typeof gift.link === 'string' && /^https?:\/\//i.test(gift.link)) return gift.link;
   return null;
 }
 
 function validatePartnerUrl(raw) {
   if (!raw || typeof raw !== 'string') return { ok: false, reason: 'empty' };
   if (!/^https?:\/\//i.test(raw)) return { ok: false, reason: 'no-scheme' };
-  if (/^\s*erid\s*=/i.test(raw))
-    return { ok: false, reason: 'starts-with-param' };
+  if (/^\s*erid\s*=/i.test(raw)) return { ok: false, reason: 'starts-with-param' };
   if (/\s/.test(raw)) return { ok: false, reason: 'spaces' };
 
   let u;
@@ -292,14 +278,7 @@ function validatePartnerUrl(raw) {
     'effiliation.com',
     'advcake.com',
   ]);
-  const CLICK_PARAMS = [
-    'erid',
-    'subid',
-    'sub_id',
-    'sub1',
-    'clickid',
-    'admitad_uid',
-  ];
+  const CLICK_PARAMS = ['erid', 'subid', 'sub_id', 'sub1', 'clickid', 'admitad_uid'];
 
   if (affiliateDomains.has(u.hostname)) {
     const hasClickParam = CLICK_PARAMS.some((p) => u.searchParams.has(p));
@@ -308,11 +287,9 @@ function validatePartnerUrl(raw) {
     if (!ulp) return { ok: false, reason: 'no-ulp' };
     try {
       const target = new URL(decodeURIComponent(ulp));
-      const targetProtoOk =
-        target.protocol === 'http:' || 'https:' === target.protocol;
+      const targetProtoOk = target.protocol === 'http:' || 'https:' === target.protocol;
       const targetHostOk = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(target.hostname);
-      const targetPathOk =
-        typeof target.pathname === 'string' && target.pathname.length >= 2;
+      const targetPathOk = typeof target.pathname === 'string' && target.pathname.length >= 2;
       if (!targetProtoOk || !targetHostOk || !targetPathOk)
         return { ok: false, reason: 'bad-ulp-url' };
     } catch {
@@ -327,423 +304,32 @@ function b64url(str) {
   return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-// ===============================
-// «Кому»: группировка и фильтрация
-// ===============================
-const CHILD_MAX_AGE = 13;
-const RECIPIENT_GROUPS = {
-  maleChild: new Set(['брат', 'сын', 'мальчик', 'племянник', 'внук']),
-  femaleChild: new Set(['сестра', 'дочь', 'девочка', 'внучка', 'племянница']),
-  childAny: new Set([
-    'ребенок',
-    'ребёнок',
-    'дети',
-    'ребенку',
-    'ребёнку',
-    'детям',
-  ]),
-  maleAdult: new Set([
-    'муж',
-    'парень',
-    'папа',
-    'отец',
-    'дедушка',
-    'начальник',
-    'друг',
-    'коллега',
-  ]),
-  femaleAdult: new Set([
-    'жена',
-    'девушка',
-    'мама',
-    'мать',
-    'бабушка',
-    'подруга',
-    'сестра',
-    'коллега',
-  ]),
-  adultAny: new Set(['родственник', 'родня', 'семья', 'человек']),
+// === deps for GiftCard component (собираем в одном месте)
+const GIFT_CARD_DEPS = {
+  showTransitionOverlay,
+  openWithPreloader,
+  resolveGiftUrl,
+  validatePartnerUrl,
+  b64url,
+  translateCategory,
+  formatPrice,
+  API_BASE,
 };
-const TAGS_MALE_CHILD = new Set([
-  'сын',
-  'брат',
-  'мальчик',
-  'внук',
-  'племянник',
-]);
-const TAGS_FEMALE_CHILD = new Set([
-  'дочь',
-  'сестра',
-  'девочка',
-  'внучка',
-  'племянница',
-]);
-const TAGS_GENERIC_CHILD = new Set([
-  'ребёнок',
-  'ребенок',
-  'дети',
-  'семья',
-  'унисекс',
-]);
-const TAGS_MALE_ADULT = new Set([
-  'муж',
-  'папа',
-  'отец',
-  'дедушка',
-  'парень',
-  'брат',
-  'коллега',
-  'начальник',
-]);
-const TAGS_FEMALE_ADULT = new Set([
-  'жена',
-  'мама',
-  'бабушка',
-  'девушка',
-  'сестра',
-  'подруга',
-  'коллега',
-  'начальник',
-]);
-const TAGS_GENERIC_ADULT = new Set([
-  'семья',
-  'унисекс',
-  'пара',
-  'дом',
-  'универсально',
-]);
 
-function intersects(setA, setB) {
-  for (const v of setB) if (setA.has(v)) return true;
-  return false;
-}
-function inferRecipientGroup(recipient, age) {
-  const r = (recipient || '').toLowerCase();
-  const isChild = age != null && age <= CHILD_MAX_AGE;
-  if (isChild) {
-    if (RECIPIENT_GROUPS.maleChild.has(r)) return 'maleChild';
-    if (RECIPIENT_GROUPS.femaleChild.has(r)) return 'femaleChild';
-    if (RECIPIENT_GROUPS.childAny.has(r)) return 'childAny';
-    return 'childAny';
-  } else {
-    if (RECIPIENT_GROUPS.maleAdult.has(r)) return 'maleAdult';
-    if (RECIPIENT_GROUPS.femaleAdult.has(r)) return 'femaleAdult';
-    return 'adultAny';
-  }
-}
-function matchesRecipientGroup(gift, group) {
-  const tags = (gift.recipientTags || []).map((t) => t.toLowerCase());
-  const tagSet = new Set(tags);
-  if (group === 'maleChild') {
-    const allow =
-      intersects(tagSet, TAGS_MALE_CHILD) ||
-      intersects(tagSet, TAGS_GENERIC_CHILD);
-    const onlyFemale =
-      intersects(tagSet, TAGS_FEMALE_CHILD) &&
-      !intersects(tagSet, TAGS_MALE_CHILD) &&
-      !intersects(tagSet, TAGS_GENERIC_CHILD);
-    return allow && !onlyFemale;
-  }
-  if (group === 'femaleChild') {
-    const allow =
-      intersects(tagSet, TAGS_FEMALE_CHILD) ||
-      intersects(tagSet, TAGS_GENERIC_CHILD);
-    const onlyMale =
-      intersects(tagSet, TAGS_MALE_CHILD) &&
-      !intersects(tagSet, TAGS_FEMALE_CHILD) &&
-      !intersects(tagSet, TAGS_GENERIC_CHILD);
-    return allow && !onlyMale;
-  }
-  if (group === 'childAny') {
-    return (
-      intersects(tagSet, TAGS_GENERIC_CHILD) ||
-      intersects(tagSet, TAGS_MALE_CHILD) ||
-      intersects(tagSet, TAGS_FEMALE_CHILD)
-    );
-  }
-  if (group === 'maleAdult') {
-    const allow =
-      intersects(tagSet, TAGS_MALE_ADULT) ||
-      intersects(tagSet, TAGS_GENERIC_ADULT);
-    const onlyFemale =
-      intersects(tagSet, TAGS_FEMALE_ADULT) &&
-      !intersects(tagSet, TAGS_MALE_ADULT) &&
-      !intersects(tagSet, TAGS_GENERIC_ADULT);
-    return allow && !onlyFemale;
-  }
-  if (group === 'femaleAdult') {
-    const allow =
-      intersects(tagSet, TAGS_FEMALE_ADULT) ||
-      intersects(tagSet, TAGS_GENERIC_ADULT);
-    const onlyMale =
-      intersects(tagSet, TAGS_MALE_ADULT) &&
-      !intersects(tagSet, TAGS_FEMALE_ADULT) &&
-      !intersects(tagSet, TAGS_GENERIC_ADULT);
-    return allow && !onlyMale;
-  }
-  return (gift.recipientTags || []).length > 0;
-}
 
-// ===============================
-// Парсер строки поиска
-// ===============================
-function parseQuery(input) {
-  const result = { recipient: null, age: null, budget: null };
-  if (!input || !input.trim()) return result;
 
-  const normalized = input.toLowerCase().trim();
-  const tokens = normalized.split(/\s+/);
-  const numbers = [];
-  const words = [];
 
-  tokens.forEach((token) => {
-    const num = parseInt(token);
-    if (!isNaN(num) && num > 0) numbers.push(num);
-    else words.push(token);
-  });
-
-  const recipientQuery = words.join(' ');
-  for (const [key, synonymsList] of Object.entries(recipientMap)) {
-    const allVariants = [key, ...synonymsList];
-    if (allVariants.some((variant) => recipientQuery.includes(variant))) {
-      result.recipient = key;
-      break;
-    }
-  }
-
-  if (numbers.length === 1) {
-    if (numbers[0] >= 1000) result.budget = numbers[0];
-    else if (numbers[0] <= 100) result.age = numbers[0];
-    else result.budget = numbers[0];
-  } else if (numbers.length >= 2) {
-    const sorted = [...numbers].sort((a, b) => a - b);
-    if (sorted[0] <= 100) {
-      result.age = sorted[0];
-      result.budget = sorted[sorted.length - 1];
-    } else {
-      result.budget = sorted[sorted.length - 1];
-    }
-  }
-  return result;
-}
-
-// ===============================
-// Фильтрация подарков
-// ===============================
-function filterGifts(gifts, params) {
-  const age = params.age != null ? parseInt(params.age) : null;
-  const budget = params.budget != null ? parseInt(params.budget) : null;
-  const recipient = params.recipient || null;
-  const group = inferRecipientGroup(recipient, age);
-
-  return gifts.filter((gift) => {
-    if (age !== null && age !== undefined) {
-      if (
-        !Array.isArray(gift.ageRange) ||
-        age < gift.ageRange[0] ||
-        age > gift.ageRange[1]
-      )
-        return false;
-    }
-    if (budget !== null && budget !== undefined) {
-      if (typeof gift.price === 'number' && gift.price > budget) return false;
-    }
-    if (recipient) {
-      if (!matchesRecipientGroup(gift, group)) return false;
-    }
-    return true;
-  });
-}
-
-// ===============================
-// CTA блок
-// ===============================
-function createTelegramCTA() {
-  const ctaBlock = document.createElement('div');
-  ctaBlock.className = 'telegram-cta-inline glass-effect';
-  ctaBlock.innerHTML = `
-    <div class="telegram-cta-content">
-      <h3 class="telegram-cta-title">🤖 Подарочный помощник в твоём кармане</h3>
-      <p class="telegram-cta-text">Наш чат-бот в Telegram подскажет идеи подарков за секунды — где бы ты ни был</p>
-      <a href="${TELEGRAM_BOT_URL}?start=catalog&utm_source=site&utm_medium=inline_cta&utm_campaign=giftbot" class="telegram-cta-btn">
-        <svg class="telegram-icon" viewBox="0 0 24 24" width="20" height="20">
-          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.953l11.566-4.458c.538-.196 1.006.128.832.941z"/>
-        </svg>
-        Перейти в Telegram-бота
-      </a>
-    </div>
-    <div class="telegram-cta-decoration"><span class="decoration-icon">🎁</span></div>
-  `;
-  return ctaBlock;
-}
-
-// ===============================
-// Межстраничный переход: карточка
-// ===============================
-function createGiftCard(gift) {
-  const card = document.createElement('div');
-  card.className = 'gift-card';
-  card.style.animationDelay = `${Math.random() * 0.2}s`;
-
-  const categoryIcons = {
-    beauty: '💄',
-    health: '💊',
-    tech: '💻',
-    hobby: '🎨',
-    tools: '🔧',
-    toys: '🧸',
-    education: '📚',
-    creative: '🎨',
-    jewelry: '💎',
-    perfume: '🌸',
-    sport: '⚽',
-    grooming: '🧔',
-    office: '💼',
-    food: '🍰',
-    home: '🏠',
-    photo: '📸',
-    entertainment: '🎬',
-    transport: '🛴',
-    books: '📖',
-    clothes: '👕',
-    outdoor: '🏔️',
-    universal: '🎁',
-  };
-  const icon = categoryIcons[gift.category] || '🎁';
-
-  // Каркас
-  card.innerHTML = `
-    <div class="gift-card-image" aria-hidden="true">
-      <span style="font-size: 4rem; line-height: 1;">${icon}</span>
-    </div>
-    <div class="gift-card-body">
-      <h3 class="gift-card-title">${gift.name}</h3>
-      <p class="gift-card-description">${gift.description || ''}</p>
-      <div class="gift-card-price">${formatPrice(gift.price)}</div>
-      <div class="gift-card-tags">
-        ${
-          Array.isArray(gift.recipientTags)
-            ? gift.recipientTags
-                .slice(0, 3)
-                .map((t) => `<span class="gift-tag">${t}</span>`)
-                .join('')
-            : ''
-        }
-      </div>
-      <div class="gift-card-footer">
-        <span class="age-range">${gift.ageRange?.[0] ?? 0}-${
-    gift.ageRange?.[1] ?? 120
-  } лет</span>
-        <span class="category-badge">${translateCategory(gift.category)}</span>
-      </div>
-      <div class="gift-card-actions" style="margin-top:12px;"></div>
-    </div>
-  `;
-
-  const partnerUrl = resolveGiftUrl(gift);
-  const actions = card.querySelector('.gift-card-actions');
-
-  const setUnavailable = () => {
-    if (!actions) return;
-    actions.innerHTML = `<button class="gift-buy-btn" disabled aria-disabled="true" title="Товар временно недоступен">Ожидаем поставку</button>`;
-    card.style.cursor = 'default';
-    card.removeAttribute('role');
-    card.removeAttribute('tabindex');
-    card.removeAttribute('aria-label');
-  };
-
-  // [ИЗМЕНЕНО] — аккуратное поведение: ссылка работает нативно, карточка открывает в новой вкладке.
-  // Оверлей не мешает клику (см. правку pointer-events для #transitionOverlay).
-  const setAvailable = (partnerUrl) => {
-    if (!actions) return;
-
-    // ИЗМЕНЕНО: используем серверный редирект вместо фронтовой страницы
-    // const interstitialUrl = `/api/go?t=${b64url(partnerUrl)}`;
-
-    const interstitialUrl = `${API_BASE}/api/go?t=${b64url(partnerUrl)}`;
-    //                      ^ добавили базу: '' в проде, полный прод-URL на localhost
-
-    // 1) Рендерим НАСТОЯЩУЮ ссылку. Пусть браузер сам открывает её (надежнее всего).
-    actions.innerHTML = `
-    <a class="gift-buy-btn"
-       href="${interstitialUrl}"
-       target="_blank"
-       rel="noopener nofollow sponsored"
-       aria-label="Перейти к товару на площадке">К товару</a>
-  `;
-    const linkEl = actions.querySelector('.gift-buy-btn');
-
-    linkEl.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isPrimary = e.button === 0;
-      const hasMods = e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
-      if (isPrimary && !hasMods) {
-        e.preventDefault();
-        showTransitionOverlay('Подбираем подарки…', 2000); // старый таб — красивый оверлей
-        openWithPreloader(
-          linkEl.href,
-          'Подбираем подарки…',
-          'Это займёт несколько секунд'
-        ); // новая вкладка — лоадер
-      }
-    });
-
-    // 2) Карточка: клик по пустому месту — открыть межстраницу в НОВОЙ вкладке.
-    card.style.cursor = 'pointer';
-    card.setAttribute('role', 'link');
-    card.setAttribute('tabindex', '0');
-    card.setAttribute('aria-label', `Открыть товар: ${gift.name}`);
-
-    // Только ЛКМ без модификаторов — открываем одну новую вкладку.
-    card.addEventListener('click', (e) => {
-      if (e.target && e.target.closest && e.target.closest('.gift-buy-btn'))
-        return;
-      showTransitionOverlay('Подбираем подарки…', 2000);
-      openWithPreloader(
-        interstitialUrl,
-        'Подбираем подарки…',
-        'Пожалуйста, подождите'        
-      );
-    });
-
-    // Доступность: Enter/Space
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        showTransitionOverlay('Подбираем подарки…', 2000);
-        openWithPreloader(
-          interstitialUrl,
-          'Подбираем подарки…',
-          'Пожалуйста, подождите'
-        );
-      }
-    });
-  };
-
-  if (!partnerUrl) {
-    setUnavailable();
-    return card;
-  }
-  const v = validatePartnerUrl(partnerUrl);
-  if (!v.ok) {
-    setUnavailable();
-    return card;
-  }
-  setAvailable(partnerUrl);
-  return card;
-}
 
 // ===============================
 // Псевдо-запрос к БД (эмуляция задержки)
 function fetchGiftsBatch(allItems, offset, limit) {
   const slice = allItems.slice(offset, offset + limit);
   return new Promise((resolve) => {
-    console.log(
-      `[fetch] offset=${offset}, limit=${limit}, willReturn=${slice.length}`
-    );
+    console.log(`[fetch] offset=${offset}, limit=${limit}, willReturn=${slice.length}`);
     setTimeout(() => resolve(slice), 250);
   });
 }
+
 
 // =====ПРОМО==========================
 function renderPromoGifts() {
@@ -752,17 +338,18 @@ function renderPromoGifts() {
 
   grid.innerHTML = '';
 
-  const promoGifts = GIFTS.filter((g) => PROMO_GIFTS_IDS.includes(g.id)).slice(
-    0,
-    6
-  );
-  promoGifts.forEach((gift) => grid.appendChild(createGiftCard(gift)));
+  const promoGifts = GIFTS.filter((g) => PROMO_GIFTS_IDS.includes(g.id)).slice(0, 6);
+  promoGifts.forEach((gift) => grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS)));
+;
+
 
   // Скрываем спиннер ТОЛЬКО ПОСЛЕ рендера
   const loader = document.getElementById('promoLoader');
-  if (loader) loader.classList.add('hidden');
+  if (loader) {
+    loader.classList.add('hidden');
+    loader.setAttribute('aria-hidden', 'true'); // [fix] не падаем, если элемента нет
+  }
 }
-
 
 // ===============================
 // Каталог
@@ -789,48 +376,58 @@ function initCatalogList() {
   catalogShowMoreBtn.classList.add('hidden');
   catalogResetBtn?.classList.add('hidden');
   catalogCTAContainer.innerHTML = '';
-  catalogCTAContainer.appendChild(createTelegramCTA());
+  catalogCTAContainer.appendChild(createTelegramCTA(TELEGRAM_BOT_URL)); // [изменено] передаём URL бота
 
   const catalogInitialLoader = document.getElementById('catalogInitialLoader');
   catalogInitialLoader?.classList.remove('hidden');
   catalogLoader?.classList.add('hidden'); // скрываем пагинационный спиннер
-  fetchGiftsBatch(shuffledCatalogGifts, catalogOffset, INITIAL_BATCH).then(
-    (batch) => {
-      batch.forEach((g) => catalogGrid.appendChild(createGiftCard(g)));
-      catalogOffset += batch.length;
-      catalogInitialLoader?.classList.add('hidden');
-      // catalogLoader?.classList.add('hidden');
+  catalogLoader?.setAttribute('aria-hidden', 'true'); // [fix] через optional chaining
 
-      if (catalogOffset < shuffledCatalogGifts.length) {
-        catalogShowMoreBtn.classList.remove('hidden');
-      } else {
-        catalogShowMoreBtn.classList.add('hidden');
-        catalogResetBtn?.classList.remove('hidden');
-      }
+  fetchGiftsBatch(shuffledCatalogGifts, catalogOffset, INITIAL_BATCH).then((batch) => {
+    batch.forEach((g) => catalogGrid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+    catalogOffset += batch.length;
+    catalogInitialLoader?.classList.add('hidden');
+    catalogInitialLoader?.setAttribute('aria-hidden', 'true');
+    // catalogLoader?.classList.add('hidden');
+
+    if (catalogOffset < shuffledCatalogGifts.length) {
+      catalogShowMoreBtn.classList.remove('hidden');
+    } else {
+      catalogShowMoreBtn.classList.add('hidden');
+      catalogResetBtn?.classList.remove('hidden');
     }
-  );
+  });
 
   catalogShowMoreBtn.onclick = () => {
     if (catalogOffset >= shuffledCatalogGifts.length) return;
     catalogLoader?.classList.remove('hidden');
-    fetchGiftsBatch(shuffledCatalogGifts, catalogOffset, LOAD_BATCH).then(
-      (batch) => {
-        batch.forEach((g) => catalogGrid.appendChild(createGiftCard(g)));
-        catalogOffset += batch.length;
-        catalogLoader?.classList.add('hidden');
+    // catalogShowMoreBtn.setAttribute('aria-busy', 'true');
+    // catalogShowMoreBtn.disabled = true;
+    // catalogShowMoreBtn.textContent = 'Загружаем…';
 
-        if (catalogOffset < shuffledCatalogGifts.length) {
-          catalogShowMoreBtn.classList.remove('hidden');
-        } else {
+    fetchGiftsBatch(shuffledCatalogGifts, catalogOffset, LOAD_BATCH)
+      .then((batch) => {
+        batch.forEach((g) => catalogGrid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+        catalogOffset += batch.length;
+      })
+      .catch((err) => {
+        console.error('[catalog] Ошибка загрузки:', err);
+      })
+      .finally(() => {
+        catalogLoader?.classList.add('hidden');
+        // catalogShowMoreBtn.setAttribute('aria-busy', 'false');
+        // catalogShowMoreBtn.disabled = false;
+        // catalogShowMoreBtn.textContent = 'Посмотреть ещё';
+        if (catalogOffset >= shuffledCatalogGifts.length) {
           catalogShowMoreBtn.classList.add('hidden');
           catalogResetBtn?.classList.remove('hidden');
         }
-      }
-    );
+      });
   };
 
   if (catalogResetBtn) catalogResetBtn.onclick = resetToPromo;
 }
+
 
 function resetToPromo() {
   const catalogGrid = document.getElementById('catalogGifts');
@@ -846,8 +443,7 @@ function resetToPromo() {
   initCatalogList();
 
   const promoSection = document.querySelector('.random-gifts');
-  if (promoSection)
-    promoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (promoSection) promoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ===============================
@@ -910,9 +506,7 @@ function showSearchResults(gifts, params) {
   const section = document.getElementById('searchResults');
   const resultsCount = document.getElementById('resultsCount');
   const resultsTitle = document.getElementById('resultsTitle');
-  const randomSection = document
-    .getElementById('randomGifts')
-    ?.closest('section');
+  const randomSection = document.getElementById('randomGifts')?.closest('section');
   const catalogSection = document.getElementById('catalogSection');
   const heroSection = document.querySelector('.hero');
   const searchBlock = document.querySelector('.search-block');
@@ -937,17 +531,20 @@ function showSearchResults(gifts, params) {
   searchOffset = 0;
 
   searchCTAContainer.innerHTML = '';
-  searchCTAContainer.appendChild(createTelegramCTA());
+  searchCTAContainer.appendChild(createTelegramCTA(TELEGRAM_BOT_URL)); // [изменено] передаём URL бота
 
   section.classList.remove('hidden');
 
   fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
-    batch.forEach((g) => grid.appendChild(createGiftCard(g)));
+    batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
     searchOffset += batch.length;
 
     if (searchOffset < searchAll.length) {
       loadMoreBtn.textContent = 'Посмотреть ещё';
       loadMoreBtn.classList.remove('hidden');
+      // loadMoreBtn.setAttribute('aria-busy', 'false');
+      // loadMoreBtn.disabled = false;
+      // loadMoreBtn.textContent = 'Посмотреть ещё';
       loadMoreBtn.onclick = handleSearchLoadMore;
     } else {
       loadMoreBtn.textContent = 'Начать поиск заново';
@@ -955,10 +552,7 @@ function showSearchResults(gifts, params) {
       loadMoreBtn.onclick = resetSearch;
     }
 
-    setTimeout(
-      () => section.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-      80
-    );
+    setTimeout(() => section.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
   });
 }
 
@@ -968,7 +562,7 @@ function handleSearchLoadMore() {
   if (!grid || !loadMoreBtn) return;
 
   fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((batch) => {
-    batch.forEach((g) => grid.appendChild(createGiftCard(g)));
+    batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
     searchOffset += batch.length;
 
     if (searchOffset < searchAll.length) {
@@ -980,107 +574,6 @@ function handleSearchLoadMore() {
       loadMoreBtn.onclick = resetSearch;
     }
   });
-}
-
-// ===============================
-// Прочие UI-фичи
-// function initParallax() {
-//   const layers = document.querySelectorAll('.parallax-layer');
-//   let ticking = false,
-//     mouseX = 0,
-//     mouseY = 0;
-
-//   function updateParallax() {
-//     const scrolled = window.pageYOffset;
-//     const windowHeight = window.innerHeight;
-//     const scrollProgress = Math.min(scrolled / Math.max(windowHeight, 1), 1);
-
-//     layers.forEach((layer, index) => {
-//       const speed = 0.55 * (index + 1);
-//       const yPos = -(scrolled * speed);
-//       const mouseEffect = 36;
-//       const mouseXOffset =
-//         ((mouseX - window.innerWidth / 2) / window.innerWidth) *
-//         mouseEffect *
-//         (index + 1);
-//       const mouseYOffset =
-//         ((mouseY - window.innerHeight / 2) / window.innerHeight) *
-//         mouseEffect *
-//         (index + 1);
-//       layer.style.transform = `translate(${mouseXOffset}px, ${
-//         yPos + mouseYOffset
-//       }px) scale(${1 + scrollProgress * 0.12})`;
-//     });
-//     ticking = false;
-//   }
-//   function requestTick() {
-//     if (!ticking) {
-//       window.requestAnimationFrame(updateParallax);
-//       ticking = true;
-//     }
-//   }
-//   const prefersReducedMotion = window.matchMedia(
-//     '(prefers-reduced-motion: reduce)'
-//   ).matches;
-//   if (!prefersReducedMotion) {
-//     window.addEventListener('scroll', requestTick);
-//     window.addEventListener('resize', requestTick);
-//     window.addEventListener('mousemove', (e) => {
-//       mouseX = e.clientX;
-//       mouseY = e.clientY;
-//       requestTick();
-//     });
-//   }
-// }
-
-
-// [parallax] Включаем только на десктопе и когда hero во вьюпорте
-function initParallax() {
-  const layers = document.querySelectorAll('.parallax-layer');
-  const hero = document.querySelector('.hero');
-  if (!layers.length || !hero) return;
-
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (isMobile || prefersReducedMotion) return;
-
-  let active = false;
-  let ticking = false, mouseX = 0, mouseY = 0;
-
-  const io = new IntersectionObserver((entries) => {
-    active = entries.some(e => e.isIntersecting);
-  }, { threshold: 0.05 });
-  io.observe(hero);
-
-  function updateParallax() {
-    if (!active) { ticking = false; return; }
-
-    const scrolled = window.pageYOffset;
-    const windowHeight = window.innerHeight;
-    const scrollProgress = Math.min(scrolled / Math.max(windowHeight, 1), 1);
-
-    layers.forEach((layer, index) => {
-      const speed = 0.35 * (index + 1);       // было 0.55 — делаем мягче
-      const yPos = -(scrolled * speed);
-      const mouseEffect = 20;                 // было 36 — аккуратнее
-      const mouseXOffset = ((mouseX - window.innerWidth / 2) / window.innerWidth) * mouseEffect * (index + 1);
-      const mouseYOffset = ((mouseY - window.innerHeight / 2) / window.innerHeight) * mouseEffect * (index + 1);
-      layer.style.transform = `translate(${mouseXOffset}px, ${yPos + mouseYOffset}px) scale(${1 + scrollProgress * 0.08})`;
-    });
-    ticking = false;
-  }
-  function requestTick() {
-    if (!ticking) {
-      window.requestAnimationFrame(updateParallax);
-      ticking = true;
-    }
-  }
-  window.addEventListener('scroll', requestTick, { passive: true });
-  window.addEventListener('resize', requestTick);
-  window.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX; mouseY = e.clientY; requestTick();
-  });
-  requestTick();
 }
 
 
@@ -1107,15 +600,11 @@ function initThemeToggle() {
   const apply = (t) => {
     document.documentElement.setAttribute('data-theme', t);
     themeIcon && (themeIcon.textContent = t === 'dark' ? '☀️' : '🌙');
-    themeToggle &&
-      themeToggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    themeToggle && themeToggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
   };
   apply(theme);
   themeToggle?.addEventListener('click', () => {
-    theme =
-      document.documentElement.getAttribute('data-theme') === 'dark'
-        ? 'light'
-        : 'dark';
+    theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme', theme);
     apply(theme);
   });
@@ -1159,129 +648,6 @@ function setTelegramLink() {
   }
 }
 
-// function initStickySearch() {
-//   const searchBlock = document.querySelector('.search-block');
-//   const hero = document.querySelector('.hero');
-//   if (!searchBlock || !hero) return;
-
-//   let ticking = false;
-//   function updateStickyState() {
-//     const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-//     const heroHeight = hero.offsetHeight;
-//     const headerHeight = 60;
-//     const stickyPoint = heroHeight - headerHeight - 70;
-//     const details = document.querySelector('.controls-dropdown');
-
-//     if (scrolled > stickyPoint) {
-//       searchBlock.classList.add('sticky');
-//       if (details) details.open = !true;
-//     } else {
-//       searchBlock.classList.remove('sticky');
-//       if (details) details.open = false;
-//     }
-//     ticking = false;
-//   }
-//   function requestTick() {
-//     if (!ticking) {
-//       window.requestAnimationFrame(updateStickyState);
-//       ticking = true;
-//     }
-//   }
-//   window.addEventListener('scroll', requestTick);
-//   window.addEventListener('resize', requestTick);
-//   updateStickyState();
-// }
-
-
-// [sticky] Переписано: без "прыжка", с классом на <body> и закрытием summary
-
-
-// [floating-search] Абсолютно без «прыжков»: создаём плавающую копию панели
-function initStickySearch() {
-  const original = document.querySelector('.search-block');   // исходная панель внутри hero
-  const hero = document.querySelector('.hero');
-  if (!original || !hero) return;
-
-  // 1) Создаём контейнер плавающей панели (в body)
-  const floatHost = document.createElement('div');
-  floatHost.className = 'search-float'; // стили в CSS
-  // Копируем HTML, но аккуратно: удалим дублирующиеся id в копии
-  const clone = original.cloneNode(true);
-  // Очистим ID у полей/кнопок, чтобы не было дублей
-  clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
-  // Вставляем копию внутрь хоста
-  floatHost.appendChild(clone);
-  document.body.appendChild(floatHost);
-
-  // 2) Ссылки на элементы оригинала и копии
-  const oSearchInput = original.querySelector('#searchInput');
-  const cSearchInput = clone.querySelector('input[type="text"]');
-  const oSearchBtn   = original.querySelector('#searchBtn');
-  const cSearchBtn   = clone.querySelector('button.search-btn');
-  const oAltBtn      = original.querySelector('#altSearchBtn');
-  const cAltBtn      = clone.querySelector('.alt-search-btn');
-  const detailsOrig  = original.querySelector('.controls-dropdown');
-
-  // 3) Подписки: кнопки и Enter должны работать и в копии
-  if (cSearchBtn) cSearchBtn.addEventListener('click', () => performSearch());
-  if (cSearchInput) cSearchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') performSearch();
-  });
-  if (cAltBtn) cAltBtn.addEventListener('click', () => performAlternativeSearch());
-
-  // 4) Двусторонняя синхронизация значения input (оригинал ↔ копия)
-  if (oSearchInput && cSearchInput) {
-    // копия ← оригинал
-    oSearchInput.addEventListener('input', () => { cSearchInput.value = oSearchInput.value; });
-    // оригинал ← копия
-    cSearchInput.addEventListener('input', () => { oSearchInput.value = cSearchInput.value; });
-    // стартовое выравнивание
-    cSearchInput.value = oSearchInput.value || '';
-  }
-
-  // 5) Порог, когда показывать копию
-  const headerHeight = 60;
-  const stickyPoint = () => hero.offsetHeight - headerHeight - 70;
-
-  // 6) Рендер состояния — только плавное появление/исчезновение
-  let visible = false;
-  function renderState(show) {
-    if (show === visible) return;
-    visible = show;
-
-    if (visible) {
-      floatHost.classList.add('visible');            // проявляем копию
-      original.classList.add('search-original-hidden'); // прячем оригинал без сдвига
-      document.body.classList.add('has-floating-search'); // скрыть длинный текст логотипа
-      // Закрываем details, чтобы копия была компактной
-      if (detailsOrig) detailsOrig.open = false;
-    } else {
-      floatHost.classList.remove('visible');         // плавно скрываем копию
-      original.classList.remove('search-original-hidden'); // показываем оригинал
-      document.body.classList.remove('has-floating-search');
-    }
-  }
-
-  // 7) Логика скролла
-  let ticking = false;
-  function update() {
-    const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-    const show = scrolled > stickyPoint();
-    renderState(show);
-    ticking = false;
-  }
-  function requestTick() {
-    if (!ticking) {
-      ticking = true;
-      window.requestAnimationFrame(update);
-    }
-  }
-
-  window.addEventListener('scroll', requestTick, { passive: true });
-  window.addEventListener('resize', requestTick);
-  update(); // первичная инициализация
-}
-
 
 
 function initToTopButton() {
@@ -1302,9 +668,7 @@ function initToTopButton() {
     }
   }
   window.addEventListener('scroll', requestTick);
-  toTopBtn.addEventListener('click', () =>
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  );
+  toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   updateToTopButton();
 }
 
@@ -1325,9 +689,7 @@ function hideSection(sectionId) {
 function resetSearch() {
   isSearchMode = false;
 
-  const randomSection = document
-    .getElementById('randomGifts')
-    ?.closest('section');
+  const randomSection = document.getElementById('randomGifts')?.closest('section');
   const catalogSection = document.getElementById('catalogSection');
   const heroSection = document.querySelector('.hero');
   const searchBlock = document.querySelector('.search-block');
@@ -1360,13 +722,15 @@ function init() {
   renderPromoGifts();
   initCatalogList();
 
-  initParallax();
+  // initParallax();
   initLazySections();
   initThemeToggle();
   initTooltip();
   initStickySearch();
   initToTopButton();
   setTelegramLink();
+
+  registerServiceWorker();
 
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
@@ -1393,3 +757,12 @@ if (document.readyState === 'loading') {
 } else {
   init();
 }
+
+if (typeof window !== 'undefined') {
+  window.showTransitionOverlay = showTransitionOverlay;
+  window.openWithPreloader = openWithPreloader;
+  // чтобы копия поиска могла триггерить действия:
+  window.performSearch = performSearch;
+  window.performAlternativeSearch = performAlternativeSearch;
+}
+

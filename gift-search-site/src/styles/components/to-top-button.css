@@ -1,0 +1,59 @@
+/* Кнопка "Наверх" */
+.to-top-btn {
+  position: fixed; 
+  bottom: 2rem; 
+  right: 2rem;
+  width: 56px; 
+  height: 56px; 
+  background: var(--accent); 
+  color: white;
+  border: none; 
+  border-radius: 50%; 
+  cursor: pointer;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 999; 
+  opacity: 1; 
+  transform: translateY(0) scale(1);
+}
+.to-top-btn.hidden { 
+  opacity: 0; 
+  transform: translateY(20px) scale(0.8); 
+  pointer-events: none; 
+}
+.to-top-btn:hover { 
+  background: var(--accent-hover); 
+  transform: translateY(-4px) scale(1.05); 
+  box-shadow: var(--shadow-xl); 
+}
+.to-top-btn:active { 
+  transform: translateY(-2px) scale(0.98); 
+}
+.to-top-btn svg { 
+  width: 24px; 
+  height: 24px; 
+}
+
+@media (max-width: 768px) {
+  .to-top-btn { 
+    width: 48px; 
+    height: 48px; 
+    bottom: 1.5rem; 
+    right: 1.5rem; 
+  }
+  .to-top-btn svg { 
+    width: 20px; 
+    height: 20px; 
+  }
+}
+@media (max-width: 480px) {
+  .to-top-btn { 
+    width: 44px; 
+    height: 44px; 
+    bottom: 1rem; 
+    right: 1rem; 
+  }
+}

@@ -1,0 +1,55 @@
+/* Навигация и переключение темы */
+
+header {
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 100;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logo-text {
+  transition: opacity 0.3s ease;
+}
+
+.theme-toggle {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+.theme-toggle:hover {
+  background: var(--accent-light);
+  transform: rotate(20deg);
+}
+
+/* Стики-навигация */
+body.is-sticky .logo .logo-text {
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  position: absolute;
+  white-space: nowrap;
+}

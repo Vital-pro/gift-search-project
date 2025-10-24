@@ -1,0 +1,37 @@
+/* Hero секция */
+.compact-hero {
+  padding: 2rem 0 0.75rem;
+  min-height: 54vh;
+  display: flex;
+  align-items: flex-start;
+}
+
+.hero.compact {
+  min-height: auto;
+  padding: 2rem 0 1rem;
+}
+
+/* Резерв под sticky-поиск, чтобы не перекрывать H1 и не было скачка */
+.hero::after {
+  content:"";
+  display:block;
+  height: 72px; /* подстрой под реальную высоту sticky-панели */
+}
+
+@media (min-width: 1024px) {
+  .hero { min-height: 46vh; }
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+/* В compact-режиме не скрываем alternative-controls */
+.search-block.compact .alternative-controls {
+  display: block;
+}

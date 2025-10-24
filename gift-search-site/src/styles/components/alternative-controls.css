@@ -1,0 +1,156 @@
+/* Альтернативные контролы */
+.alternative-controls { 
+  margin-top: 1rem; 
+}
+
+.controls-dropdown summary {
+  cursor: pointer;
+  color: #b02727; /* (можно заменить на var(--accent) для контраста) */
+  font-size: 1.06rem;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+.controls-dropdown summary:hover { 
+  color: var(--accent); 
+}
+.controls-dropdown[open] summary { 
+  color: var(--accent); 
+  margin-bottom: 1rem; 
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.control-group { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0.5rem; 
+}
+
+.control-group label {
+  font-size: 0.875rem; 
+  color: var(--text-secondary); 
+  font-weight: 600;
+  text-transform: uppercase; 
+  letter-spacing: 0.5px;
+}
+
+.control-group input,
+.control-group select {
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  cursor: pointer;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Стилизация select - кастомная стрелка */
+.control-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236c63ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.75rem;
+}
+/* Темная тема - изменение цвета стрелки */
+[data-theme="dark"] .control-group select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238b80ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.control-group input:hover,
+.control-group select:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.15);
+}
+.control-group input:focus,
+.control-group select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-light), 0 4px 16px rgba(108, 99, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Плейсхолдер */
+.control-group input::placeholder { 
+  color: var(--text-muted); 
+  opacity: 0.7; 
+}
+
+/* Стили для числовых инпутов */
+.control-group input[type="number"] { 
+  font-variant-numeric: tabular-nums; 
+}
+/* Убираем стрелки у number input в Chrome, Safari, Edge */
+.control-group input[type="number"]::-webkit-outer-spin-button,
+.control-group input[type="number"]::-webkit-inner-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+/* Убираем стрелки у number input в Firefox */
+.control-group input[type="number"] { 
+  -moz-appearance: textfield; 
+}
+
+.alt-search-btn {
+  grid-column: 1 / -1;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+.alt-search-btn::before {
+  content: '';
+  position: absolute; 
+  top: 0; 
+  left: -100%;
+  width: 100%; 
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+.alt-search-btn:hover { 
+  transform: translateY(-2px); 
+  box-shadow: 0 6px 24px rgba(108, 99, 255, 0.4); 
+}
+.alt-search-btn:hover::before { 
+  left: 100%; 
+}
+.alt-search-btn:active { 
+  transform: translateY(0) scale(0.98); 
+  box-shadow: 0 2px 12px rgba(108, 99, 255, 0.3); 
+}
+
+.controls-dropdown summary { font-size: 0.95rem; padding: 0.35rem 0.25rem; }
+.controls-grid { gap: 0.7rem; padding: 0.7rem; }
+.control-group label { font-size: 0.85rem; }
+.control-group input, .control-group select {
+  padding: 0.6rem 0.7rem; font-size: 0.95rem; border-radius: 10px;
+}
+.alt-search-btn { padding: 0.7rem 1.2rem; border-radius: 10px; }
