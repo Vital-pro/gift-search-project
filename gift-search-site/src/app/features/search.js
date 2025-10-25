@@ -26,9 +26,14 @@ import { formatRecipientGenitive } from '../utils/format.js';
 let searchAll = [];
 let searchOffset = 0;
 let currentParams = { recipient: null, age: null, budget: null };
+// [ДОБАВЛЕНО] Защита от гонок: id активной сессии поиска
+let activeSearchSessionId = 0;
+
 
 // === Вспомогательный рендер результатов (внутренний) ===
 function renderSearchResultsGrid(GIFT_CARD_DEPS) {
+  // [ДОБАВЛЕНО] Фиксируем ид текущей сессии для всех вложенных async
+  const sessionId = activeSearchSessionId;
   const section = document.getElementById('searchResults');
   const resultsCount = document.getElementById('resultsCount');
   const resultsTitle = document.getElementById('resultsTitle');
@@ -44,13 +49,20 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     loadMoreBtn.parentNode.insertBefore(cta, loadMoreBtn);
   }
 
-let title = 'Результаты поиска';
-if (currentParams.recipient) {
-  const rGen = formatRecipientGenitive(currentParams.recipient);
-  title = `Подарки для ${rGen}`;
-}
-resultsTitle.textContent = title;
-resultsCount.textContent = `— найдено ${searchAll.length}`;
+  let title = 'Результаты поиска';
+  if (currentParams.recipient) {
+    const rGen = formatRecipientGenitive(currentParams.recipient);
+    title = `Подарки для ${rGen}`;
+  }
+  resultsTitle.textContent = title;
+  resultsCount.textContent = `— найдено ${searchAll.length}`;
+  // [ДОБАВЛЕНО] Делаем счётчик «живым» для скринридеров и мягко фокусируем заголовок
+  resultsCount.setAttribute('aria-live', 'polite'); // обновления озвучиваются «вежливо»
+  resultsCount.setAttribute('role', 'status');
+
+  // Фокус на заголовке, чтобы пользователь клавиатуры/скринридер сразу был в нужном месте
+  resultsTitle.setAttribute('tabindex', '-1'); // можно фокусировать DIV/span/h2
+  resultsTitle.focus({ preventScroll: true }); // без пролистывания страницы
 
   // Очистка
   grid.innerHTML = '';
@@ -66,6 +78,8 @@ resultsCount.textContent = `— найдено ${searchAll.length}`;
 
   // Первая порция
   fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
+    // [ПРОВЕРКА СЕССИИ] защита от гонки: если уже начат новый поиск — не обновляем DOM
+    if (sessionId !== activeSearchSessionId) return;
     batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
     searchOffset += batch.length;
 
@@ -74,18 +88,33 @@ resultsCount.textContent = `— найдено ${searchAll.length}`;
       loadMoreBtn.textContent = 'Посмотреть ещё';
       loadMoreBtn.classList.remove('hidden');
 
+      // [ИСПРАВЛЕНО] Сбрасываем прежний обработчик, чтобы не плодить onClick
+      loadMoreBtn.onclick = null;
+
       loadMoreBtn.onclick = () => {
+        // [ПРОВЕРКА СЕССИИ] если уже другой поиск — игнорируем
+        if (sessionId !== activeSearchSessionId) return;
+
         fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
+          // [ПРОВЕРКА СЕССИИ] защита от гонки
+          if (sessionId !== activeSearchSessionId) return;
+
           more.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
           searchOffset += more.length;
 
-          if (searchOffset >= searchAll.length) {
+          if (searchOffset < searchAll.length) {
+            // ещё не конец — остаёмся на "Посмотреть ещё"
+            loadMoreBtn.textContent = 'Посмотреть ещё';
+            loadMoreBtn.classList.remove('hidden');
+          } else {
             // дошли до конца — показываем "Начать поиск заново" и УБИРАЕМ CTA (чтобы не дублировать с футером)
             cta.innerHTML = '';
             cta.classList.add('hidden');
 
             loadMoreBtn.textContent = 'Начать поиск заново';
             loadMoreBtn.classList.remove('hidden');
+            // [ИСПРАВЛЕНО] Сбросим старый обработчик перед установкой нового
+            loadMoreBtn.onclick = null;
             loadMoreBtn.onclick = () => resetSearchAndBack(GIFT_CARD_DEPS);
           }
         });
@@ -98,6 +127,8 @@ resultsCount.textContent = `— найдено ${searchAll.length}`;
 
       loadMoreBtn.textContent = 'Начать поиск заново';
       loadMoreBtn.classList.remove('hidden');
+      // [ИСПРАВЛЕНО] Сбросим потенциальный прежний обработчик
+      loadMoreBtn.onclick = null;
       loadMoreBtn.onclick = () => resetSearchAndBack(GIFT_CARD_DEPS);
     }
 
@@ -110,6 +141,7 @@ resultsCount.textContent = `— найдено ${searchAll.length}`;
  * Полнотекстовый поиск (поле #searchInput)
  */
 export function performSearch(GIFT_CARD_DEPS) {
+  activeSearchSessionId++;
   const searchInput = document.getElementById('searchInput');
   const query = searchInput?.value.trim() || '';
 
@@ -131,6 +163,15 @@ export function performSearch(GIFT_CARD_DEPS) {
     const section = document.getElementById('noResults');
     section?.classList.remove('hidden');
     document.getElementById('searchResults')?.classList.add('hidden');
+
+    // [ДОБАВЛЕНО] Фокус на заголовок «Ничего не нашлось» + мягкий скролл с отступом
+    const h = section?.querySelector('h3');
+    if (h) {
+      h.setAttribute('tabindex', '-1');
+      h.focus({ preventScroll: true });
+    }
+    // уже используем хелпер с отступом, чтобы заголовок не «уезжал» под хедер
+    scrollToSectionWithOffset(section, 12);
     return;
   }
 
@@ -144,6 +185,8 @@ export function performSearch(GIFT_CARD_DEPS) {
  * Поиск через альтернативные контролы (select + inputs)
  */
 export function performAlternativeSearch(GIFT_CARD_DEPS) {
+  // [ДОБАВЛЕНО] новая сессия поиска
+  activeSearchSessionId++;
   const recipient = document.getElementById('recipientSelect')?.value || '';
   const ageRaw = document.getElementById('ageInput')?.value || '';
   const budgetRaw = document.getElementById('budgetInput')?.value || '';
@@ -164,6 +207,15 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
     const section = document.getElementById('noResults');
     section?.classList.remove('hidden');
     document.getElementById('searchResults')?.classList.add('hidden');
+
+    // [ДОБАВЛЕНО] Фокус на заголовок «Ничего не нашлось» + мягкий скролл с отступом
+    const h = section?.querySelector('h3');
+    if (h) {
+      h.setAttribute('tabindex', '-1');
+      h.focus({ preventScroll: true });
+    }
+    // уже используем хелпер с отступом, чтобы заголовок не «уезжал» под хедер
+    scrollToSectionWithOffset(section, 12);
     return;
   }
 
@@ -177,7 +229,9 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
  * Полный сброс к промо/каталогу (кнопка «Начать поиск заново»)
  */
 export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
-  resetSearchView(); // очистка полей + возврат стартовых секций
+  resetSearchView();
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if (loadMoreBtn) loadMoreBtn.onclick = null;
   renderPromoGifts(Array.isArray(promoIds) ? promoIds : [1, 3, 5, 8, 12, 15], GIFT_CARD_DEPS);
   initCatalogList(GIFT_CARD_DEPS);
 }

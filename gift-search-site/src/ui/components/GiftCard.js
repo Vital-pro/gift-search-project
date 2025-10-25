@@ -103,6 +103,41 @@ export function createGiftCard(gift, options) {
     </div>
   `;
 
+  // [ДОБАВЛЕНО] Ленивая загрузка изображения товара, если gift.image задан
+  (function setupLazyImage() {
+    try {
+      const container = card.querySelector('.gift-card-image');
+      if (!container) return;
+
+      // если у подарка нет картинки — оставляем эмоджи как раньше
+      if (!gift.image || typeof gift.image !== 'string') return;
+
+      // очищаем эмоджи-плейсхолдер
+      container.innerHTML = '';
+
+      const img = document.createElement('img');
+      img.alt = gift.name || 'Изображение подарка';
+      img.loading = 'lazy'; // браузер сам отложит загрузку
+      img.decoding = 'async'; // асинхронное декодирование, не блокирует основной поток
+      img.referrerPolicy = 'no-referrer';
+      img.fetchPriority = 'low'; // не мешаем приоритетам «героя»
+
+      // Если известны размеры — зададим, чтобы снизить layout shift (опц.)
+      if (gift.imageWidth && gift.imageHeight) {
+        img.width = gift.imageWidth;
+        img.height = gift.imageHeight;
+      }
+
+      // Устанавливаем src в самом конце, чтобы атрибуты успели примениться
+      img.src = gift.image;
+
+      container.appendChild(img);
+    } catch (e) {
+      // fail-safe: если что-то пошло не так — просто оставим эмоджи
+      console.warn('[GiftCard] setupLazyImage error:', e);
+    }
+  })();
+
   const actions = card.querySelector('.gift-card-actions');
   const partnerUrl = resolveGiftUrl ? resolveGiftUrl(gift) : null;
 

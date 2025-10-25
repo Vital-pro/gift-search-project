@@ -6,6 +6,8 @@ import { createGiftCard } from '../../ui/components/GiftCard.js';
 import { fetchGiftsBatch } from './promo.js';
 import { INITIAL_BATCH, LOAD_BATCH, TELEGRAM_BOT_URL } from '../config.js';
 import { createTelegramCTA } from '../../ui/components/TelegramCTA.js';
+import { waitForVisible } from '../utils/lazy.js'; // [ДОБАВЛЕНО] отложим первичную загрузку
+
 
 // === Глобальное состояние каталога ===
 let catalogOffset = 0;
@@ -26,32 +28,37 @@ export function initCatalogList(GIFT_CARD_DEPS) {
   // показываем спиннер
   loader.classList.remove('hidden');
 
-  // загружаем первую порцию
-  fetchGiftsBatch(shuffledCatalog, catalogOffset, INITIAL_BATCH).then((batch) => {
-    loader.classList.add('hidden');
-    grid.innerHTML = '';
-    batch.forEach((gift) => grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS)));
-    catalogOffset += batch.length;
+  // [ИЗМЕНЕНО] Первую порцию грузим только когда секция каталога реально попала в зону видимости
+  const catalogSection = document.getElementById('catalogSection');
+  waitForVisible(catalogSection, { threshold: 0.25, rootMargin: '0px 0px -50px 0px' })
+    .then(() => {
+      // как только секция видима — делаем обычную первую загрузку
+      return fetchGiftsBatch(shuffledCatalog, catalogOffset, INITIAL_BATCH);
+    })
+    .then((batch) => {
+      loader.classList.add('hidden');
+      grid.innerHTML = '';
+      batch.forEach((gift) => grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS)));
+      catalogOffset += batch.length;
 
-    // показываем кнопку, если остались карточки
-    if (catalogOffset < shuffledCatalog.length) {
-      btnShowMore.classList.remove('hidden');
-    } else {
-      // [НОВОЕ] если догрузок не будет, CTA не нужен (внизу есть футерная версия)
-      if (ctaContainer) ctaContainer.innerHTML = '';
-    }
-
-    // CTA-блок: должен идти ПЕРЕД кнопкой «Посмотреть ещё»
-    if (ctaContainer) {
-      ctaContainer.innerHTML = '';
-      const cta = createTelegramCTA(TELEGRAM_BOT_URL);
-      ctaContainer.appendChild(cta);
-      // перемещаем контейнер CTA перед кнопкой
-      if (btnShowMore && ctaContainer.parentNode) {
-        ctaContainer.parentNode.insertBefore(ctaContainer, btnShowMore);
+      // показываем кнопку, если остались карточки
+      if (catalogOffset < shuffledCatalog.length) {
+        btnShowMore.classList.remove('hidden');
+      } else {
+        // если догрузок не будет, не дублируем CTA (он есть в футере)
+        if (ctaContainer) ctaContainer.innerHTML = '';
       }
-    }
-  });
+
+      // CTA-блок должен идти ПЕРЕД кнопкой «Посмотреть ещё»
+      if (ctaContainer) {
+        ctaContainer.innerHTML = '';
+        const cta = createTelegramCTA(TELEGRAM_BOT_URL);
+        ctaContainer.appendChild(cta);
+        if (btnShowMore && ctaContainer.parentNode) {
+          ctaContainer.parentNode.insertBefore(ctaContainer, btnShowMore);
+        }
+      }
+    });
 
   // обработчик "Посмотреть ещё"
   btnShowMore.onclick = () => {
@@ -71,7 +78,6 @@ export function initCatalogList(GIFT_CARD_DEPS) {
         // [НОВОЕ] в конце каталога скрываем CTA, чтобы не дублировать с футером
         if (ctaContainer) ctaContainer.innerHTML = '';
       }
-
     });
   };
 }
