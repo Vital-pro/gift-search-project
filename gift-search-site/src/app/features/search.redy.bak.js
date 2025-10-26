@@ -174,164 +174,8 @@ function rankAndSortGifts(items, params) {
 }
 
 // === Вспомогательный рендер результатов (внутренний) ===
-// function renderSearchResultsGrid(GIFT_CARD_DEPS) {
-//   // [ДОБАВЛЕНО] Фиксируем ид текущей сессии для всех вложенных async
-//   const sessionId = activeSearchSessionId;
-//   const section = document.getElementById('searchResults');
-//   const resultsCount = document.getElementById('resultsCount');
-//   const resultsTitle = document.getElementById('resultsTitle');
-//   const grid = document.getElementById('resultsGrid');
-//   const loadMoreBtn = document.getElementById('loadMoreBtn');
-//   const cta = document.getElementById('searchCTAContainer');
-
-//   if (!section || !grid || !loadMoreBtn || !cta) return;
-
-//   // === ДИАГНОСТИКА: проверяем порядок ДО изменений ===
-//   console.log('🔍 renderSearchResultsGrid - ДИАГНОСТИКА:');
-//   console.log('Всего карточек:', searchAll.length);
-//   console.log('Получатель:', currentParams?.recipient);
-
-//   if (currentParams?.recipient) {
-//     const rec = currentParams.recipient.toLowerCase();
-//     const exactCount = searchAll.filter(
-//       (g) =>
-//         Array.isArray(g.recipientTags) &&
-//         g.recipientTags.some((tag) => String(tag).toLowerCase() === rec),
-//     ).length;
-//     console.log(`Точных совпадений: ${exactCount}`);
-
-//     console.log('Первые 6 карточек:');
-//     searchAll.slice(0, 6).forEach((g, i) => {
-//       const isExact =
-//         Array.isArray(g.recipientTags) &&
-//         g.recipientTags.some((tag) => String(tag).toLowerCase() === rec);
-//       console.log(`${i + 1}. "${g.name}" - exact: ${isExact} - теги: [${g.recipientTags}]`);
-//     });
-//   }
-
-//   // === УБИРАЕМ СТАРУЮ ЛОГИКУ ПРИОРИТЕТИЗАЦИИ - она уже выполнена в rankAndSortGifts ===
-//   // ЗАКОММЕНТИРОВАНО: (function prioritizeExactRecipientTag() { ... })();
-
-//   // [НОВОЕ] — порядок: СНАЧАЛА CTA, ПОТОМ кнопка
-//   // Переставляем контейнер CTA перед кнопкой (DOM может быть изначально наоборот)
-//   if (loadMoreBtn.parentNode && cta.parentNode && cta.nextElementSibling !== loadMoreBtn) {
-//     loadMoreBtn.parentNode.insertBefore(cta, loadMoreBtn);
-//   }
-
-//   let title = 'Результаты поиска';
-//   if (currentParams.recipient) {
-//     const rGen = formatRecipientGenitive(currentParams.recipient);
-//     title = `Подарки для ${rGen}`;
-//   }
-//   resultsTitle.textContent = title;
-//   resultsCount.textContent = `— найдено ${searchAll.length}`;
-
-//   // Перезапуск короткой анимации появления заголовка
-//   resultsTitle.classList.remove('results-title-fade');
-//   resultsCount.classList.remove('results-title-fade');
-//   void resultsTitle.offsetWidth; // принудительный reflow, чтобы анимация переиграла
-//   resultsTitle.classList.add('results-title-fade');
-//   resultsCount.classList.add('results-title-fade');
-
-//   // [ДОБАВЛЕНО] Делаем счётчик «живым» для скринридеров и мягко фокусируем заголовок
-//   resultsCount.setAttribute('aria-live', 'polite'); // обновления озвучиваются «вежливо»
-//   resultsCount.setAttribute('role', 'status');
-
-//   // Фокус на заголовке, чтобы пользователь клавиатуры/скринридер сразу был в нужном месте
-//   resultsTitle.setAttribute('tabindex', '-1'); // можно фокусировать DIV/span/h2
-//   resultsTitle.focus({ preventScroll: true }); // без пролистывания страницы
-
-//   // Очистка
-//   grid.innerHTML = '';
-//   searchOffset = 0;
-
-//   // Рисуем CTA прямо сейчас (над кнопкой)
-//   cta.innerHTML = '';
-//   cta.appendChild(createTelegramCTA(TELEGRAM_BOT_URL));
-//   cta.classList.remove('hidden');
-
-//   // Показ секции результатов
-//   section.classList.remove('hidden');
-
-//   // Первая порция
-//   fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
-//     // [ПРОВЕРКА СЕССИИ] защита от гонки: если уже начат новый поиск — не обновляем DOM
-//     if (sessionId !== activeSearchSessionId) return;
-
-//     // === ДИАГНОСТИКА: проверяем что рендерим ===
-//     console.log('🎯 Рендерим первую порцию:');
-//     batch.forEach((g, i) => {
-//       const isExact =
-//         currentParams?.recipient &&
-//         Array.isArray(g.recipientTags) &&
-//         g.recipientTags.some(
-//           (tag) => String(tag).toLowerCase() === currentParams.recipient.toLowerCase(),
-//         );
-//       console.log(`${i + 1}. "${g.name}" - exact: ${isExact} - теги: [${g.recipientTags}]`);
-//     });
-
-//     batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
-//     searchOffset += batch.length;
-
-//     if (searchOffset < searchAll.length) {
-//       // есть что догружать: показываем "Посмотреть ещё" НИЖЕ CTA
-//       loadMoreBtn.textContent = 'Посмотреть ещё';
-//       loadMoreBtn.classList.remove('hidden');
-
-//       // [ИСПРАВЛЕНО] Сбрасываем прежний обработчик, чтобы не плодить onClick
-//       loadMoreBtn.onclick = null;
-
-//       loadMoreBtn.onclick = () => {
-//         // [ПРОВЕРКА СЕССИИ] если уже другой поиск — игнорируем
-//         if (sessionId !== activeSearchSessionId) return;
-
-//         fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
-//           // [ПРОВЕРКА СЕССИИ] защита от гонки
-//           if (sessionId !== activeSearchSessionId) return;
-
-//           more.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
-//           searchOffset += more.length;
-
-//           if (searchOffset < searchAll.length) {
-//             // ещё не конец — остаёмся на "Посмотреть ещё"
-//             loadMoreBtn.textContent = 'Посмотреть ещё';
-//             loadMoreBtn.classList.remove('hidden');
-//           } else {
-//             // дошли до конца — показываем "Начать поиск заново" и УБИРАЕМ CTA (чтобы не дублировать с футером)
-//             cta.innerHTML = '';
-//             cta.classList.add('hidden');
-
-//             loadMoreBtn.textContent = 'Начать поиск заново';
-//             loadMoreBtn.classList.remove('hidden');
-//             // [ИСПРАВЛЕНО] Сбросим старый обработчик перед установкой нового
-//             loadMoreBtn.onclick = null;
-//             loadMoreBtn.onclick = () => {
-//               window.location.href = '/';
-//             };
-//           }
-//         });
-//       };
-//     } else {
-//       // результат влез в один экран — кнопка "Начать поиск заново"
-//       // и УБИРАЕМ CTA (внизу уже есть вариант в футере)
-//       cta.innerHTML = '';
-//       cta.classList.add('hidden');
-
-//       loadMoreBtn.textContent = 'Начать поиск заново';
-//       loadMoreBtn.classList.remove('hidden');
-//       // [ИСПРАВЛЕНО] Сбросим потенциальный прежний обработчик
-//       loadMoreBtn.onclick = null;
-//       loadMoreBtn.onclick = () => {
-//         window.location.href = '/';
-//       };
-//     }
-
-//     // Прокрутка с отступом от header — чтобы заголовок не уехал под хедер
-//     setTimeout(() => scrollToSectionWithOffset(section, 12), 60);
-//   });
-// }
-
 function renderSearchResultsGrid(GIFT_CARD_DEPS) {
+  // [ДОБАВЛЕНО] Фиксируем ид текущей сессии для всех вложенных async
   const sessionId = activeSearchSessionId;
   const section = document.getElementById('searchResults');
   const resultsCount = document.getElementById('resultsCount');
@@ -339,9 +183,8 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   const grid = document.getElementById('resultsGrid');
   const loadMoreBtn = document.getElementById('loadMoreBtn');
   const cta = document.getElementById('searchCTAContainer');
-  const sortToggle = document.getElementById('sortToggle'); // ДОБАВИЛ
 
-  if (!section || !grid || !loadMoreBtn || !cta || !sortToggle) return;
+  if (!section || !grid || !loadMoreBtn || !cta) return;
 
   // === ДИАГНОСТИКА: проверяем порядок ДО изменений ===
   console.log('🔍 renderSearchResultsGrid - ДИАГНОСТИКА:');
@@ -366,10 +209,11 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     });
   }
 
-  // === НОВАЯ ЛОГИКА: Настраиваем кнопку сортировки ===
-  setupSortToggle();
+  // === УБИРАЕМ СТАРУЮ ЛОГИКУ ПРИОРИТЕТИЗАЦИИ - она уже выполнена в rankAndSortGifts ===
+  // ЗАКОММЕНТИРОВАНО: (function prioritizeExactRecipientTag() { ... })();
 
   // [НОВОЕ] — порядок: СНАЧАЛА CTA, ПОТОМ кнопка
+  // Переставляем контейнер CTA перед кнопкой (DOM может быть изначально наоборот)
   if (loadMoreBtn.parentNode && cta.parentNode && cta.nextElementSibling !== loadMoreBtn) {
     loadMoreBtn.parentNode.insertBefore(cta, loadMoreBtn);
   }
@@ -385,21 +229,23 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   // Перезапуск короткой анимации появления заголовка
   resultsTitle.classList.remove('results-title-fade');
   resultsCount.classList.remove('results-title-fade');
-  void resultsTitle.offsetWidth;
+  void resultsTitle.offsetWidth; // принудительный reflow, чтобы анимация переиграла
   resultsTitle.classList.add('results-title-fade');
   resultsCount.classList.add('results-title-fade');
 
-  resultsCount.setAttribute('aria-live', 'polite');
+  // [ДОБАВЛЕНО] Делаем счётчик «живым» для скринридеров и мягко фокусируем заголовок
+  resultsCount.setAttribute('aria-live', 'polite'); // обновления озвучиваются «вежливо»
   resultsCount.setAttribute('role', 'status');
 
-  resultsTitle.setAttribute('tabindex', '-1');
-  resultsTitle.focus({ preventScroll: true });
+  // Фокус на заголовке, чтобы пользователь клавиатуры/скринридер сразу был в нужном месте
+  resultsTitle.setAttribute('tabindex', '-1'); // можно фокусировать DIV/span/h2
+  resultsTitle.focus({ preventScroll: true }); // без пролистывания страницы
 
   // Очистка
   grid.innerHTML = '';
   searchOffset = 0;
 
-  // Рисуем CTA
+  // Рисуем CTA прямо сейчас (над кнопкой)
   cta.innerHTML = '';
   cta.appendChild(createTelegramCTA(TELEGRAM_BOT_URL));
   cta.classList.remove('hidden');
@@ -407,128 +253,82 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   // Показ секции результатов
   section.classList.remove('hidden');
 
-  // Рендерим первую порцию
-  renderCurrentBatch();
-
-  // === НОВЫЕ ФУНКЦИИ ДЛЯ СОРТИРОВКИ ===
-
-  function setupSortToggle() {
-    // Показываем кнопку только если есть результаты
-    if (searchAll.length > 1) {
-      sortToggle.classList.remove('hidden');
-      sortToggle.setAttribute('aria-label', 'Изменить сортировку результатов');
-    } else {
-      sortToggle.classList.add('hidden');
-      return;
-    }
-
-    // Сбрасываем обработчики
-    sortToggle.onclick = null;
-
-    // Обработчик клика
-    sortToggle.onclick = () => {
-      const currentState = sortToggle.getAttribute('aria-pressed');
-      const sortText = sortToggle.querySelector('.sort-text');
-
-      if (currentState === 'false') {
-        // Первое нажатие: сортируем по убыванию цены (дорогие сначала)
-        sortToggle.setAttribute('aria-pressed', 'true');
-        sortText.textContent = 'Сначала недорогие';
-        applyPriceSort('desc');
-      } else if (currentState === 'true') {
-        // Второе нажатие: сортируем по возрастанию цены (недорогие сначала)
-        sortToggle.setAttribute('aria-pressed', 'asc');
-        sortText.textContent = 'По умолчанию';
-        applyPriceSort('asc');
-      } else {
-        // Третье нажатие: возврат к исходной сортировке
-        sortToggle.setAttribute('aria-pressed', 'false');
-        sortText.textContent = 'Сначала дорогие';
-        resetToDefaultSort();
-      }
-    };
-  }
-
-  function applyPriceSort(order) {
-    const sorted = [...searchAll].sort((a, b) => {
-      const priceA = a.price || 0;
-      const priceB = b.price || 0;
-      return order === 'desc' ? priceB - priceA : priceA - priceB;
-    });
-
-    // Обновляем данные и перерисовываем
-    searchAll = sorted;
-    searchOffset = 0;
-    grid.innerHTML = '';
-    renderCurrentBatch();
-
-    // Плавная прокрутка к началу
-    setTimeout(() => {
-      resultsTitle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 100);
-  }
-
-  function resetToDefaultSort() {
-    // Восстанавливаем исходную сортировку через rankAndSortGifts
-    const prioritized = rankAndSortGifts(GIFTS, currentParams);
-    const filtered = filterGifts(prioritized, currentParams);
-    searchAll = filtered;
-    searchOffset = 0;
-    grid.innerHTML = '';
-    renderCurrentBatch();
-  }
-
-  function renderCurrentBatch() {
-    fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
-      if (sessionId !== activeSearchSessionId) return;
-
-      batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
-      searchOffset += batch.length;
-
-      if (searchOffset < searchAll.length) {
-        loadMoreBtn.textContent = 'Посмотреть ещё';
-        loadMoreBtn.classList.remove('hidden');
-        loadMoreBtn.onclick = null;
-        loadMoreBtn.onclick = handleLoadMore;
-      } else {
-        cta.innerHTML = '';
-        cta.classList.add('hidden');
-        loadMoreBtn.textContent = 'Начать поиск заново';
-        loadMoreBtn.classList.remove('hidden');
-        loadMoreBtn.onclick = null;
-        loadMoreBtn.onclick = () => {
-          window.location.href = '/';
-        };
-      }
-
-      setTimeout(() => scrollToSectionWithOffset(section, 12), 60);
-    });
-  }
-
-  function handleLoadMore() {
+  // Первая порция
+  fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
+    // [ПРОВЕРКА СЕССИИ] защита от гонки: если уже начат новый поиск — не обновляем DOM
     if (sessionId !== activeSearchSessionId) return;
 
-    fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
-      if (sessionId !== activeSearchSessionId) return;
-
-      more.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
-      searchOffset += more.length;
-
-      if (searchOffset < searchAll.length) {
-        loadMoreBtn.textContent = 'Посмотреть ещё';
-        loadMoreBtn.classList.remove('hidden');
-      } else {
-        cta.innerHTML = '';
-        cta.classList.add('hidden');
-        loadMoreBtn.textContent = 'Начать поиск заново';
-        loadMoreBtn.classList.remove('hidden');
-        loadMoreBtn.onclick = null;
-        loadMoreBtn.onclick = () => {
-          window.location.href = '/';
-        };
-      }
+    // === ДИАГНОСТИКА: проверяем что рендерим ===
+    console.log('🎯 Рендерим первую порцию:');
+    batch.forEach((g, i) => {
+      const isExact =
+        currentParams?.recipient &&
+        Array.isArray(g.recipientTags) &&
+        g.recipientTags.some(
+          (tag) => String(tag).toLowerCase() === currentParams.recipient.toLowerCase(),
+        );
+      console.log(`${i + 1}. "${g.name}" - exact: ${isExact} - теги: [${g.recipientTags}]`);
     });
-  }
+
+    batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+    searchOffset += batch.length;
+
+    if (searchOffset < searchAll.length) {
+      // есть что догружать: показываем "Посмотреть ещё" НИЖЕ CTA
+      loadMoreBtn.textContent = 'Посмотреть ещё';
+      loadMoreBtn.classList.remove('hidden');
+
+      // [ИСПРАВЛЕНО] Сбрасываем прежний обработчик, чтобы не плодить onClick
+      loadMoreBtn.onclick = null;
+
+      loadMoreBtn.onclick = () => {
+        // [ПРОВЕРКА СЕССИИ] если уже другой поиск — игнорируем
+        if (sessionId !== activeSearchSessionId) return;
+
+        fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
+          // [ПРОВЕРКА СЕССИИ] защита от гонки
+          if (sessionId !== activeSearchSessionId) return;
+
+          more.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+          searchOffset += more.length;
+
+          if (searchOffset < searchAll.length) {
+            // ещё не конец — остаёмся на "Посмотреть ещё"
+            loadMoreBtn.textContent = 'Посмотреть ещё';
+            loadMoreBtn.classList.remove('hidden');
+          } else {
+            // дошли до конца — показываем "Начать поиск заново" и УБИРАЕМ CTA (чтобы не дублировать с футером)
+            cta.innerHTML = '';
+            cta.classList.add('hidden');
+
+            loadMoreBtn.textContent = 'Начать поиск заново';
+            loadMoreBtn.classList.remove('hidden');
+            // [ИСПРАВЛЕНО] Сбросим старый обработчик перед установкой нового
+            loadMoreBtn.onclick = null;
+            loadMoreBtn.onclick = () => {
+              window.location.href = '/';
+            };
+          }
+        });
+      };
+    } else {
+      // результат влез в один экран — кнопка "Начать поиск заново"
+      // и УБИРАЕМ CTA (внизу уже есть вариант в футере)
+      cta.innerHTML = '';
+      cta.classList.add('hidden');
+
+      loadMoreBtn.textContent = 'Начать поиск заново';
+      loadMoreBtn.classList.remove('hidden');
+      // [ИСПРАВЛЕНО] Сбросим потенциальный прежний обработчик
+      loadMoreBtn.onclick = null;
+      loadMoreBtn.onclick = () => {
+        window.location.href = '/';
+      };
+    }
+
+    // Прокрутка с отступом от header — чтобы заголовок не уехал под хедер
+    setTimeout(() => scrollToSectionWithOffset(section, 12), 60);
+  });
 }
 /**
  * Полнотекстовый поиск (поле #searchInput)
@@ -652,47 +452,11 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
 /**
  * Полный сброс к промо/каталогу (кнопка «Начать поиск заново»)
  */
-// export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
-//   // 1) Сбросим режим и прокрутим мгновенно (чтоб фокус не «съедал» smooth)
-//   resetSearchView({ instantScroll: true });
-
-//   // 2) Явно вернём видимость оригинальной панели и уберём липкую
-//   const floatHost = document.querySelector('.search-float');
-//   const originalBlock = document.querySelector('.search-block');
-//   // липкую выключаем
-//   if (floatHost) {
-//     floatHost.classList.remove('visible');
-//     floatHost.classList.remove('force-visible'); // на всякий случай
-//   }
-//   // оригинальную показываем
-//   if (originalBlock) {
-//     originalBlock.classList.remove('search-original-hidden');
-//     originalBlock.classList.remove('compact');
-//   }
-
-//   // 3) Сброс обработчика и перерисовка стартового экрана
-//   const loadMoreBtn = document.getElementById('loadMoreBtn');
-//   if (loadMoreBtn) loadMoreBtn.onclick = null;
-
-//   renderPromoGifts(Array.isArray(promoIds) ? promoIds : [1, 3, 5, 8, 12, 15], GIFT_CARD_DEPS);
-//   initCatalogList(GIFT_CARD_DEPS);
-// }
-
-
 export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
   // 1) Сбросим режим и прокрутим мгновенно (чтоб фокус не «съедал» smooth)
   resetSearchView({ instantScroll: true });
 
-  // 2) Сбрасываем состояние сортировки
-  const sortToggle = document.getElementById('sortToggle');
-  if (sortToggle) {
-    sortToggle.classList.add('hidden');
-    sortToggle.setAttribute('aria-pressed', 'false');
-    const sortText = sortToggle.querySelector('.sort-text');
-    if (sortText) sortText.textContent = 'Сначала дорогие';
-  }
-
-  // 3) Явно вернём видимость оригинальной панели и уберём липкую
+  // 2) Явно вернём видимость оригинальной панели и уберём липкую
   const floatHost = document.querySelector('.search-float');
   const originalBlock = document.querySelector('.search-block');
   // липкую выключаем
@@ -706,7 +470,7 @@ export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
     originalBlock.classList.remove('compact');
   }
 
-  // 4) Сброс обработчика и перерисовка стартового экрана
+  // 3) Сброс обработчика и перерисовка стартового экрана
   const loadMoreBtn = document.getElementById('loadMoreBtn');
   if (loadMoreBtn) loadMoreBtn.onclick = null;
 

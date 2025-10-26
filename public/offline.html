@@ -4,8 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Нет подключения</title>
+  <title>Нет подключения — GiftBot</title>
+  <meta name="robots" content="noindex,nofollow" />
   <style>
+    :root {
+      color-scheme: light dark;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #f8f9fa;
@@ -34,17 +39,17 @@
       color: #6c757d;
       max-width: 500px;
       line-height: 1.6;
+      margin: 0 0 12px;
     }
 
     .btn {
       margin-top: 1.5rem;
       padding: 0.75rem 1.5rem;
       background: #6c63ff;
-      color: white;
-      border: none;
+      color: #fff;
+      border: 0;
       border-radius: 12px;
       font-size: 1rem;
-      cursor: pointer;
       text-decoration: none;
       display: inline-block;
     }
@@ -63,10 +68,12 @@
 </head>
 
 <body>
-  <div class="icon">📶</div>
-  <h1>Нет подключения к интернету</h1>
-  <p>Попробуйте обновить страницу позже. А пока — вспомните, кому вы хотели подарить что-то классное!</p>
-  <a href="/" class="btn" onclick="window.location.reload(); return false;">Повторить</a>
+  <div class="icon" aria-hidden="true">📶</div>
+  <main role="status" aria-live="polite" aria-atomic="true">
+    <h1>Нет подключения к интернету</h1>
+    <p>Попробуйте обновить страницу позже. А пока — вспомните, кому вы хотели подарить что-то классное!</p>
+    <a href="/" class="btn" rel="nofollow">На главную</a>
+  </main>
 </body>
 
 </html>

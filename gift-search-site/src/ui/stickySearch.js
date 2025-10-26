@@ -42,6 +42,20 @@ export function initStickySearch() {
   }
   if (cAltBtn) cAltBtn.addEventListener('click', () => window.performAlternativeSearch?.());
 
+  const cAltControlsRoot = clone.querySelector('.controls-grid');
+  if (cAltControlsRoot) {
+    const altInputs = cAltControlsRoot.querySelectorAll('select, input[type="number"]');
+    altInputs.forEach((el) => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'NumpadEnter') {
+          e.preventDefault();
+          // вызывем глобальный прокси, который уже прокинут с deps в init.js
+          window.performAlternativeSearch?.();
+        }
+      });
+    });
+  }
+
   // 4) Двусторонняя синхронизация значения input
   if (oSearchInput && cSearchInput) {
     oSearchInput.addEventListener('input', () => {
@@ -80,14 +94,22 @@ export function initStickySearch() {
   const THROTTLE_MS = 80; // ~12.5 FPS, достаточно для UI без лагов
   let resizeTimer = null;
 
+  // <-- ВСТАВЬ СЮДА: ПОЛНАЯ ЗАМЕНА ФУНКЦИИ update() -->
   function update() {
     // вызывается внутри rAF
     const scrolled = window.pageYOffset || document.documentElement.scrollTop;
-    const show = scrolled > stickyPoint();
+    const wantShow = scrolled > stickyPoint();
+
+    // Во время режима поиска (body.search-mode) липкую панель принудительно скрываем,
+    // чтобы не перекрывать заголовок "Подарки для ..."
+    const forcedHidden = document.body.classList.contains('search-mode');
+    const show = wantShow && !forcedHidden;
+
     renderState(show);
     ticking = false;
     lastRun = performance.now();
   }
+  // <-- /ВСТАВЬ СЮДА -->
 
   function onScroll() {
     // micro-throttle: не чаще THROTTLE_MS и по rAF

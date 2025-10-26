@@ -93,6 +93,8 @@ export function resetSearchView() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+
+
 /**
  * Очистить только текстовые поля поиска (везде: оригинал + липкая).
  */

@@ -76,6 +76,30 @@ export function createGiftCard(gift, options) {
   };
   const icon = categoryIcons[gift.category] || '🎁';
 
+  // === ИЗМЕНЕНИЕ: Сортируем теги так, чтобы точное совпадение было первым ===
+  const prepareRecipientTags = (tags) => {
+    if (!Array.isArray(tags)) return [];
+
+    const currentRecipient = window.currentSearchRecipient || '';
+    let sortedTags = [...tags];
+
+    // Если есть текущий поиск по получателю, ставим точное совпадение первым
+    if (currentRecipient) {
+      const exactIndex = sortedTags.findIndex(
+        (tag) => String(tag).toLowerCase() === currentRecipient.toLowerCase(),
+      );
+      if (exactIndex > -1) {
+        // Перемещаем точное совпадение в начало массива
+        const [exactTag] = sortedTags.splice(exactIndex, 1);
+        sortedTags.unshift(exactTag);
+      }
+    }
+
+    return sortedTags.slice(0, 5); // показываем до 5 тегов
+  };
+
+  const displayTags = prepareRecipientTags(gift.recipientTags);
+
   // Каркас — строго прежние классы
   card.innerHTML = `
     <div class="gift-card-image" aria-hidden="true">
@@ -86,14 +110,7 @@ export function createGiftCard(gift, options) {
       <p class="gift-card-description">${gift.description || ''}</p>
       <div class="gift-card-price">${formatPrice ? formatPrice(gift.price) : gift.price}</div>
       <div class="gift-card-tags">
-        ${
-          Array.isArray(gift.recipientTags)
-            ? gift.recipientTags
-                .slice(0, 3)
-                .map((t) => `<span class="gift-tag">${t}</span>`)
-                .join('')
-            : ''
-        }
+        ${displayTags.map((t) => `<span class="gift-tag">${t}</span>`).join('')}
       </div>
       <div class="gift-card-footer">
         <span class="age-range">${gift.ageRange?.[0] ?? 0}-${gift.ageRange?.[1] ?? 120} лет</span>

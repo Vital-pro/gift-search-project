@@ -1,6 +1,6 @@
 {
-  "name": "Что подарить — GiftBot",
-  "short_name": "GiftBot",
+  "name": "Что подарить",
+  "short_name": "Подарки",
   "description": "Найди идеальный подарок за секунды!",
   "start_url": "/",
   "display": "standalone",

@@ -53,41 +53,53 @@ export function initApp() {
 
   registerServiceWorker();
 
-  // === Слушатели поиска (как было — но вызываем через прокси с deps)
+  // === Слушатели поиска — НАДЁЖНО, без обращения к window.* до их назначения
   const searchBtn = document.getElementById('searchBtn');
   const searchInput = document.getElementById('searchInput');
   const altSearchBtn = document.getElementById('altSearchBtn');
 
-  // Основной поиск по кнопке
-  // Основной поиск по кнопке
-  searchBtn?.addEventListener('click', () => window.performSearch?.());
-
-  // [ИСПРАВЛЕНО] Enter только на keydown — чтобы не было двойного запуска
-  const triggerEnterSearch = (e) => {
-    if (e.key === 'Enter' || e.key === 'NumpadEnter') {
-      e.preventDefault();
-      window.performSearch?.();
-    }
-  };
-  searchInput?.addEventListener('keydown', triggerEnterSearch); // ← оставили только keydown
-
-  // Альтернативные контролы — по кнопке
-  altSearchBtn?.addEventListener('click', () => window.performAlternativeSearch?.());
-
-  // Enter для альтернативных контролов — только keydown
   const recipientSelect = document.getElementById('recipientSelect');
   const ageInput = document.getElementById('ageInput');
   const budgetInput = document.getElementById('budgetInput');
 
-  const triggerAltEnter = (e) => {
+  // Локальные триггеры, захватывающие GIFT_CARD_DEPS
+  function triggerTextSearch() {
+    performSearch(GIFT_CARD_DEPS);
+  }
+  function triggerAltSearch() {
+    performAlternativeSearch(GIFT_CARD_DEPS);
+  }
+
+  // Клик по "Найти"
+  searchBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerTextSearch();
+  });
+
+  // Enter в текстовом поле поиска — только keydown, один раз
+  searchInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === 'NumpadEnter') {
       e.preventDefault();
-      window.performAlternativeSearch?.();
+      triggerTextSearch();
+    }
+  });
+
+  // Клик по "Подобрать" (альтернативные контролы)
+  altSearchBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    triggerAltSearch();
+  });
+
+  // Enter в любом из альтернативных контролов
+  const handleAltEnter = (e) => {
+    if (e.key === 'Enter' || e.key === 'NumpadEnter') {
+      e.preventDefault();
+      triggerAltSearch();
     }
   };
-  recipientSelect?.addEventListener('keydown', triggerAltEnter);
-  ageInput?.addEventListener('keydown', triggerAltEnter);
-  budgetInput?.addEventListener('keydown', triggerAltEnter);
+  recipientSelect?.addEventListener('keydown', handleAltEnter);
+  ageInput?.addEventListener('keydown', handleAltEnter);
+  budgetInput?.addEventListener('keydown', handleAltEnter);
 
   // Фокус в поле поиска при загрузке
   searchInput?.focus();
@@ -110,4 +122,13 @@ export function initApp() {
 
   // Сброс к стартовому экрану с перерисовкой промо/каталога
   window.resetSearch = () => resetSearchAndBack(GIFT_CARD_DEPS, PROMO_GIFTS_IDS);
+
+  // === Обработчик кнопки "Начать поиск заново" в блоке noResults ===
+const restartBtn = document.getElementById('restartSearchBtn');
+if (restartBtn) {
+  restartBtn.addEventListener('click', () => {
+    window.location.href = '/';
+  });
+}
+
 }

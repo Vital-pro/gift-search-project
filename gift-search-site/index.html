@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <meta property="og:title" content="Что подарить? Идеи за 10 секунд!">
-  <meta property="og:description" content="Забудьте о головной боли выбора подарка! Наш сервис подберёт идеальный презент всего за 10 секунд: укажите пол, возраст и бюджет, и мы найдём лучший подарок для каждого случая.">
+  <meta property="og:description"
+    content="Забудьте о головной боли выбора подарка! Наш сервис подберёт идеальный презент всего за 10 секунд: укажите пол, возраст и бюджет, и мы найдём лучший подарок для каждого случая.">
 
   <title>Что подарить? Идеи за 10 секунд!</title>
 
   <!-- Сохраняем существующие метатеги -->
   <meta property="og:image" content="https://gift-search-project.vercel.app/assets/images/hero-gift.svg">
-  <meta property="og:image:alt" content="Яркий подарок в подарочной коробке"/>
+  <meta property="og:image:alt" content="Яркий подарок в подарочной коробке" />
   <meta property="og:locale" content="ru_RU">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://gift-search-project.vercel.app/">
   <meta property="og:site_name" content="Gift Search Project">
   <meta name="robots" content="index,follow,noodp" />
-  <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_HERE"/>
-  <meta name="keywords" content="что подарить, идеи подарков, подарки, подбор подарков, выбор презента, быстрый подбор подарков"/>
-  <meta name="description" content="Что подарить - идеи по любому поводу. Найдите идеальный подарок за секунды!. Подберите идеальный подарок быстро и удобно благодаря нашему сервису. Лучшие варианты для семьи, друзей и любимых всего за пару шагов."/>
+  <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_HERE" />
+  <meta name="keywords"
+    content="что подарить, идеи подарков, подарки, подбор подарков, выбор презента, быстрый подбор подарков" />
+  <meta name="description"
+    content="Что подарить - идеи по любому поводу. Найдите идеальный подарок за секунды!. Подберите идеальный подарок быстро и удобно благодаря нашему сервису. Лучшие варианты для семьи, друзей и любимых всего за пару шагов." />
 
-  <link rel="canonical" href="https://gift-search-project.vercel.app/"/>
+  <link rel="canonical" href="https://gift-search-project.vercel.app/" />
   <link rel="icon" href="./favicon.ico">
   <link rel="preload" href="./assets/images/hero-gift.svg" as="image" fetchpriority="high">
   <!-- PWA manifest -->
@@ -43,20 +47,20 @@
   }
   </script>
 
-<!-- Yandex.Metrica (без падения, если ID не задан) Теперь ym вызывается только если ID задан числом. -->
-<script type="text/javascript">
-  (function (m, e, t, r, i, k, a) {
-    m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-    m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-  })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-  // ↓↓↓ ИЗМЕНЕНО: не вызываем ym(...) без реального ID
-  (function () {
-    var YM_ID = null; // поставь реальный номер счётчика или оставь null
-    if (typeof YM_ID === 'number') {
-      ym(YM_ID, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
-    }
-  })();
-</script>
+  <!-- Yandex.Metrica (без падения, если ID не задан) Теперь ym вызывается только если ID задан числом. -->
+  <script type="text/javascript">
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+      m[i].l = 1 * new Date(); k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+    })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    // ↓↓↓ ИЗМЕНЕНО: не вызываем ym(...) без реального ID
+    (function () {
+      var YM_ID = null; // поставь реальный номер счётчика или оставь null
+      if (typeof YM_ID === 'number') {
+        ym(YM_ID, "init", { clickmap: true, trackLinks: true, accurateTrackBounce: true, webvisor: true });
+      }
+    })();
+  </script>
   <!-- /Yandex.Metrica counter -->
 
   <!-- Google tag (gtag.js) -->
@@ -77,18 +81,19 @@
 
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
   <noscript>
     <div><img src="https://mc.yandex.ru/watch/XXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
   </noscript>
 
-<div class="parallax-scene">
-  <div class="parallax-layer layer-bg"></div>
-  <div class="parallax-layer layer-shape-1"></div>
-  <div class="parallax-layer layer-shape-2"></div>
-  <div class="parallax-layer layer-gift"></div>
-  <div class="parallax-layer layer-shape-3"></div>
-</div>
+  <div class="parallax-scene">
+    <div class="parallax-layer layer-bg"></div>
+    <div class="parallax-layer layer-shape-1"></div>
+    <div class="parallax-layer layer-shape-2"></div>
+    <div class="parallax-layer layer-gift"></div>
+    <div class="parallax-layer layer-shape-3"></div>
+  </div>
 
   <header>
     <div class="container">
@@ -123,13 +128,8 @@
           </div>
 
           <div class="search-input-group">
-            <input
-              type="text"
-              id="searchInput"
-              class="search-input"
-              placeholder="например: сестре 26 3000"
-              aria-label="Поиск подарка"
-            >
+            <input type="text" id="searchInput" class="search-input" placeholder="например: сестре 26 3000"
+              aria-label="Поиск подарка">
             <button id="searchBtn" class="search-btn">Найти</button>
             <button class="help-btn" aria-label="Помощь">?</button>
           </div>
@@ -199,51 +199,55 @@
     <section id="catalogSection" class="catalog-gifts lazy-section">
       <div class="container">
         <h2 class="section-title">Случайные подарки для вдохновения</h2>
-    
+
         <div id="catalogGifts" class="gifts-grid"></div>
         <div id="catalogInitialLoader" class="loader hidden">
           <div class="spinner"></div>
           <p>Загружаем вдохновение…</p>
         </div>
-    
+
         <!-- Кнопка пагинации каталога -->
         <button id="catalogShowMoreBtn" class="load-more-btn hidden">Посмотреть ещё</button>
-    
+
         <!-- Баннер после кнопки -->
         <div id="catalogCTAContainer"></div>
-    
+
         <!-- Спиннер загрузки (используем при дозагрузке) -->
         <div id="catalogLoader" class="loader hidden">
           <div class="spinner"></div>
           <p>Загружаем ещё подарки...</p>
         </div>
-    
+
         <!-- Кнопка сброса к началу каталога (опц.) -->
         <button id="catalogResetBtn" class="load-more-btn hidden">Начать поиск заново</button>
       </div>
     </section>
 
-
-
     <!-- Результаты поиска -->
     <section id="searchResults" class="search-results hidden">
       <div class="container">
-        <h2 class="section-title">
-          <span id="resultsTitle">Результаты поиска</span>
-          <span id="resultsCount" class="results-count"></span>
-        </h2>
-    
+        <!-- ЗАМЕНЯЕМ ЭТОТ БЛОК -->
+        <div class="search-results-header">
+          <div class="results-title-group">
+            <h2 id="resultsTitle" class="results-title-fade">Результаты поиска</h2>
+            <span id="resultsCount" class="results-count"></span>
+          </div>
+        </div>
+        <!-- КНОПКА СОРТИРОВКИ -->
+        <button id="sortToggle" class="sort-toggle hidden" aria-pressed="false">
+          <span class="sort-text">Сначала дорогие</span>
+          <span class="sort-icon">▼</span>
+        </button>
+
         <div id="resultsGrid" class="gifts-grid"></div>
-    
+
         <!-- Кнопка пагинации результатов -->
         <button id="loadMoreBtn" class="load-more-btn hidden">Посмотреть ещё</button>
-    
+
         <!-- Баннер после кнопки -->
         <div id="searchCTAContainer"></div>
       </div>
     </section>
-
-
 
     <!-- Нет результатов -->
     <section id="noResults" class="no-results hidden">
@@ -251,7 +255,10 @@
         <div class="no-results-content">
           <span class="no-results-icon">🤔</span>
           <h3>Ничего не нашлось</h3>
-          <p>Попробуйте изменить параметры поиска или посмотрите случайные подарки выше</p>
+          <p>Попробуйте изменить параметры поиска или</p>
+          <button id="restartSearchBtn" class="btn-restart">
+            🔄 Начните поиск заново
+          </button>
         </div>
       </div>
     </section>
@@ -268,7 +275,8 @@
           </p>
           <a href="https://t.me/poodarokBot" id="telegramLink" class="telegram-btn">
             <svg class="telegram-icon" viewBox="0 0 24 24" width="24" height="24">
-              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.953l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+              <path
+                d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.953l11.566-4.458c.538-.196 1.006.128.832.941z" />
             </svg>
             Перейти в Telegram-бота
           </a>
@@ -283,7 +291,8 @@
       </div>
       <!-- todo обязательно нужно сделать красиво -->
       <p class="affiliate-disclaimer" style="opacity:.8;font-size:.9rem;margin-top:8px">
-        На сайте используются партнёрские ссылки. Переход по ним не влияет на цену у продавца и помогает поддерживать проект.
+        На сайте используются партнёрские ссылки. Переход по ним не влияет на цену у продавца и помогает поддерживать
+        проект.
       </p>
     </div>
   </footer>
@@ -302,18 +311,19 @@
 
   <!-- Кнопка "Наверх" -->
   <button id="toTopBtn" class="to-top-btn hidden" aria-label="Вернуться наверх">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
       <polyline points="18 15 12 9 6 15"></polyline>
     </svg>
   </button>
 
-<!-- Новый плавный overlay-переход (единственный в DOM) -->
-<div id="transitionOverlay" class="overlay hide" role="status" aria-live="polite" aria-label="Переходим в магазин">
-  <div class="overlay-content">
-    <div class="spinner" aria-hidden="true"></div>
-    <p class="overlay-text">🎁 Подбираем лучший подарок для вас...</p>
+  <!-- Новый плавный overlay-переход (единственный в DOM) -->
+  <div id="transitionOverlay" class="overlay hide" role="status" aria-live="polite" aria-label="Переходим в магазин">
+    <div class="overlay-content">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="overlay-text">🎁 Подбираем лучший подарок для вас...</p>
+    </div>
   </div>
-</div>
 
 
 
@@ -334,4 +344,5 @@
   </script> -->
 
 </body>
+
 </html>
