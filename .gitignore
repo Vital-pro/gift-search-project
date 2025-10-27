@@ -141,9 +141,10 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-# External project we do NOT track here
+# External project we do NOT track here and custom files
 gifts.xlsx
 telegram-gift-bot-yc/
+documentation.md
 
 # OS junk
 .DS_Store
