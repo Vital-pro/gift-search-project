@@ -7,15 +7,20 @@
 const crypto = require('crypto');
 
 const AFF_HOSTS = new Set([
-  'bywiola.com',
-  'uuwgc.com',
-  'qwpeg.com',
-  'xpuvo.com',
-  'admitad.com',
-  'actionpay.net',
-  'cityads.com',
-  'effiliation.com',
-  'advcake.com',
+  'xpuvo.com', // Tefal
+  'rthsu.com', // Moulinex
+  'ujhjj.com', // Партнёрская сеть FloraExpress
+  'www.floraexpress.ru', // Прямой магазин (добавить UTM)
+  'kpwfp.com', // BoxDari / впечатления
+  'bywiola.com', // Бубль Гум
+  'qwpeg.com', // Flor2U
+  'dhwnh.com', // Aliexpress
+  'gndrz.com', // Letual
+  'ytebb.com', // Askona
+  'ogsib.com', // СоюзЦветТорг
+  'uuwgc.com', // МаксидоМ
+  'admitad.com', // Admitad
+  'advcake.com', // advcake.com
 ]);
 
 function b64urlDecode(input) {

@@ -48,14 +48,19 @@ export function validatePartnerUrl(raw) {
 
   // 🧩 Специальные правила для аффилиатных доменов
   const affiliateDomains = new Set([
-    'bywiola.com',
-    'uuwgc.com',
-    'qwpeg.com',
     'xpuvo.com',
+    'rthsu.com',
+    'ujhjj.com',
+    'www.floraexpress.ru',
+    'kpwfp.com',
+    'bywiola.com',
+    'qwpeg.com',
+    'dhwnh.com',
+    'gndrz.com',
+    'ytebb.com',
+    'ogsib.com',
+    'uuwgc.com',
     'admitad.com',
-    'actionpay.net',
-    'cityads.com',
-    'effiliation.com',
     'advcake.com',
   ]);
   const CLICK_PARAMS = ['erid', 'subid', 'sub_id', 'sub1', 'clickid', 'admitad_uid'];

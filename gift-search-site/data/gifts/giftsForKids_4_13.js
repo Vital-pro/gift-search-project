@@ -30,8 +30,9 @@
     ageRange: [7, 13],
     description:
       'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
-    category: 'creativity',
+    category: 'creative',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchka-3d-kosmicheskoe-puteshestvie-v-assortimente%2F',
+    image: '',
   },
   {
     id: 2,
@@ -54,6 +55,7 @@
       'Игра проверит компанию на эрудицию, артистизм и находчивость. Всего в наборе 147 карт заданий, 27 карт действий и правила игры. Игра имеет два уровня сложности и огромное 2900 вариаций заданий',
     category: 'boardgames',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Figra-hobby-worl-nastolnaya-voobrazhariy-na-eruditsiyu-i-nakhodchivost%2F',
+    image: '',
   },
   {
     id: 4,
@@ -76,6 +78,7 @@
       'Кооперативные механики, тренировка коммуникации и планирования.',
     category: 'boardgames',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Figra-nastolnaya-hobby-world-kak-pobedit-drakona-s-8let%2F',
+    image: '',
   },
   {
     id: 6,
