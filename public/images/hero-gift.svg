@@ -1,0 +1,15 @@
+<!-- docs/assets/images/hero-gift.svg -->
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8B80FF"/>
+      <stop offset="1" stop-color="#FF6B6B"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="96" width="192" height="128" rx="16" fill="url(#g1)" opacity="0.9"/>
+  <rect x="24" y="80" width="208" height="40" rx="12" fill="#ffffff" opacity="0.9"/>
+  <rect x="120" y="72" width="16" height="160" rx="8" fill="#ffffff" opacity="0.95"/>
+  <path d="M88 72c-10 0-24-10-24-24 0-10 8-16 16-16 10 0 18 6 24 16 6-10 14-16 24-16 8 0 16 6 16 16 0 14-14 24-24 24H88z" fill="#FFD166" opacity="0.95"/>
+  <circle cx="88" cy="40" r="8" fill="#FF6B6B"/>
+  <circle cx="152" cy="40" r="8" fill="#8B80FF"/>
+</svg>
