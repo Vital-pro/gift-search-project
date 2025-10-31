@@ -52,7 +52,7 @@
 
 /* Подарок — увеличен, ярче */
 .layer-gift {
-  background-image: url("/assets/images/hero-gift.svg");
+  background-image: url("/images/hero-gift.svg");
   background-size: clamp(180px, 20vw, 300px) auto;
   background-repeat: no-repeat;
   background-position: right 10% top 20%;
