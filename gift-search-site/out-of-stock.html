@@ -81,11 +81,16 @@
       document.getElementById('shopHost').textContent = host;
       document.getElementById('shopHostWrap').style.display = '';
     }
+
+    console.log('Out-of-stock page loaded');
+    console.log('History length:', history.length);
+    console.log('Referrer:', document.referrer);
+
     const back = document.getElementById('tryAgain');
     back.addEventListener('click', (e) => {
       e.preventDefault();
-      if (history.length > 1) history.back();
-      else location.href = './index.html';
+      // Всегда возвращаем на главную, без сложной логики
+      location.href = './index.html';
     });
   </script>
 </body>
