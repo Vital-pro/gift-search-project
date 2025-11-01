@@ -1,8 +1,5 @@
 // api/go.js
 // Серверный редирект (302) + осторожная проверка ULP + Telegram-уведомления
-// не чаще 2 раз за 24 часа на каждый уникальный ULP (через Upstash Redis).
-//
-// Что считаем "мёртвым": ТОЛЬКО явный 404/410 от магазина (HEAD/GET). Всё остальное — пропускаем (fail-open).
 
 const crypto = require('crypto');
 
@@ -10,7 +7,7 @@ const AFF_HOSTS = new Set([
   'xpuvo.com', // Tefal
   'rthsu.com', // Moulinex
   'ujhjj.com', // Партнёрская сеть FloraExpress
-  'www.floraexpress.ru', // Прямой магазин (добавить UTM)
+  'www.floraxpress.ru', // Прямой магазин (добавить UTM)
   'kpwfp.com', // BoxDari / впечатления
   'bywiola.com', // Бубль Гум
   'qwpeg.com', // Flor2U
@@ -23,22 +20,19 @@ const AFF_HOSTS = new Set([
   'advcake.com', // advcake.com
 ]);
 
-// ЦЕНТРАЛИЗОВАННЫЙ СПИСОК ПАТТЕРНОВ ПРОБЛЕМНЫХ РЕДИРЕКТОВ
-const PROBLEMATIC_REDIRECT_PATTERNS = [
-  'offerwall.admitad.com',
-  // БУДУЩИЕ ПАТТЕРНЫ ДОБАВЛЯЕМ СЮДА:
-  // 'error.admitad.com',
-  // 'blocked.admitad.com',
-  // 'unavailable.admitad.com',
-  // 'advcake.com/error/',
-];
+const PROBLEMATIC_REDIRECT_PATTERNS = ['offerwall.admitad.com'];
 
-
+// ФИКС: Правильное декодирование base64 URL
 function b64urlDecode(input) {
   try {
-    const b64 = input.replace(/-/g, '+').replace(/_/g, '/');
+    // Добавляем padding если нужно
+    let b64 = input.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) {
+      b64 += '=';
+    }
     return Buffer.from(b64, 'base64').toString('utf8');
-  } catch {
+  } catch (error) {
+    console.log('Base64 decode error:', error.message);
     return '';
   }
 }
@@ -56,18 +50,28 @@ function safeDecodeURIComponent(s) {
   }
 }
 
-async function timedFetch(url, opts = {}, timeoutMs = 600) {
+// УНИФИЦИРОВАННАЯ функция fetch с таймаутом
+async function fetchWithTimeout(url, opts = {}, timeoutMs = 6000) {
   const controller = new AbortController();
-  const to = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
-    const resp = await fetch(url, { ...opts, signal: controller.signal });
-    return resp;
+    const response = await fetch(url, {
+      ...opts,
+      signal: controller.signal,
+      headers: {
+        'user-agent': 'Mozilla/5.0 (compatible; GiftBot-Probe/1.0)',
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        ...opts.headers,
+      },
+    });
+    return response;
   } finally {
-    clearTimeout(to);
+    clearTimeout(timeout);
   }
 }
 
-// === ПРОБНИК ULP: считаем dead ТОЛЬКО по 404/410 ===
+// ПРОБНИК ULP
 async function probeUlp(ulpStr) {
   try {
     const u = new URL(ulpStr);
@@ -88,7 +92,6 @@ async function probeUlp(ulpStr) {
     try {
       getResp = await fetchWithTimeout(ulpStr, { method: 'GET' }, 4500);
     } catch {
-      // сетевые ошибки НЕ считаем dead — пропускаем пользователя
       return { dead: false, reason: 'probe-error', status: 0, host };
     }
 
@@ -96,25 +99,26 @@ async function probeUlp(ulpStr) {
       return { dead: true, reason: 'http-dead', status: getResp.status, host };
     }
 
-    // Любой другой статус — считаем живым (никакого анализа HTML)
     return { dead: false, reason: 'ok', status: getResp.status, host };
   } catch {
     return { dead: false, reason: 'probe-error', status: 0, host: null };
   }
 }
 
-// === ПРОВЕРКА ПРОБЛЕМНЫХ РЕДИРЕКТОВ ADMITAD ===
+// ПРОВЕРКА ПРОБЛЕМНЫХ РЕДИРЕКТОВ
 async function checkProblematicRedirect(affiliateUrl, originalUlp) {
   try {
-    // Следуем по редиректам чтобы получить конечный URL
-    const response = await fetchWithTimeout(affiliateUrl, { 
-      method: 'HEAD', 
-      redirect: 'follow' 
-    }, 5000);
-    
+    const response = await fetchWithTimeout(
+      affiliateUrl,
+      {
+        method: 'HEAD',
+        redirect: 'follow',
+      },
+      5000,
+    );
+
     const finalUrl = response.url;
-    
-    // Проверяем конечный URL на проблемные паттерны
+
     for (const pattern of PROBLEMATIC_REDIRECT_PATTERNS) {
       if (finalUrl.includes(pattern)) {
         return {
@@ -122,43 +126,36 @@ async function checkProblematicRedirect(affiliateUrl, originalUlp) {
           pattern: pattern,
           finalUrl: finalUrl,
           originalUlp: originalUlp,
-          affiliateHost: new URL(affiliateUrl).hostname
+          affiliateHost: new URL(affiliateUrl).hostname,
         };
       }
     }
-    
+
     return { isProblematic: false };
   } catch (error) {
-    // Если ошибка сети - считаем не проблемным (fail-open)
     return { isProblematic: false };
   }
 }
 
-
-
-// ====== Лимитер через Upstash Redis (<=2 уведомления за 24ч) ======
-
+// Upstash Redis функции
 function sha1(input) {
   return crypto.createHash('sha1').update(input).digest('hex');
 }
 
-// Upstash REST: используем GET и RESP-число вида ":1\r\n"
 async function incrWithTtl24h(key) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return null;
 
-  // INCR (GET)
   const r1 = await fetch(`${url}/incr/${encodeURIComponent(key)}`, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` },
   });
-  const t1 = await r1.text(); // например, ":1\r\n"
-  const m = t1.match(/:(\d+)/); // берём число после двоеточия
+  const t1 = await r1.text();
+  const m = t1.match(/:(\d+)/);
   const count = m ? parseInt(m[1], 10) : Number.NaN;
   if (Number.isNaN(count)) return null;
 
-  // EXPIRE 24h (GET) — только при первом срабатывании
   if (count === 1) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/86400`, {
       method: 'GET',
@@ -168,122 +165,17 @@ async function incrWithTtl24h(key) {
   return count;
 }
 
-// === Безопасный fetch с таймаутом (HEAD/GET) ===
-async function fetchWithTimeout(url, opts = {}, ms = 4000) {
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), ms);
-  try {
-    const resp = await fetch(url, {
-      redirect: 'follow',
-      headers: {
-        'user-agent': 'Mozilla/5.0 (compatible; GiftBot-Probe/1.0)',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-      },
-      signal: ac.signal,
-      ...opts
-    });
-    return resp;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-
-// ====== Telegram-уведомление ======
-
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
-        c
-      ])
-  );
-}
-
-// ====== Telegram-уведомление (с логами ошибок) ======
-// ===== ВСПОМОГАТЕЛЬНО: запись в Upstash для отладки (новое) =====
-async function upstashSet(key, value, ttlSec = null) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return false;
-  // SET
-  await fetch(
-    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-  // EXPIRE (если нужен TTL)
-  if (ttlSec) {
-    await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-  return true;
-}
-
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
-        c
-      ])
-  );
-}
-
-// ====== Telegram-уведомление (возвращаем подробный результат) ======
-// ===== ВСПОМОГАТЕЛЬНО: запись в Upstash для отладки (tglog:...) =====
-async function upstashSet(key, value, ttlSec = null) {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return false;
-  await fetch(
-    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
-    {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-  if (ttlSec) {
-    await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-  return true;
-}
-
-function escapeHtml(s) {
-  return String(s).replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
-        c
-      ])
-  );
-}
-
-// ====== Telegram-уведомление (с подробным результатом) ======
-// ===== Сервисная запись в Upstash для отладки (tglog:...) =====
+// ЕДИНСТВЕННАЯ функция upstashSet
 async function upstashSet(key, value, ttlSec = null) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) return false;
 
-  // SET (GET)
-  await fetch(
-    `${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`,
-    {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+  await fetch(`${url}/set/${encodeURIComponent(key)}/${encodeURIComponent(value)}`, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-  // EXPIRE (GET)
   if (ttlSec) {
     await fetch(`${url}/expire/${encodeURIComponent(key)}/${ttlSec}`, {
       method: 'GET',
@@ -293,21 +185,19 @@ async function upstashSet(key, value, ttlSec = null) {
   return true;
 }
 
+// ЕДИНСТВЕННАЯ функция escapeHtml
 function escapeHtml(s) {
   return String(s).replace(
     /[&<>"']/g,
-    (c) =>
-      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[
-        c
-      ])
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
   );
 }
 
+// Telegram функция
 async function sendTelegram(message) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  if (!token || !chatId)
-    return { ok: false, status: null, body: 'missing env' };
+  if (!token || !chatId) return { ok: false, status: null, body: 'missing env' };
 
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const resp = await fetch(url, {
@@ -324,53 +214,6 @@ async function sendTelegram(message) {
   return { ok: resp.ok, status: resp.status, body };
 }
 
-// async function notifyIfNeededTelegram(
-//   ulp,
-//   shopHost,
-//   reason = 'unknown',
-//   status = null
-// ) {
-//   const hash = sha1(ulp);
-//   const key = `dead:${hash}`;
-//   const count = await incrWithTtl24h(key);
-//   if (!count) return;
-//   if (count > 2) return;
-
-//   const env = process.env.APP_ENV || 'production';
-//   const time = new Date().toISOString();
-
-//   const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
-//   const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
-//   const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
-
-//   const msg =
-//     `<b>[${escapeHtml(
-//       env
-//     )}] Товар закончился</b>${hostLine}${statusLine}${reasonLine}\n` +
-//     `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
-//     `<b>Срабатывание #</b>${count} за 24ч\n` +
-//     `<b>Время:</b> ${time}`;
-
-//   const tg = await sendTelegram(msg).catch((e) => ({
-//     ok: false,
-//     status: null,
-//     body: String(e),
-//   }));
-
-//   // ЛОГ В ЛЮБОМ СЛУЧАЕ
-//   const logKey = `tglog:${hash}:${count}`;
-//   const logVal = JSON.stringify({
-//     time,
-//     status: tg.status,
-//     ok: !!tg.ok,
-//     body: tg.body,
-//   });
-//   await upstashSet(logKey, logVal, 86400).catch(() => {});
-//   await upstashSet(`tglog:last:${hash}`, logVal, 86400).catch(() => {});
-// }
-
-
-// ====== Основной обработчик ======
 async function notifyIfNeededTelegram(
   ulp,
   shopHost,
@@ -390,7 +233,6 @@ async function notifyIfNeededTelegram(
   let message = '';
 
   if (problematicRedirect) {
-    // УВЕДОМЛЕНИЕ О ПРОБЛЕМНОМ РЕДИРЕКТЕ
     message =
       `🔄 <b>[${escapeHtml(env)}] Проблемный редирект Admitad</b>\n` +
       `┌ <b>Аффилейт:</b> ${escapeHtml(problematicRedirect.affiliateHost)}\n` +
@@ -401,7 +243,6 @@ async function notifyIfNeededTelegram(
       `<b>Время:</b> ${time}\n` +
       `<b>ULP:</b> ${escapeHtml(ulp)}`;
   } else {
-    // СТАРОЕ УВЕДОМЛЕНИЕ О 404/410
     const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
     const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
     const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
@@ -419,7 +260,6 @@ async function notifyIfNeededTelegram(
     body: String(e),
   }));
 
-  // ЛОГ В ЛЮБОМ СЛУЧАЕ
   const logKey = `tglog:${hash}:${count}`;
   const logVal = JSON.stringify({
     time,
@@ -432,25 +272,44 @@ async function notifyIfNeededTelegram(
   await upstashSet(`tglog:last:${hash}`, logVal, 86400).catch(() => {});
 }
 
+// ОСНОВНОЙ ОБРАБОТЧИК
 module.exports = async (req, res) => {
   console.log('🎯 API/go ВЫЗВАН!');
-  console.log('URL:', req.url);
-  console.log('Query t:', req.query.t);
-  console.log('Query to:', req.query.to);
+  console.log('Query params:', req.query);
+
   const { t, to } = req.query || {};
-  const raw = typeof to === 'string' ? to : typeof t === 'string' ? b64urlDecode(t) : '';
+  console.log('Parameter t:', t);
+  console.log('Parameter to:', to);
+
+  // ФИКС: Правильное извлечение raw URL
+  let raw = '';
+  if (typeof to === 'string') {
+    raw = to;
+  } else if (typeof t === 'string') {
+    raw = b64urlDecode(t);
+  }
+
+  console.log('Decoded raw URL:', raw);
+
+  if (!raw) {
+    res.statusCode = 400;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.end('Bad request: missing URL parameter');
+    return;
+  }
 
   let url;
   try {
     url = new URL(raw);
-  } catch {
+  } catch (error) {
+    console.log('URL parsing error:', error.message);
     res.statusCode = 400;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.end('Bad request: invalid URL');
     return;
   }
 
-  // Базовая валидация партнёрского домена
+  // Базовая валидация
   const isHttp = url.protocol === 'http:' || url.protocol === 'https:';
   if (!isHttp) {
     res.statusCode = 400;
@@ -458,22 +317,27 @@ module.exports = async (req, res) => {
     res.end('Bad request: protocol must be http/https');
     return;
   }
+
   if (!AFF_HOSTS.has(url.hostname)) {
+    console.log('Domain not allowed:', url.hostname);
     res.statusCode = 400;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.end('Bad request: domain not allowed');
     return;
   }
 
-  // Аккуратная проверка ULP
+  console.log('Valid affiliate URL:', url.toString());
+
+  // Проверка ULP
   const ulpParam = url.searchParams.get('ulp');
   if (ulpParam) {
     const decodedUlp = safeDecodeURIComponent(ulpParam);
+    console.log('ULP found:', decodedUlp);
 
-    // 1. Сначала проверяем на проблемные редиректы Admitad
+    // 1. Проверка проблемных редиректов
     const redirectCheck = await checkProblematicRedirect(url.toString(), decodedUlp);
     if (redirectCheck.isProblematic) {
-      // Телеграм-уведомление о проблемном редиректе
+      console.log('Problematic redirect detected');
       try {
         await notifyIfNeededTelegram(
           decodedUlp,
@@ -482,59 +346,48 @@ module.exports = async (req, res) => {
           null,
           redirectCheck,
         );
-      } catch {}
+      } catch (error) {
+        console.log('Telegram notification error:', error);
+      }
 
-      // Перенаправляем на out-of-stock
       const shopParam = redirectCheck.affiliateHost
         ? `?shop=${encodeURIComponent(redirectCheck.affiliateHost)}`
         : '';
       res.statusCode = 302;
       res.setHeader('Location', `/out-of-stock.html${shopParam}`);
-
-      // Анти-кэш
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      res.setHeader('Referrer-Policy', 'no-referrer');
-      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-
       res.end();
       return;
     }
 
-    // 2. Если проблемных редиректов нет, проверяем обычным способом
+    // 2. Обычная проверка ULP
     const probe = await probeUlp(decodedUlp);
+    console.log('ULP probe result:', probe);
 
     if (probe.dead) {
-      // Телеграм-уведомление (лимит <= 2 за 24ч)
+      console.log('Dead ULP detected');
       try {
         await notifyIfNeededTelegram(decodedUlp, probe.host, probe.reason, probe.status);
-      } catch {}
+      } catch (error) {
+        console.log('Telegram notification error:', error);
+      }
 
-      // Дружелюбная заглушка.
       const shopParam = probe.host ? `?shop=${encodeURIComponent(probe.host)}` : '';
       res.statusCode = 302;
       res.setHeader('Location', `/out-of-stock.html${shopParam}`);
-
-      // Анти-кэш на всех уровнях (браузер, CDN)
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-
-      // Без реферера для партнёров + не индексировать
-      res.setHeader('Referrer-Policy', 'no-referrer');
-      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-
       res.end();
       return;
     }
   }
 
-  // Штатный 302 на партнёрскую ссылку
+  // Штатный редирект
+  console.log('Proceeding with normal redirect to:', url.toString());
   res.statusCode = 302;
   res.setHeader('Location', url.toString());
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Cache-Control', 'no-store');
-  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   res.end();
 };
