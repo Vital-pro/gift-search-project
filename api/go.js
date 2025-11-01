@@ -23,6 +23,17 @@ const AFF_HOSTS = new Set([
   'advcake.com', // advcake.com
 ]);
 
+// ЦЕНТРАЛИЗОВАННЫЙ СПИСОК ПАТТЕРНОВ ПРОБЛЕМНЫХ РЕДИРЕКТОВ
+const PROBLEMATIC_REDIRECT_PATTERNS = [
+  'offerwall.admitad.com',
+  // БУДУЩИЕ ПАТТЕРНЫ ДОБАВЛЯЕМ СЮДА:
+  // 'error.admitad.com',
+  // 'blocked.admitad.com',
+  // 'unavailable.admitad.com',
+  // 'advcake.com/error/',
+];
+
+
 function b64urlDecode(input) {
   try {
     const b64 = input.replace(/-/g, '+').replace(/_/g, '/');
@@ -89,6 +100,37 @@ async function probeUlp(ulpStr) {
     return { dead: false, reason: 'ok', status: getResp.status, host };
   } catch {
     return { dead: false, reason: 'probe-error', status: 0, host: null };
+  }
+}
+
+// === ПРОВЕРКА ПРОБЛЕМНЫХ РЕДИРЕКТОВ ADMITAD ===
+async function checkProblematicRedirect(affiliateUrl, originalUlp) {
+  try {
+    // Следуем по редиректам чтобы получить конечный URL
+    const response = await fetchWithTimeout(affiliateUrl, { 
+      method: 'HEAD', 
+      redirect: 'follow' 
+    }, 5000);
+    
+    const finalUrl = response.url;
+    
+    // Проверяем конечный URL на проблемные паттерны
+    for (const pattern of PROBLEMATIC_REDIRECT_PATTERNS) {
+      if (finalUrl.includes(pattern)) {
+        return {
+          isProblematic: true,
+          pattern: pattern,
+          finalUrl: finalUrl,
+          originalUlp: originalUlp,
+          affiliateHost: new URL(affiliateUrl).hostname
+        };
+      }
+    }
+    
+    return { isProblematic: false };
+  } catch (error) {
+    // Если ошибка сети - считаем не проблемным (fail-open)
+    return { isProblematic: false };
   }
 }
 
@@ -282,11 +324,59 @@ async function sendTelegram(message) {
   return { ok: resp.ok, status: resp.status, body };
 }
 
+// async function notifyIfNeededTelegram(
+//   ulp,
+//   shopHost,
+//   reason = 'unknown',
+//   status = null
+// ) {
+//   const hash = sha1(ulp);
+//   const key = `dead:${hash}`;
+//   const count = await incrWithTtl24h(key);
+//   if (!count) return;
+//   if (count > 2) return;
+
+//   const env = process.env.APP_ENV || 'production';
+//   const time = new Date().toISOString();
+
+//   const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
+//   const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
+//   const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
+
+//   const msg =
+//     `<b>[${escapeHtml(
+//       env
+//     )}] Товар закончился</b>${hostLine}${statusLine}${reasonLine}\n` +
+//     `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
+//     `<b>Срабатывание #</b>${count} за 24ч\n` +
+//     `<b>Время:</b> ${time}`;
+
+//   const tg = await sendTelegram(msg).catch((e) => ({
+//     ok: false,
+//     status: null,
+//     body: String(e),
+//   }));
+
+//   // ЛОГ В ЛЮБОМ СЛУЧАЕ
+//   const logKey = `tglog:${hash}:${count}`;
+//   const logVal = JSON.stringify({
+//     time,
+//     status: tg.status,
+//     ok: !!tg.ok,
+//     body: tg.body,
+//   });
+//   await upstashSet(logKey, logVal, 86400).catch(() => {});
+//   await upstashSet(`tglog:last:${hash}`, logVal, 86400).catch(() => {});
+// }
+
+
+// ====== Основной обработчик ======
 async function notifyIfNeededTelegram(
   ulp,
   shopHost,
   reason = 'unknown',
-  status = null
+  status = null,
+  problematicRedirect = null,
 ) {
   const hash = sha1(ulp);
   const key = `dead:${hash}`;
@@ -297,19 +387,33 @@ async function notifyIfNeededTelegram(
   const env = process.env.APP_ENV || 'production';
   const time = new Date().toISOString();
 
-  const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
-  const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
-  const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
+  let message = '';
 
-  const msg =
-    `<b>[${escapeHtml(
-      env
-    )}] Товар закончился</b>${hostLine}${statusLine}${reasonLine}\n` +
-    `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
-    `<b>Срабатывание #</b>${count} за 24ч\n` +
-    `<b>Время:</b> ${time}`;
+  if (problematicRedirect) {
+    // УВЕДОМЛЕНИЕ О ПРОБЛЕМНОМ РЕДИРЕКТЕ
+    message =
+      `🔄 <b>[${escapeHtml(env)}] Проблемный редирект Admitad</b>\n` +
+      `┌ <b>Аффилейт:</b> ${escapeHtml(problematicRedirect.affiliateHost)}\n` +
+      `├ <b>Магазин:</b> ${escapeHtml(shopHost || 'не указан')}\n` +
+      `├ <b>Паттерн:</b> ${escapeHtml(problematicRedirect.pattern)}\n` +
+      `├ <b>Тип:</b> Offerwall (CORS ошибки)\n` +
+      `└ <b>Срабатывание #${count} за 24ч</b>\n\n` +
+      `<b>Время:</b> ${time}\n` +
+      `<b>ULP:</b> ${escapeHtml(ulp)}`;
+  } else {
+    // СТАРОЕ УВЕДОМЛЕНИЕ О 404/410
+    const hostLine = shopHost ? `\n<b>Магазин:</b> ${escapeHtml(shopHost)}` : '';
+    const statusLine = status ? `\n<b>HTTP:</b> ${status}` : '';
+    const reasonLine = `\n<b>Причина:</b> ${escapeHtml(reason)}`;
 
-  const tg = await sendTelegram(msg).catch((e) => ({
+    message =
+      `<b>[${escapeHtml(env)}] Товар закончился</b>${hostLine}${statusLine}${reasonLine}\n` +
+      `<b>ULP:</b> ${escapeHtml(ulp)}\n` +
+      `<b>Срабатывание #${count} за 24ч</b>\n` +
+      `<b>Время:</b> ${time}`;
+  }
+
+  const tg = await sendTelegram(message).catch((e) => ({
     ok: false,
     status: null,
     body: String(e),
@@ -322,18 +426,19 @@ async function notifyIfNeededTelegram(
     status: tg.status,
     ok: !!tg.ok,
     body: tg.body,
+    type: problematicRedirect ? 'problematic_redirect' : 'dead_link',
   });
   await upstashSet(logKey, logVal, 86400).catch(() => {});
   await upstashSet(`tglog:last:${hash}`, logVal, 86400).catch(() => {});
 }
 
-
-// ====== Основной обработчик ======
-
 module.exports = async (req, res) => {
+  console.log('🎯 API/go ВЫЗВАН!');
+  console.log('URL:', req.url);
+  console.log('Query t:', req.query.t);
+  console.log('Query to:', req.query.to);
   const { t, to } = req.query || {};
-  const raw =
-    typeof to === 'string' ? to : typeof t === 'string' ? b64urlDecode(t) : '';
+  const raw = typeof to === 'string' ? to : typeof t === 'string' ? b64urlDecode(t) : '';
 
   let url;
   try {
@@ -364,30 +469,55 @@ module.exports = async (req, res) => {
   const ulpParam = url.searchParams.get('ulp');
   if (ulpParam) {
     const decodedUlp = safeDecodeURIComponent(ulpParam);
+
+    // 1. Сначала проверяем на проблемные редиректы Admitad
+    const redirectCheck = await checkProblematicRedirect(url.toString(), decodedUlp);
+    if (redirectCheck.isProblematic) {
+      // Телеграм-уведомление о проблемном редиректе
+      try {
+        await notifyIfNeededTelegram(
+          decodedUlp,
+          redirectCheck.originalUlp ? new URL(redirectCheck.originalUlp).hostname : null,
+          'problematic_redirect',
+          null,
+          redirectCheck,
+        );
+      } catch {}
+
+      // Перенаправляем на out-of-stock
+      const shopParam = redirectCheck.affiliateHost
+        ? `?shop=${encodeURIComponent(redirectCheck.affiliateHost)}`
+        : '';
+      res.statusCode = 302;
+      res.setHeader('Location', `/out-of-stock.html${shopParam}`);
+
+      // Анти-кэш
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Referrer-Policy', 'no-referrer');
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+
+      res.end();
+      return;
+    }
+
+    // 2. Если проблемных редиректов нет, проверяем обычным способом
     const probe = await probeUlp(decodedUlp);
 
     if (probe.dead) {
       // Телеграм-уведомление (лимит <= 2 за 24ч)
       try {
         await notifyIfNeededTelegram(decodedUlp, probe.host, probe.reason, probe.status);
-//                     ^^^^^^^^^^^^  именно ЭТУ переменную передаём
-
       } catch {}
 
       // Дружелюбная заглушка.
-      // Возвращаем «красивый» путь и ВЫРУБАЕМ кэш, чтобы повторные переходы тоже
-      // всегда шли на нашу заглушку (а не на закешированный ответ/404 магазина).
-      const shopParam = probe.host
-        ? `?shop=${encodeURIComponent(probe.host)}`
-        : '';
+      const shopParam = probe.host ? `?shop=${encodeURIComponent(probe.host)}` : '';
       res.statusCode = 302;
       res.setHeader('Location', `/out-of-stock.html${shopParam}`);
 
       // Анти-кэш на всех уровнях (браузер, CDN)
-      res.setHeader(
-        'Cache-Control',
-        'no-store, no-cache, must-revalidate, max-age=0'
-      );
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
 
