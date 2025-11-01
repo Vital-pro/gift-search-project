@@ -289,15 +289,26 @@ module.exports = async (req, res) => {
   console.log('Parameter t:', t);
   console.log('Parameter to:', to);
 
-  // ФИКС: Правильное извлечение raw URL
+  // ✅ Безопасное извлечение raw URL (не падаем, даже если t битый)
+  //    1) если есть `to` — используем его как есть
+  //    2) иначе, если есть `t` — пытаемся декодировать через наш b64urlDecode
+  //    3) любые ошибки декодирования ловим и логируем, но не падаем
   let raw = '';
-  if (typeof to === 'string') {
+  if (typeof to === 'string' && to.trim()) {
     raw = to;
-  } else if (typeof t === 'string') {
-    raw = b64urlDecode(t);
+  } else if (typeof t === 'string' && t.trim()) {
+    try {
+      // ВАЖНО: функция b64urlDecode должна быть объявлена ВЫШЕ обработчика
+      // (в вашем файле она уже есть в верхней части; если вдруг её закомментировали — раскомментируйте)
+      raw = b64urlDecode(t);
+    } catch (e) {
+      console.log('b64urlDecode error:', e && e.message ? e.message : String(e));
+      raw = '';
+    }
   }
 
   console.log('Decoded raw URL:', raw);
+
 
   if (!raw) {
     res.statusCode = 400;
