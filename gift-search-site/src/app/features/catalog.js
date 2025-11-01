@@ -3,6 +3,7 @@
 
 import { GIFTS } from '../../../data/index.js';
 import { createGiftCard } from '../../ui/components/GiftCard.js';
+import { hasValidLinks } from '../../utils/link-checker.js'; // <-- ДОБАВЛЕНА ПРОВЕРКА ССЫЛОК
 import { fetchGiftsBatch } from './promo.js';
 import { INITIAL_BATCH, LOAD_BATCH, TELEGRAM_BOT_URL } from '../config.js';
 import { createTelegramCTA } from '../../ui/components/TelegramCTA.js';
@@ -38,7 +39,13 @@ export function initCatalogList(GIFT_CARD_DEPS) {
     .then((batch) => {
       loader.classList.add('hidden');
       grid.innerHTML = '';
-      batch.forEach((gift) => grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS)));
+            batch.forEach((gift) => {
+              const card = createGiftCard(gift, GIFT_CARD_DEPS);
+              if (card) {
+                // <-- ДОБАВЛЕНА ПРОВЕРКА НА NULL
+                grid.appendChild(card);
+              }
+            });
       catalogOffset += batch.length;
 
       // показываем кнопку, если остались карточки
@@ -67,7 +74,13 @@ export function initCatalogList(GIFT_CARD_DEPS) {
     if (catalogLoader) catalogLoader.classList.remove('hidden');
 
     fetchGiftsBatch(shuffledCatalog, catalogOffset, LOAD_BATCH).then((batch) => {
-      batch.forEach((gift) => grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS)));
+            batch.forEach((gift) => {
+              const card = createGiftCard(gift, GIFT_CARD_DEPS);
+              if (card) {
+                // <-- ДОБАВЛЕНА ПРОВЕРКА НА NULL
+                grid.appendChild(card);
+              }
+            });
       catalogOffset += batch.length;
       if (catalogLoader) catalogLoader.classList.add('hidden');
 

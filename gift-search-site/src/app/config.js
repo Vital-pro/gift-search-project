@@ -12,6 +12,15 @@ export const LOAD_BATCH = 9;
 export const PROD_ORIGIN = 'https://gift-search-project.vercel.app';
 export const API_BASE = typeof location !== 'undefined' && location.hostname === 'localhost' ? PROD_ORIGIN : '';
 
+// НОВЫЙ ЧЁРНЫЙ СПИСОК АФФИЛЕЙТ-ДОМЕНОВ - добавляйте сюда домены аффилейт-сетей
+export const BLOCKED_STORES = [
+  "example-bad-store.com", // пример
+  "bywiola.com",  // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  // "kpwfp.com", 
+  // "ogsib.com"
+  // и т.д.
+];
+
 // Количество карточек в промо-блоке (по твоему желанию 9 — ок)
 export const PROMO_COUNT = 9;
 

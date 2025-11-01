@@ -1,8 +1,15 @@
 // gift-search-site/src/ui/components/GiftCard.js
 // Компонент ничего не "знает" о глобалах — все зависимости передаются через options.
 import { categoryPlaceholderImages } from '../../../data/gifts/categoryPlaceholderImages.js';
+import { hasValidLinks, filterBlockedLinks } from '../../utils/link-checker.js'; 
 
 export function createGiftCard(gift, options) {
+  // НОВАЯ ПРОВЕРКА: есть ли валидные ссылки у товара
+  if (!hasValidLinks(gift)) {
+    console.log(`🚫 Товар "${gift.name}" (ID: ${gift.id}) скрыт: все аффилейты в чёрном списке`);
+    return null; // Возвращаем null для скрытия товара
+  }
+
   const {
     showTransitionOverlay,
     openWithPreloader,
@@ -131,10 +138,17 @@ export function createGiftCard(gift, options) {
     }
   })();
 
-  // ... (остальной код функции, который не менялся) ...
-
   const actions = card.querySelector('.gift-card-actions');
-  const partnerUrl = resolveGiftUrl ? resolveGiftUrl(gift) : null;
+
+  // НОВАЯ ФИЛЬТРАЦИЯ: используем только разрешённые аффилейт-ссылки
+  const validLinks = filterBlockedLinks(gift.link || gift.llink);
+  const partnerUrl =
+    validLinks.length > 0
+      ? resolveGiftUrl
+        ? resolveGiftUrl({ ...gift, link: validLinks[0] })
+        : validLinks[0]
+      : null;
+
   const setUnavailable = () => {
     if (!actions) return;
     actions.innerHTML = `<button class="gift-buy-btn" disabled aria-disabled="true" title="Товар временно недоступен">Ожидаем поставку</button>`;

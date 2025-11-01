@@ -4,6 +4,7 @@
 
 import { GIFTS } from '../../../data/index.js';
 import { createGiftCard } from '../../ui/components/GiftCard.js';
+import { hasValidLinks } from '../../utils/link-checker.js'; // <-- ДОБАВЛЕНА ПРОВЕРКА ССЫЛОК
 import { PROMO_COUNT } from '../config.js';
 
 /**
@@ -44,9 +45,13 @@ export function renderPromoGifts(promoIds, GIFT_CARD_DEPS) {
   // ограничиваем ровно PROMO_COUNT, как раньше
   promoGifts = promoGifts.slice(0, PROMO_COUNT);
 
-  promoGifts.forEach((gift) => {
-    grid.appendChild(createGiftCard(gift, GIFT_CARD_DEPS));
-  });
+    promoGifts.forEach((gift) => {
+      const card = createGiftCard(gift, GIFT_CARD_DEPS);
+      if (card) {
+        // <-- ДОБАВЛЕНА ПРОВЕРКА НА NULL
+        grid.appendChild(card);
+      }
+    });
 
   // Скрываем спиннер ПОСЛЕ рендера (как было)
   if (loader) {
