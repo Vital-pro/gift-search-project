@@ -3,8 +3,6 @@ import { BLOCKED_STORES } from '../app/config.js';
 
 /**
  * Проверяет, заблокирован ли аффилейт-домен в ссылке
- * @param {string} link - URL для проверки
- * @returns {boolean} true если аффилейт заблокирован
  */
 export function isLinkBlocked(link) {
   if (!link || typeof link !== 'string') return true;
@@ -13,21 +11,19 @@ export function isLinkBlocked(link) {
     const url = new URL(link);
     const hostname = url.hostname.toLowerCase();
 
-    // Проверяем аффилейт-домен (например: bywiola.com, kpwfp.com)
     return BLOCKED_STORES.some((blocked) => {
       const blockedLower = blocked.toLowerCase();
       return hostname === blockedLower || hostname.endsWith('.' + blockedLower);
     });
   } catch (error) {
     console.warn('Invalid URL:', link, error);
-    return true; // Невалидные ссылки блокируем
+    return true;
   }
 }
 
 /**
  * Фильтрует массив ссылок, оставляя только разрешённые
- * @param {string|string[]} links - ссылка или массив ссылок
- * @returns {string[]} массив рабочих ссылок
+ * ВОЗВРАЩАЕТ МАССИВ РАБОЧИХ ССЫЛОК (для резервных)
  */
 export function filterBlockedLinks(links) {
   if (!links) return [];
@@ -45,14 +41,29 @@ export function filterBlockedLinks(links) {
 
 /**
  * Проверяет, есть ли у товара хотя бы одна рабочая ссылка
- * @param {Object} gift - объект подарка
- * @returns {boolean} true если есть валидные ссылки
+ * ТЕПЕРЬ ВОЗВРАЩАЕТ ОБЪЕКТ С ИНФОРМАЦИЕЙ О СТАТУСЕ
  */
-export function hasValidLinks(gift) {
-  if (!gift) return false;
+export function getGiftLinkStatus(gift) {
+  if (!gift) return { hasValidLinks: false, validLinks: [], allBlocked: true };
 
   const links = gift.link || gift.llink;
-  if (!links) return false;
+  if (!links) return { hasValidLinks: false, validLinks: [], allBlocked: true };
 
-  return filterBlockedLinks(links).length > 0;
+  const validLinks = filterBlockedLinks(links);
+  const hasValidLinks = validLinks.length > 0;
+  const allBlocked = validLinks.length === 0;
+
+  return {
+    hasValidLinks,
+    validLinks,
+    allBlocked,
+    firstValidLink: validLinks[0] || null,
+  };
+}
+
+/**
+ * Для обратной совместимости - использует новую функцию
+ */
+export function hasValidLinks(gift) {
+  return getGiftLinkStatus(gift).hasValidLinks;
 }

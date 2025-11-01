@@ -1,13 +1,15 @@
 // gift-search-site/src/ui/components/GiftCard.js
-// Компонент ничего не "знает" о глобалах — все зависимости передаются через options.
 import { categoryPlaceholderImages } from '../../../data/gifts/categoryPlaceholderImages.js';
-import { hasValidLinks, filterBlockedLinks } from '../../utils/link-checker.js'; 
+import { getGiftLinkStatus } from '../../utils/link-checker.js';
 
 export function createGiftCard(gift, options) {
-  // НОВАЯ ПРОВЕРКА: есть ли валидные ссылки у товара
-  if (!hasValidLinks(gift)) {
-    console.log(`🚫 Товар "${gift.name}" (ID: ${gift.id}) скрыт: все аффилейты в чёрном списке`);
-    return null; // Возвращаем null для скрытия товара
+  // НОВАЯ ПРОВЕРКА: получаем статус ссылок товара
+  const linkStatus = getGiftLinkStatus(gift);
+
+  // ВСЕ ссылки заблокированы - создаем карточку "проверяем доступность"
+  if (linkStatus.allBlocked) {
+    console.log(`🚫 Товар "${gift.name}" (ID: ${gift.id}) - проверяем доступность`);
+    return createCheckingAvailabilityCard(gift, options);
   }
 
   const {
@@ -72,11 +74,11 @@ export function createGiftCard(gift, options) {
         sortedTags.unshift(exactTag);
       }
     }
-    return sortedTags.slice(0, 4); // показываем до 5 тегов
+    return sortedTags.slice(0, 4);
   };
   const displayTags = prepareRecipientTags(gift.recipientTags);
 
-  // === ИЗМЕНЕНИЕ: Каркас — теперь всегда создается <img> с placeholderImageUrl ===
+  // === Каркас карточки ===
   card.innerHTML = `
     <div class="gift-card-image" aria-hidden="true">
       <img src="${placeholderImageUrl}" alt="${gift.name || 'Изображение подарка'}" loading="lazy" decoding="async" referrerPolicy="no-referrer" fetchPriority="low" style="width:100%; height:auto; object-fit: cover;">
@@ -96,29 +98,25 @@ export function createGiftCard(gift, options) {
     </div>
   `;
 
-  // === ИЗМЕНЕНИЕ: setupLazyImage теперь заменяет placeholderImageUrl на gift.image (если есть) ===
+  // === Lazy image setup ===
   (function setupLazyImage() {
     try {
       const container = card.querySelector('.gift-card-image');
       if (!container) return;
 
-      // Если у подарка НЕТ своей картинки, оставляем placeholderImageUrl, который уже вставлен
       if (!gift.image || typeof gift.image !== 'string' || gift.image.trim() === '') {
         return;
       }
 
-      // Если своя картинка ЕСТЬ, заменяем ею placeholderImageUrl
       const imgEl = container.querySelector('img');
       if (imgEl) {
-        imgEl.src = gift.image; // Устанавливаем реальное изображение
-        // Если известны размеры реального изображения — зададим
+        imgEl.src = gift.image;
         if (gift.imageWidth && gift.imageHeight) {
           imgEl.width = gift.imageWidth;
           imgEl.height = gift.imageHeight;
         }
       } else {
-        // Если почему-то <img> не было (маловероятно, но для страховки)
-        container.innerHTML = ''; // Очищаем контейнер
+        container.innerHTML = '';
         const newImg = document.createElement('img');
         newImg.alt = gift.name || 'Изображение подарка';
         newImg.loading = 'lazy';
@@ -134,20 +132,17 @@ export function createGiftCard(gift, options) {
       }
     } catch (e) {
       console.warn('[GiftCard] setupLazyImage error:', e);
-      // Если что-то пошло не так, placeholderImageUrl (заглушка) останется
     }
   })();
 
   const actions = card.querySelector('.gift-card-actions');
 
-  // НОВАЯ ФИЛЬТРАЦИЯ: используем только разрешённые аффилейт-ссылки
-  const validLinks = filterBlockedLinks(gift.link || gift.llink);
-  const partnerUrl =
-    validLinks.length > 0
-      ? resolveGiftUrl
-        ? resolveGiftUrl({ ...gift, link: validLinks[0] })
-        : validLinks[0]
-      : null;
+  // НОВАЯ ЛОГИКА: используем ПЕРВУЮ разрешённую ссылку из массива
+  const partnerUrl = linkStatus.firstValidLink
+    ? resolveGiftUrl
+      ? resolveGiftUrl({ ...gift, link: linkStatus.firstValidLink })
+      : linkStatus.firstValidLink
+    : null;
 
   const setUnavailable = () => {
     if (!actions) return;
@@ -157,6 +152,7 @@ export function createGiftCard(gift, options) {
     card.removeAttribute('tabindex');
     card.removeAttribute('aria-label');
   };
+
   const setAvailable = (url) => {
     if (!actions) return;
     const interstitialUrl = (API_BASE || '') + `/api/go?t=${b64url ? b64url(url) : ''}`;
@@ -226,6 +222,80 @@ export function createGiftCard(gift, options) {
   }
 
   setAvailable(partnerUrl);
+
+  return card;
+}
+
+// НОВАЯ ФУНКЦИЯ: создает карточку "проверяем доступность"
+function createCheckingAvailabilityCard(gift, options) {
+  const { translateCategory, formatPrice } = options || {};
+
+  const card = document.createElement('div');
+  card.className = 'gift-card gift-card--checking';
+  card.style.animationDelay = `${Math.random() * 0.3}s`;
+
+  // Добавляем data-атрибут для фильтрации
+  card.setAttribute('data-availability', 'checking');
+
+  // Определяем URL изображения-заглушки
+  const placeholderImageUrl =
+    categoryPlaceholderImages[gift.category] || categoryPlaceholderImages.universal;
+
+  // Подготавливаем теги
+  const prepareRecipientTags = (tags) => {
+    if (!Array.isArray(tags)) return [];
+    const currentRecipient = window.currentSearchRecipient || '';
+    let sortedTags = [...tags];
+    if (currentRecipient) {
+      const exactIndex = sortedTags.findIndex(
+        (tag) => String(tag).toLowerCase() === currentRecipient.toLowerCase(),
+      );
+      if (exactIndex > -1) {
+        const [exactTag] = sortedTags.splice(exactIndex, 1);
+        sortedTags.unshift(exactTag);
+      }
+    }
+    return sortedTags.slice(0, 4);
+  };
+  const displayTags = prepareRecipientTags(gift.recipientTags);
+
+  // Каркас карточки с кнопкой "Проверяем доступность"
+  card.innerHTML = `
+    <div class="gift-card-image" aria-hidden="true">
+      <img src="${placeholderImageUrl}" alt="${gift.name || 'Изображение подарка'}" loading="lazy" decoding="async" referrerPolicy="no-referrer" fetchPriority="low" style="width:100%; height:auto; object-fit: cover; opacity: 0.7;">
+    </div>
+    <div class="gift-card-body">
+      <h3 class="gift-card-title" style="opacity: 0.8;">${gift.name}</h3>
+      <p class="gift-card-description" style="opacity: 0.7;">${gift.description || ''}</p>
+      <div class="gift-card-price" style="opacity: 0.8;">${formatPrice ? formatPrice(gift.price) : gift.price}</div>
+      <div class="gift-card-tags">
+        ${displayTags.map((t) => `<span class="gift-tag" style="opacity: 0.7;">${t}</span>`).join('')}
+      </div>
+      <div class="gift-card-footer">
+        <span class="age-range" style="opacity: 0.7;">${gift.ageRange?.[0] ?? 0}-${gift.ageRange?.[1] ?? 120} лет</span>
+        <span class="category-badge" style="opacity: 0.7;">${translateCategory ? translateCategory(gift.category) : gift.category}</span>
+      </div>
+      <div class="gift-card-actions" style="margin-top:12px;">
+        <button class="gift-buy-btn gift-buy-btn--checking" disabled aria-disabled="true">
+          Проверяем доступность
+        </button>
+      </div>
+    </div>
+  `;
+
+  // Добавляем обработчики для ховер-эффекта
+  const button = card.querySelector('.gift-buy-btn--checking');
+
+  card.addEventListener('mouseenter', () => {
+    button.style.transform = 'scale(1.05)';
+    button.style.fontWeight = '600';
+    button.style.transition = 'all 0.2s ease';
+  });
+
+  card.addEventListener('mouseleave', () => {
+    button.style.transform = 'scale(1)';
+    button.style.fontWeight = '400';
+  });
 
   return card;
 }

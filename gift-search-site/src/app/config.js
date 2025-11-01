@@ -14,9 +14,12 @@ export const API_BASE = typeof location !== 'undefined' && location.hostname ===
 
 // НОВЫЙ ЧЁРНЫЙ СПИСОК АФФИЛЕЙТ-ДОМЕНОВ - добавляйте сюда домены аффилейт-сетей
 export const BLOCKED_STORES = [
-  "example-bad-store.com", // пример
-  "bywiola.com",  // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
-  // "kpwfp.com", 
+  'example-bad-store.com', // пример
+  'bywiola.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  // 'gndrz.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  // 'ujhjj.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  // 'uuwgc.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  // "kpwfp.com",
   // "ogsib.com"
   // и т.д.
 ];

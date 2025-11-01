@@ -20,7 +20,13 @@
       'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
     category: 'toys',
     // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
-    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
+    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
+    link: [
+      'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+      'https://ogsib.com/g/k2puk5f0x4c4e3de98aceac27ebda8/?erid=25H8d7vbP8SRTvFaS7yFUc&ulp=https%3A%2F%2Fsouzcvettorg.ru%2Fcatalog%2Fot-5000-do-7000-rub',
+      'https://gndrz.com/g/df78170859c4e3de98ac29547bf01b/?erid=F7NfYUJRWmqqH7m5M1NK&ulp=https%3A%2F%2Fwww.letu.ru%2Fbrowse%2Fpodarki%2Ftsvety%3FNf%3Dsku.activePrice%257CBTWN%2B5000%2B7000',
+      'https://ujhjj.com/g/bg71l7yp65c4e3de98acc1e2b709c0/?erid=MvGzQC98w3Z1gMq1kwrGzNyN&ulp=https%3A%2F%2Fwww.floraexpress.ru%2Fru%2Ffilter%2F%3Fcity%3D2800%26dt%3D29.10.2025%26cur%3Drub%26cost%3D5000%2C7000',
+    ],
   },
   {
     id: 1,
@@ -63,8 +69,7 @@
     price: 999,
     recipientTags: ['ребёнок', 'сын', 'дочь', 'семья'],
     ageRange: [8, 13],
-    description:
-      'Лёгкий «данжен-ран» для всей семьи: планирование ходов и чувство юмора.',
+    description: 'Лёгкий «данжен-ран» для всей семьи: планирование ходов и чувство юмора.',
     category: 'boardgames',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Figra-nastolnaya-hobby-world-podzemelya-i-pesiki-s-8let%2F',
   },
@@ -74,8 +79,7 @@
     price: 1999,
     recipientTags: ['ребёнок', 'сын', 'дочь', 'семья'],
     ageRange: [8, 13],
-    description:
-      'Кооперативные механики, тренировка коммуникации и планирования.',
+    description: 'Кооперативные механики, тренировка коммуникации и планирования.',
     category: 'boardgames',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Figra-nastolnaya-hobby-world-kak-pobedit-drakona-s-8let%2F',
     image: '',
@@ -127,8 +131,7 @@
     price: 1599,
     recipientTags: ['ребёнок', 'сын', 'дочь'],
     ageRange: [2, 16],
-    description:
-      'Украшение с возрастной цифрой — персонализация праздника за минуту.',
+    description: 'Украшение с возрастной цифрой — персонализация праздника за минуту.',
     category: 'party',
     link: 'https://qwpeg.com/g/u9f3xtkuz2c4e3de98ac22482ded91/?erid=2bL9aMPo2e49hMef4rqUKwVpXC&ulp=https%3A%2F%2Fflor2u.ru%2Fproduct%2Fvozdushnye-shary-tsifry-zoloto-2%2F',
   },
@@ -138,8 +141,7 @@
     price: 1040,
     recipientTags: ['ребёнок', 'сын', 'дочь'],
     ageRange: [5, 14],
-    description:
-      'Активная игра и развитие координации прямо во дворе или на даче.',
+    description: 'Активная игра и развитие координации прямо во дворе или на даче.',
     category: 'sport',
     link: 'https://uuwgc.com/g/vw6dqabpgkc4e3de98acb6a2cdd7f0/?erid=25H8d7vbP8SRTvH4HtSZJ1&ulp=https%3A%2F%2Fdev.maxidom.ru%2Fcatalog%2Finventar-dlya-sporta%2F1001365164%2F',
   },
@@ -235,14 +237,7 @@
     id: 20,
     name: 'Набор для создания гелевых свечей Морское дно с ракушками',
     price: 699,
-    recipientTags: [
-      'дочь',
-      'племянница',
-      'подруга',
-      'сестра',
-      'ребёнок',
-      'сын',
-    ],
+    recipientTags: ['дочь', 'племянница', 'подруга', 'сестра', 'ребёнок', 'сын'],
     ageRange: [7, 14],
     description:
       'Безопасная основа. Волшебный морской мир в стаканчике своими руками. Можно сделать подарки для семьи.',
@@ -321,8 +316,7 @@
     price: 1899,
     recipientTags: ['сын', 'дочь', 'племянник', 'ребёнок', 'племянница'],
     ageRange: [7, 15],
-    description:
-      'Весь реквизит безопасен для юного фокусника. Готовое шоу для праздника!',
+    description: 'Весь реквизит безопасен для юного фокусника. Готовое шоу для праздника!',
     category: 'games',
     link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-60-fokusov%2F',
   },
@@ -341,14 +335,7 @@
     id: 29,
     name: 'Набор раций Lanson Toys «Полиция», 2 шт.',
     price: 810,
-    recipientTags: [
-      'ребёнок',
-      'сын',
-      'дочь',
-      'племянник',
-      'племянница',
-      'внучка',
-    ],
+    recipientTags: ['ребёнок', 'сын', 'дочь', 'племянник', 'племянница', 'внучка'],
     ageRange: [4, 14],
     description:
       'Работают на расстоянии до 50 м. Отлично для игр в шпионов, полицейских или командных приключений во дворе.',
@@ -469,8 +456,7 @@
     price: 1219,
     recipientTags: ['мальчик', 'девочка', 'ребенок'],
     ageRange: [4, 12],
-    description:
-      'Качели подвесные Лодочка с948, предназначены для спорта и отдыха.',
+    description: 'Качели подвесные Лодочка с948, предназначены для спорта и отдыха.',
     category: 'creativity',
     link: 'https://uuwgc.com/g/vw6dqabpgkc4e3de98acb6a2cdd7f0/?erid=25H8d7vbP8SRTvH4HtSZJ1&ulp=https%3A%2F%2Fdev.maxidom.ru%2Fcatalog%2Fkacheli-detskie%2F1001501191%2F',
   },
@@ -480,8 +466,7 @@
     price: 1699,
     recipientTags: ['мальчик', 'девочка', 'ребенок'],
     ageRange: [4, 14],
-    description:
-      'Ватрушка-тюбинг диаметром 85 см - повод встретить зиму с удовольствием!',
+    description: 'Ватрушка-тюбинг диаметром 85 см - повод встретить зиму с удовольствием!',
     category: 'creativity',
     link: 'https://uuwgc.com/g/vw6dqabpgkc4e3de98acb6a2cdd7f0/?erid=25H8d7vbP8SRTvH4HtSZJ1&ulp=https%3A%2F%2Fdev.maxidom.ru%2Fcatalog%2Fsanki-ledyanki%2F1001564706%2F',
   },

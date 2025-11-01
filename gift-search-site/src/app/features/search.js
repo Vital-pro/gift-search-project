@@ -23,6 +23,7 @@ import {
 
 import { formatRecipientGenitive } from '../utils/format.js';
 import { recipientMap } from '../../../vendor/recipient-map.js';
+import { appendSortedCards } from '../../utils/card-sorter.js'; // <-- ДОБАВЬ ЭТУ СТРОКУ
 
 // --- модульное состояние поиска ---
 let searchAll = [];
@@ -326,7 +327,17 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
       if (sessionId !== activeSearchSessionId) return;
 
-      batch.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+      // Собираем все карточки сначала
+      const allCards = [];
+      batch.forEach((gift) => {
+        const card = createGiftCard(gift, GIFT_CARD_DEPS);
+        if (card) {
+          allCards.push(card);
+        }
+      });
+
+      // Добавляем отсортированные карточки в grid
+      appendSortedCards(grid, allCards);
       searchOffset += batch.length;
 
       if (searchOffset < searchAll.length) {
@@ -355,7 +366,17 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
       if (sessionId !== activeSearchSessionId) return;
 
-      more.forEach((g) => grid.appendChild(createGiftCard(g, GIFT_CARD_DEPS)));
+      // Собираем все карточки сначала
+      const allCards = [];
+      more.forEach((gift) => {
+        const card = createGiftCard(gift, GIFT_CARD_DEPS);
+        if (card) {
+          allCards.push(card);
+        }
+      });
+
+      // Добавляем отсортированные карточки в grid
+      appendSortedCards(grid, allCards);
       searchOffset += more.length;
 
       if (searchOffset < searchAll.length) {
@@ -521,7 +542,6 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
 //   renderPromoGifts(Array.isArray(promoIds) ? promoIds : [1, 3, 5, 8, 12, 15], GIFT_CARD_DEPS);
 //   initCatalogList(GIFT_CARD_DEPS);
 // }
-
 
 export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
   // 1) Сбросим режим и прокрутим мгновенно (чтоб фокус не «съедал» smooth)

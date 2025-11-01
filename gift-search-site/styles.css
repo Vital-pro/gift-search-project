@@ -112,3 +112,28 @@ section { padding: 3rem 0; }
   animation: fadeInTitle .28s ease-out both;
 }
 
+/* Стили для карточек "проверяем доступность" */
+.gift-card--checking {
+  opacity: 0.7;
+  filter: grayscale(20%);
+  transition: all 0.3s ease;
+  cursor: not-allowed;
+}
+
+.gift-card--checking:hover {
+  opacity: 0.9;
+  filter: grayscale(10%);
+}
+
+.gift-buy-btn--checking {
+  background-color: #6c757d !important;
+  color: white !important;
+  cursor: not-allowed !important;
+  border: none !important;
+  opacity: 0.8;
+  transition: all 0.2s ease !important;
+}
+
+.gift-buy-btn--checking:hover {
+  opacity: 1;
+}
