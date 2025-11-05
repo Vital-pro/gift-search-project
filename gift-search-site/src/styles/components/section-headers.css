@@ -1,10 +1,13 @@
 /* Заголовки секций */
 .section-title {
-  font-size: 2rem; 
+  /* font-size: 2.6rem;  */
+  font-size: clamp(1.4rem, 1.044rem + 1.78vw, 2.6rem); 
   font-weight: 700; 
   text-align: center;
+  text-shadow: 2px 8px 8px rgba(0, 0, 0, 0.4);
   position: relative; 
   margin-bottom: 2.5rem;
+  color: #a9edff;
 }
 
 .results-count { 

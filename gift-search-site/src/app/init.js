@@ -61,6 +61,12 @@ export function initApp() {
   const recipientSelect = document.getElementById('recipientSelect');
   const ageInput = document.getElementById('ageInput');
   const budgetInput = document.getElementById('budgetInput');
+  const layer2 = document.getElementsByClassName('layer-shape-2')[0];
+  const layer3 = document.getElementsByClassName('layer-shape-3')[0];
+  setTimeout(() => {
+    layer2.classList.add('work-bg')
+    layer3.classList.add('work-bg')
+  }, 4000);
 
   // Локальные триггеры, захватывающие GIFT_CARD_DEPS
   function triggerTextSearch() {

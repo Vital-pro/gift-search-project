@@ -11,7 +11,7 @@
 
 .search-float {
   position: fixed;
-  top: 10px;
+  top: 6px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 40px);
@@ -19,7 +19,7 @@
   z-index: 998;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .22s ease;
+  transition: opacity 0.22s ease;
 }
 /* Внешний вид копии — тот же, что у search-block */
 .search-float .search-block {
@@ -61,37 +61,44 @@
 /* альтернативные контролы показываем и в копии */
 .search-float .alternative-controls {
   display: block;
-  margin-top: .6rem;
+  margin-top: 0.6rem;
 }
 
 /* компактные отступы внутри раскрытия */
-.search-float .controls-dropdown { border: none; padding: 0; }
+.search-float .controls-dropdown {
+  border: none;
+  padding: 0;
+}
 .search-float .controls-dropdown summary {
   cursor: pointer;
   color: var(--text-secondary);
-  font-size: .9rem;
-  padding: .25rem .25rem;
+  font-size: 0.9rem;
+  padding: 0.25rem 0.25rem;
   user-select: none;
 }
-.search-float .controls-dropdown[open] summary { color: var(--accent); }
+.search-float .controls-dropdown[open] summary {
+  color: var(--accent);
+}
 
 /* компактная сетка */
 .search-float .controls-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: .6rem;
-  padding: .6rem;
+  gap: 0.6rem;
+  padding: 0.6rem;
   background: transparent;
   border: none;
   box-shadow: none;
 }
 
 /* поля — чуть ниже и уже */
-.search-float .control-group label { font-size: .78rem; }
+.search-float .control-group label {
+  font-size: 0.78rem;
+}
 .search-float .control-group input,
 .search-float .control-group select {
-  padding: .5rem .6rem;
-  font-size: .95rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.95rem;
   border-radius: 10px;
 }
 
@@ -103,7 +110,7 @@
 
 /* кнопка «Подобрать» компактнее */
 .search-float .alt-search-btn {
-  padding: .6rem 1rem;
+  padding: 0.6rem 1rem;
   border-radius: 10px;
 }
 
@@ -117,4 +124,21 @@ body.has-floating-search .logo .logo-text {
   white-space: nowrap;
 }
 
-.search-block { padding: 1rem 1.1rem; border-radius: 18px; }
+.search-block {
+  padding: 1rem;
+  border-radius: 18px;
+  box-shadow: 2px 8px 8px rgba(0, 0, 0, 0.4) !important;
+  max-width: 750px;
+  /* width: calc(80% - 40px); */
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .search-block {
+    max-width: 660px;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-block { padding: clamp(0.5rem, 0.143rem + 1.79vw, 1rem); }
+}

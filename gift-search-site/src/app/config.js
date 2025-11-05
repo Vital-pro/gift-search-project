@@ -12,13 +12,13 @@ export const LOAD_BATCH = 9;
 export const PROD_ORIGIN = 'https://gift-search-project.vercel.app';
 export const API_BASE = typeof location !== 'undefined' && location.hostname === 'localhost' ? PROD_ORIGIN : '';
 
-// НОВЫЙ ЧЁРНЫЙ СПИСОК АФФИЛЕЙТ-ДОМЕНОВ - добавляйте сюда домены аффилейт-сетей
+// ЧЁРНЫЙ СПИСОК АФФИЛЕЙТ-ДОМЕНОВ - добавляйте сюда домены аффилейт-сетей, которые нужно ОТКЛЮЧИТЬ из поиска.
 export const BLOCKED_STORES = [
   'example-bad-store.com', // пример
-  'bywiola.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
-  // 'gndrz.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
-  // 'ujhjj.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
-  // 'uuwgc.com', // <-- РАСКОММЕНТИРОВАНО для теста (аффилейт для boobl-goom.ru)
+  'bywiola.com', // <-- РАСКОММЕНТИРОВАНО, значит, НЕ работает, исключаем из поиска
+  // 'gndrz.com', // <-- ЗАКОММЕНТИРОВАНО, значит, работает
+  // 'ujhjj.com', // <-- ЗАКОММЕНТИРОВАНО, значит, работает
+  // 'uuwgc.com', // <-- ЗАКОММЕНТИРОВАНО, значит, работает
   // "kpwfp.com",
   // "ogsib.com"
   // и т.д.

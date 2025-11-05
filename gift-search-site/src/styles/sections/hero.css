@@ -23,12 +23,13 @@
 }
 
 .hero-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.6rem, 1.037rem + 2.81vw, 3.5rem);
   font-weight: 700;
   text-align: center;
-  margin-bottom: 2rem;
-  color: var(--text-primary);
+  text-shadow: 2px 8px 8px rgba(0,0,0,0.4);
+  color: #e0b5ff;
   line-height: 1.2;
+  margin-bottom: clamp(1rem, 0.704rem + 1.48vw, 2rem);
 }
 
 /* В compact-режиме не скрываем alternative-controls */

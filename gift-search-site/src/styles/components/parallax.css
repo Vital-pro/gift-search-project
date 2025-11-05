@@ -48,6 +48,7 @@
     radial-gradient(circle at 20% 70%, #00c9ff 0%, transparent 50%);
   opacity: 0.9;
   animation: floatWave 22s ease-in-out infinite;
+  transition: all 10s ease-in-out;
 }
 
 /* Подарок — увеличен, ярче */
@@ -60,6 +61,13 @@
   animation: floatGiftStrong 16s ease-in-out infinite;
 }
 
+@media (max-width: 1200px) {
+  .layer-gift {
+    background-position: left 60% bottom 30%;
+    opacity: .6;
+  }
+}
+
 /* Абстрактная лента — контрастная */
 .layer-shape-3 {
   background: 
@@ -68,6 +76,7 @@
   opacity: 0.7;
   clip-path: polygon(0 30%, 100% 20%, 100% 80%, 0 70%);
   animation: driftRibbon 26s ease-in-out infinite alternate;
+  transition: all 10s ease-in-out;
 }
 
 /* Анимации — сильные, заметные */
@@ -89,7 +98,7 @@
 }
 
 /* Отключаем на мобильных и при reduced motion */
-@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   .parallax-scene { display: none; }
 }
 
@@ -141,4 +150,8 @@
 @keyframes gradientShift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
+}
+
+.work-bg {
+  opacity: 0;
 }

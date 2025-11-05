@@ -1,13 +1,13 @@
 /* Альтернативные контролы */
 .alternative-controls { 
-  margin-top: 1rem; 
+  margin-top: clamp(0.2rem, -0.037rem + 1.19vw, 1rem); 
 }
 
 .controls-dropdown summary {
   cursor: pointer;
   color: #b02727; /* (можно заменить на var(--accent) для контраста) */
-  font-size: 1.06rem;
-  padding: 0.5rem;
+  font-size: clamp(0.8rem, 0.723rem + 0.39vw, 1.06rem);
+  /* padding: 0.5rem; */
   transition: color 0.2s ease;
   user-select: none;
 }
@@ -16,7 +16,7 @@
 }
 .controls-dropdown[open] summary { 
   color: var(--accent); 
-  margin-bottom: 1rem; 
+  margin-bottom: clamp(0.5rem, 0.143rem + 1.79vw, 1rem); 
 }
 
 .controls-grid {
@@ -147,7 +147,6 @@
   box-shadow: 0 2px 12px rgba(108, 99, 255, 0.3); 
 }
 
-.controls-dropdown summary { font-size: 0.95rem; padding: 0.35rem 0.25rem; }
 .controls-grid { gap: 0.7rem; padding: 0.7rem; }
 .control-group label { font-size: 0.85rem; }
 .control-group input, .control-group select {
