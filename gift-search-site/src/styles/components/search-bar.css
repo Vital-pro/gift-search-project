@@ -54,6 +54,10 @@
   font-weight: 500;
 }
 
+@media (max-width: 470px) or (max-height: 310px) {
+  .search-float .search-compact-title { margin-bottom: -.9rem;}
+}
+
 .search-float .search-compact-title strong {
   font-size: clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
 }
