@@ -18,8 +18,8 @@
   margin-bottom: clamp(0.5rem, 0.143rem + 1.79vw, 1rem); 
 }
 
-@media (max-width: 470px) {
-  .controls-dropdown[open] summary { margin-bottom: 0;}
+@media (max-width: 470px) or (max-height: 310px) {
+  .controls-dropdown[open] summary { margin-bottom: -6px;}
 }
 
 .controls-grid {
