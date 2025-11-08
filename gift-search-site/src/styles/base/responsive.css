@@ -1,7 +1,6 @@
 /* Адаптивность */
 @media (max-width: 768px) {
   .hero-title { font-size: 2rem; }
-  /* .search-block { padding: 1.5rem; } */
   /* .search-input-group { flex-wrap: wrap; } */
   .search-input { width: 100%; }
   /* .search-btn { flex: 1; } */

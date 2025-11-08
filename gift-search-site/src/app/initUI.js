@@ -55,11 +55,10 @@ function initTooltip() {
 
 // [ДОБАВЛЕНО] Тоггл темы (light/dark) с запоминанием и реакцией на систему
 function initThemeToggle() {
-  const themeToggle = document.querySelector('.theme-toggle');
-  const themeIcon = document.querySelector('.theme-icon');
+  const themeToggles = document.querySelectorAll('.theme-toggle');
 
   // если на странице нет кнопки — тихо выходим
-  if (!themeToggle) return;
+  if (!themeToggles.length === 0) return;
 
   const saved = localStorage.getItem('theme');
   const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -67,35 +66,39 @@ function initThemeToggle() {
 
   const apply = (t) => {
     document.documentElement.setAttribute('data-theme', t);
-    if (themeIcon) themeIcon.textContent = t === 'dark' ? '☀️' : '🌙';
-    themeToggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    themeToggles.forEach(themeToggle => {
+      const themeIcon = themeToggle.querySelector('.theme-icon');
+      if (themeIcon) themeIcon.textContent = t === 'dark' ? '☀️' : '🌙';
+      themeToggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+    })
   };
 
   // первоначальное применение
   apply(theme);
 
   // клик по кнопке — переключение и сохранение
-  themeToggle.addEventListener('click', () => {
-    theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    localStorage.setItem('theme', theme);
-    apply(theme);
-  });
+  themeToggles.forEach(themeToggle => {
+    themeToggle.addEventListener('click', () => {
+      theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', theme);
+      apply(theme);
+    });
+  })
 
-  // если пользователь НЕ сохранял тему — реагируем на системную смену
-  if (!saved && window.matchMedia) {
+  if (!saved && window.matchMedia ) {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     // старые браузеры могут не поддерживать addEventListener у MQ
-    if (typeof mq.addEventListener === 'function') {
+    if (typeof mq.addEventListener === 'function' ) {
       mq.addEventListener('change', (e) => {
-        theme = e.matches ? 'dark' : 'light';
-        apply(theme);
-      });
-    } else if (typeof mq.addListener === 'function') {
+        theme = e.matches ? 'dark' : 'light'
+        apply(theme)
+      })
+    } else if (typeof mq.addListener === 'function' ) {
       // fallback для старых
       mq.addListener((e) => {
-        theme = e.matches ? 'dark' : 'light';
-        apply(theme);
-      });
+        theme = e.matches ? 'dark' : 'light'
+        apply(theme)
+      })
     }
   }
 }

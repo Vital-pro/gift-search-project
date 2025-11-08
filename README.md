@@ -2,7 +2,7 @@
 
 ## Структура
 - `/gift-search-site` — сайт (index.html, styles.css, main.js)
-- `/data` — данные (export const GIFTS = [...])
+- `/data` — данные (export const GIFTS = [...]) - НЕТ?
 
 ## Локально
 Открой `gift-search-site/index.html` в браузере.

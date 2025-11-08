@@ -11,11 +11,13 @@
 
 .search-float {
   position: fixed;
-  top: 6px;
+  top: 0px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 990px;
+  /* width: calc(100% - 40px); */
+  /* max-width: 990px; */
+  max-width: 1160px;
+  width: 100%;
   z-index: 998;
   opacity: 0;
   pointer-events: none;
@@ -26,12 +28,14 @@
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 18px;
-  padding: 1rem 1.5rem;
+  /* padding: 1rem 1.5rem; */
   box-shadow: var(--shadow-xl);
 }
 .search-float.visible {
   opacity: 1;
   pointer-events: auto;
+  max-width: 1160px;
+  width: 100%;
 }
 /* пока копия видна — оригинал не мигает */
 .search-original-hidden {
@@ -44,8 +48,9 @@
   opacity: 1;
   text-align: center;
   margin-bottom: 0.6rem;
-  font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1.1rem);
-  color: var(--text-secondary);
+  /* font-size: clamp(0.9rem, 0.86rem + 0.2vw, 1.1rem); */
+  font-size: 1rem;
+  /* color: var(--text-secondary); */
   font-weight: 500;
 }
 
@@ -128,15 +133,9 @@ body.has-floating-search .logo .logo-text {
   padding: 1rem;
   border-radius: 18px;
   box-shadow: 2px 8px 8px rgba(0, 0, 0, 0.4) !important;
-  max-width: 750px;
+  /* max-width: 750px; */
   /* width: calc(80% - 40px); */
   margin: 0 auto;
-}
-
-@media (max-width: 1024px) {
-  .search-block {
-    max-width: 660px;
-  }
 }
 
 @media (max-width: 768px) {
