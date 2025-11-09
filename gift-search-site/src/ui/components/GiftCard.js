@@ -290,12 +290,13 @@ function createCheckingAvailabilityCard(gift, options) {
   card.addEventListener('mouseenter', () => {
     button.style.transform = 'scale(1.05)';
     button.style.fontWeight = '600';
-    button.style.transition = 'all 0.2s ease';
+    button.style.transition = 'all 0.3s ease';
   });
 
   card.addEventListener('mouseleave', () => {
     button.style.transform = 'scale(1)';
     button.style.fontWeight = '400';
+    button.style.transition = 'all 0.3s ease';
   });
 
   return card;

@@ -1,33 +1,33 @@
 ﻿export const GIFTS_FOR_KIDS_4_13 = [
-  {
-    id: 121312313132,
-    name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Ручка 3D Lanson Toys «Космическое путешествие»',
-    price: 100,
-    recipientTags: ['ребёнок', 'сын', 'дочь'],
-    ageRange: [7, 13],
-    description:
-      'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
-    category: 'creativity',
-    link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchcheskoe-puteshestvie-v-assortimente%2F',
-  },
-  {
-    id: 27879878798,
-    name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Игровой набор раций Lanson Toys 2шт',
-    price: 150,
-    recipientTags: ['ребёнок', 'сын', 'дочь'],
-    ageRange: [4, 14],
-    description:
-      'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
-    category: 'toys',
-    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
-    // link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
-    link: [
-      'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
-      'https://ogsib.com/g/k2puk5f0x4c4e3de98aceac27ebda8/?erid=25H8d7vbP8SRTvFaS7yFUc&ulp=https%3A%2F%2Fsouzcvettorg.ru%2Fcatalog%2Fot-5000-do-7000-rub',
-      'https://gndrz.com/g/df78170859c4e3de98ac29547bf01b/?erid=F7NfYUJRWmqqH7m5M1NK&ulp=https%3A%2F%2Fwww.letu.ru%2Fbrowse%2Fpodarki%2Ftsvety%3FNf%3Dsku.activePrice%257CBTWN%2B5000%2B7000',
-      'https://ujhjj.com/g/bg71l7yp65c4e3de98acc1e2b709c0/?erid=MvGzQC98w3Z1gMq1kwrGzNyN&ulp=https%3A%2F%2Fwww.floraexpress.ru%2Fru%2Ffilter%2F%3Fcity%3D2800%26dt%3D29.10.2025%26cur%3Drub%26cost%3D5000%2C7000',
-    ],
-  },
+  // {
+  //   id: 121312313132,
+  //   name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Ручка 3D Lanson Toys «Космическое путешествие»',
+  //   price: 100,
+  //   recipientTags: ['ребёнок', 'сын', 'дочь'],
+  //   ageRange: [7, 13],
+  //   description:
+  //     'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
+  //   category: 'creativity',
+  //   link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchcheskoe-puteshestvie-v-assortimente%2F',
+  // },
+  // {
+  //   id: 27879878798,
+  //   name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Игровой набор раций Lanson Toys 2шт',
+  //   price: 150,
+  //   recipientTags: ['ребёнок', 'сын', 'дочь'],
+  //   ageRange: [4, 14],
+  //   description:
+  //     'Мини-комплект для поисково-приключенческих игр, рации способны принимать и передавать речь на расстоянии до 50 м.',
+  //   category: 'toys',
+  //   link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+  //   link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fkonstruktor-dvorets-dlya-printsessy-540det-s-6let%2F',
+  //   link: [
+  //     'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fnabor-ratsiy-lanson-toys-politsiya-2sht%2F',
+  //     'https://ogsib.com/g/k2puk5f0x4c4e3de98aceac27ebda8/?erid=25H8d7vbP8SRTvFaS7yFUc&ulp=https%3A%2F%2Fsouzcvettorg.ru%2Fcatalog%2Fot-5000-do-7000-rub',
+  //     'https://gndrz.com/g/df78170859c4e3de98ac29547bf01b/?erid=F7NfYUJRWmqqH7m5M1NK&ulp=https%3A%2F%2Fwww.letu.ru%2Fbrowse%2Fpodarki%2Ftsvety%3FNf%3Dsku.activePrice%257CBTWN%2B5000%2B7000',
+  //     'https://ujhjj.com/g/bg71l7yp65c4e3de98acc1e2b709c0/?erid=MvGzQC98w3Z1gMq1kwrGzNyN&ulp=https%3A%2F%2Fwww.floraexpress.ru%2Fru%2Ffilter%2F%3Fcity%3D2800%26dt%3D29.10.2025%26cur%3Drub%26cost%3D5000%2C7000',
+  //   ],
+  // },
   {
     id: 1,
     name: 'Ручка 3D Lanson Toys «Космическое путешествие»',
