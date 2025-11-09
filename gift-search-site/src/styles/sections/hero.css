@@ -1,7 +1,7 @@
 /* Hero секция */
 .compact-hero {
   padding: 2rem 0 0.75rem;
-  min-height: 54vh;
+  /* min-height: 54vh; */
   display: flex;
   align-items: flex-start;
 }
@@ -11,15 +11,15 @@
   padding: 2rem 0 1rem;
 }
 
+@media (max-width: 400px) {
+  .compact-hero { padding: 1rem 0 0.75rem; }
+}
+
 /* Резерв под sticky-поиск, чтобы не перекрывать H1 и не было скачка */
 .hero::after {
   content:"";
   display:block;
   height: 72px; /* подстрой под реальную высоту sticky-панели */
-}
-
-@media (min-width: 1024px) {
-  .hero { min-height: 46vh; }
 }
 
 .hero-title {

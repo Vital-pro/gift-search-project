@@ -1,6 +1,5 @@
 /* Заголовки секций */
 .section-title {
-  /* font-size: 2.6rem;  */
   font-size: clamp(1.4rem, 1.044rem + 1.78vw, 2.6rem); 
   font-weight: 700; 
   text-align: center;
@@ -10,9 +9,17 @@
   color: #a9edff;
 }
 
+.results-title-fade {
+  font-size: clamp(1.4rem, 1.044rem + 1.78vw, 2.6rem);
+  line-height: 1.2;
+  color: #a9edff;
+  text-shadow: 2px 8px 8px rgba(0, 0, 0, 0.4);
+  animation: fadeInTitle .28s ease-out both;
+}
+
 .results-count { 
-  font-size: 1rem !important;
-  color: #000 !important;
+  font-size: clamp(0.9rem, 0.693rem + 1.04vw, 1.6rem);
+  color: #ff7e5f !important;
   font-weight: 400; 
   padding-top: 10px;
   margin-left: 1rem; 

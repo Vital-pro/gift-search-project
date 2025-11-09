@@ -3,6 +3,7 @@ import { categoryPlaceholderImages } from '../../../data/gifts/categoryPlacehold
 import { getGiftLinkStatus } from '../../utils/link-checker.js';
 
 export function createGiftCard(gift, options) {
+
   // НОВАЯ ПРОВЕРКА: получаем статус ссылок товара
   const linkStatus = getGiftLinkStatus(gift);
 

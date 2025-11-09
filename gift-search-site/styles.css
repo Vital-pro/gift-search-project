@@ -74,7 +74,11 @@ header,
 }
 
 /* Общие секции — [dedup] оставляем одно определение */
-section { padding: 3rem 0; }
+section { padding: 2rem 0; }
+
+@media (max-width: 480px) {
+  section { padding: clamp(1rem, -1rem + 10vw, 2rem) 0; }
+}
 
 /* Поддержка reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -114,15 +118,16 @@ section { padding: 3rem 0; }
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.results-title-fade {
-  font-size: 2.4rem;
+/* .results-title-fade {
+  font-size: clamp(1.4rem, 1.044rem + 1.78vw, 2.6rem);
+  line-height: 1.2;
   color: #a9edff;
   text-shadow: 2px 8px 8px rgba(0, 0, 0, 0.4);
   animation: fadeInTitle .28s ease-out both;
-}
+} */
 
 /* Стили для карточек "проверяем доступность" */
-.gift-card--checking {
+/* .gift-card--checking {
   opacity: 0.7;
   filter: grayscale(20%);
   transition: all 0.3s ease;
@@ -145,4 +150,4 @@ section { padding: 3rem 0; }
 
 .gift-buy-btn--checking:hover {
   opacity: 1;
-}
+} */

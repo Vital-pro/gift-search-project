@@ -68,6 +68,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .layer-gift {
+    display: none;
+  }
+}
+
 /* Абстрактная лента — контрастная */
 .layer-shape-3 {
   background: 

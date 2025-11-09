@@ -188,6 +188,31 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
 
   if (!section || !grid || !loadMoreBtn || !cta || !sortToggle) return;
 
+  // ИЗМЕНЕНИЕ: Вспомогательная функция для склонения слова "подарок"
+  function getGiftWordForm(count) {
+    // Получаем последнюю цифру числа (для единиц)
+    const lastDigit = count % 10;
+    // Получаем последние две цифры числа (для десятков, чтобы учесть 11, 12, 13, 14)
+    const lastTwoDigits = count % 100;
+
+    // Если число заканчивается на 11, 12, 13, 14, то всегда "подарков"
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+      return 'подарков';
+    }
+
+    // В остальных случаях склоняем по последней цифре:
+    // 1 -> "подарок"
+    if (lastDigit === 1) {
+      return 'подарок';
+    }
+    // 2, 3, 4 -> "подарка"
+    if (lastDigit >= 2 && lastDigit <= 4) {
+      return 'подарка';
+    }
+    // 0, 5, 6, 7, 8, 9 -> "подарков"
+    return 'подарков';
+  }
+
   // === ДИАГНОСТИКА: проверяем порядок ДО изменений ===
   console.log('🔍 renderSearchResultsGrid - ДИАГНОСТИКА:');
   console.log('Всего карточек:', searchAll.length);
@@ -225,7 +250,9 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     title = `Подарки для ${rGen}`;
   }
   resultsTitle.textContent = title;
-  resultsCount.textContent = `— найдено ${searchAll.length}`;
+  // resultsCount.textContent = `— ${searchAll.length} подарок`;
+  // ИЗМЕНЕНИЕ: Используем функцию getGiftWordForm для динамического склонения слова "подарок"
+  resultsCount.textContent = `— ${searchAll.length} ${getGiftWordForm(searchAll.length)}`;
 
   // Перезапуск короткой анимации появления заголовка
   resultsTitle.classList.remove('results-title-fade');
