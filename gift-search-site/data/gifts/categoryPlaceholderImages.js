@@ -19,10 +19,12 @@ export const categoryPlaceholderImages = {
     '/images/category_images/adventures.jpg',
   books:
     '/images/category_images/toys/toys-retro.jpg',
+  gifts:
+    '/images/category_images/toys/toys-retro.jpg',
   outdoor:
     '/images/category_images/adventures.jpg',
   universal:
-    '/images/category_images/universal/universal.jpg',
+    '/images/category_images/universal/universal.jpg' ,
   boardgames:
     '/images/category_images/toys/toys-boardgames.jpg',
 };
