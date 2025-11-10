@@ -75,57 +75,48 @@ function rankAndSortGifts(items, params) {
   console.log('Бюджет:', budget);
   console.log('Всего карточек на входе:', items.length);
 
-  // Если получатель не указан - работаем по старой логике
-  if (!rec) {
-    console.log('❌ Получатель не указан - обычная сортировка');
-    return items
+  // === ВАЖНОЕ ИЗМЕНЕНИЕ: если указан получатель, ищем ТОЛЬКО точные совпадения ===
+  if (rec) {
+    console.log('🔍 Ищем ТОЛЬКО точные совпадения по тегу:', rec);
+
+    const exactMatches = items.filter((g) => {
+      const hasExactTag =
+        Array.isArray(g.recipientTags) &&
+        g.recipientTags.some((tag) => String(tag).toLowerCase() === rec);
+
+      if (hasExactTag) {
+        console.log(`✅ Точное совпадение: "${g.name}" - теги: [${g.recipientTags}]`);
+      }
+      return hasExactTag;
+    });
+
+    console.log(`📊 Найдено точных совпадений: ${exactMatches.length}`);
+
+    // === КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: если нет точных совпадений - возвращаем ПУСТОЙ массив ===
+    if (exactMatches.length === 0) {
+      console.log('❌ Нет точных совпадений - возвращаем пустой массив');
+      return [];
+    }
+
+    // Если есть точные совпадения - сортируем их по релевантности
+    console.log('🎯 Сортируем точные совпадения по релевантности');
+    const sortedExact = exactMatches
       .map((g) => scoreOne(g))
       .sort(compareScored)
       .map((x) => x.g);
+
+    console.log('=== КОНЕЦ DEBUG (точные совпадения) ===');
+    return sortedExact;
   }
 
-  // ПРОСТАЯ ЛОГИКА: сначала ВСЕ с точным тегом, потом ВСЕ остальные
-  const exact = [];
-  const rest = [];
-
-  const hasExactTag = (g) => {
-    const has =
-      Array.isArray(g.recipientTags) &&
-      g.recipientTags.some((tag) => String(tag).toLowerCase() === rec);
-
-    if (has) {
-      console.log(`✅ Точное совпадение: "${g.name}" - теги: [${g.recipientTags}]`);
-    }
-    return has;
-  };
-
-  for (const g of items) {
-    if (hasExactTag(g)) {
-      exact.push(g);
-    } else {
-      rest.push(g);
-    }
-  }
-
-  console.log(`📊 ИТОГ: exact=${exact.length}, rest=${rest.length}`);
-
-  // ВАЖНО: внутри каждой группы сортируем по обычным правилам
-  const exactSorted = exact
+  // === СТАРАЯ ЛОГИКА: если получатель не указан - обычная сортировка ===
+  console.log('❌ Получатель не указан - обычная сортировка');
+  return items
     .map((g) => scoreOne(g))
     .sort(compareScored)
     .map((x) => x.g);
 
-  const restSorted = rest
-    .map((g) => scoreOne(g))
-    .sort(compareScored)
-    .map((x) => x.g);
-
-  console.log('=== КОНЕЦ DEBUG ===');
-
-  // Сначала ВСЕ точные совпадения, потом ВСЕ остальные
-  return [...exactSorted, ...restSorted];
-
-  // --- вспомогательные внутри функции ---
+  // --- вспомогательные функции (без изменений) ---
   function scoreOne(g) {
     let score = 0;
 

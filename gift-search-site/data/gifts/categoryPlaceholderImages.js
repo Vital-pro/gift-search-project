@@ -13,18 +13,12 @@ export const categoryPlaceholderImages = {
   office: '/images/category_images/universal/universal-1.jpg',
   food: '/images/category_images/universal/universal-1.jpg',
   home: '/images/category_images/flowers/flowers-3.jpg',
-  photo:
-    '/images/category_images/creative/сreative-1.jpg',
-  entertainment:
-    '/images/category_images/adventures.jpg',
-  books:
-    '/images/category_images/toys/toys-retro.jpg',
-  gifts:
-    '/images/category_images/toys/toys-retro.jpg',
-  outdoor:
-    '/images/category_images/adventures.jpg',
-  universal:
-    '/images/category_images/universal/universal.jpg' ,
-  boardgames:
-    '/images/category_images/toys/toys-boardgames.jpg',
+  photo: '/images/category_images/creative/сreative-1.jpg',
+  entertainment: '/images/category_images/adventures.jpg',
+  impressions: '/images/category_images/creative/сreative-1.jpg',
+  books: '/images/category_images/toys/toys-retro.jpg',
+  gifts: '/images/category_images/toys/toys-retro.jpg',
+  outdoor: '/images/category_images/adventures.jpg',
+  universal: '/images/category_images/universal/universal.jpg',
+  boardgames: '/images/category_images/toys/toys-boardgames.jpg',
 };
