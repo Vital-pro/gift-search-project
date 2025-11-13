@@ -7,7 +7,7 @@ import { GIFTS_FOR_TEENS_55 } from './giftsForTeens_55.js';
 import { GIFTS_FOR_WOMEN_66 } from './giftsForWomen_66.js';
 
 export const GIFTS = [
-  // ...GIFTS_FOR_KIDS_1,
+  ...GIFTS_FOR_KIDS_1,
   // ...BOOBL_GOOM_11,
   ...GIFTS_DIFFERENT_22,
   ...GIFTS_BOXDARI_33,
