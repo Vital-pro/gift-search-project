@@ -271,7 +271,7 @@ export const GIFTS_BOXDARI_33 = [
       'ребёнок',
       'парень',
     ],
-    ageRange: [7, 18],
+    ageRange: [14, 67],
     description: 'Это не просто тренажер, а настоящая кабина самолета, где обучаются летчики!',
     category: 'childdevelopment',
     link: 'https://kpwfp.com/g/e0bok8v2rv1093e93c08923f2a33cc/?erid=2bL9aMPo2e49hMef4rqUZ15VSz&ulp=https%3A%2F%2Fboxdari.ru%2Fcatalog%2Fgifts%2Fekskursiya-v-aviatsentr-s-poletom-v-nastoyashchey-kabine-samoleta%2F',
@@ -1634,7 +1634,7 @@ export const GIFTS_BOXDARI_33 = [
       'дедушка',
       'коллега',
     ],
-    ageRange: [18, 77],
+    ageRange: [18, 67],
     description:
       'Индивидуальный полет с расширенной программой полета. По желанию, полёты записываются с 4-х видеокамер',
     category: 'impressions',
@@ -2430,7 +2430,8 @@ export const GIFTS_BOXDARI_33 = [
       'начальник',
     ],
     ageRange: [14, 77],
-    description: '',
+    description:
+      'Все необходимые материалы включены в стоимость билета. Можете использовать свою ткань, при этом стоимость курса останется неизменной.',
     category: 'hobby',
     link: 'https://kpwfp.com/g/e0bok8v2rv1093e93c08923f2a33cc/?erid=2bL9aMPo2e49hMef4rqUZ15VSz&ulp=https%3A%2F%2Fboxdari.ru%2Fcatalog%2Fgifts%2Fmaster-klass-po-poshivu-platya%2F',
     image: '/images/category_images/hobby/dress.webp',
