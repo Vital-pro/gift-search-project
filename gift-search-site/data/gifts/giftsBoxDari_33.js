@@ -1778,7 +1778,7 @@ export const GIFTS_BOXDARI_33 = [
       'Процедура, направленная на снятие напряжения и улучшение кровообращения в области шеи и верхней части спины.',
     category: 'health',
     link: 'https://kpwfp.com/g/e0bok8v2rv1093e93c08923f2a33cc/?erid=2bL9aMPo2e49hMef4rqUZ15VSz&ulp=https%3A%2F%2Fboxdari.ru%2Fcatalog%2Fgifts%2Fmassazh-sheyno-vorotnikovoy-zony%2F',
-    image: '/images/category_images/health/massage-neck.jp',
+    image: '/images/category_images/health/massage-neck.jpg',
   },
   {
     id: 3358,
