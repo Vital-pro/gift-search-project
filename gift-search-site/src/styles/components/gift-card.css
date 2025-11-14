@@ -151,7 +151,7 @@
   /* .gift-card-title { font-size: calc((1vw + 1vh)*1.23); } */
 }
 @media (max-width: 768px) {
-  .gift-card-title { font-size: clamp(1.25rem, 0.982rem + 1.34vw, 1.625rem); min-height: 1rem;}
+  .gift-card-title { font-size: clamp(1.375rem, 1.196rem + 0.89vw, 1.625rem); min-height: 1rem;}
   .gift-card-description {min-height: 1rem; }
 }
 @media (max-width: 375px) {
