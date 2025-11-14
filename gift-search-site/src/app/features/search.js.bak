@@ -381,13 +381,6 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   function handleLoadMore() {
     if (sessionId !== activeSearchSessionId) return;
 
-    // [ДОБАВЛЕНО] Сохраняем позицию кнопки ДО скрытия для скролла
-    const loadMoreBtnTop = loadMoreBtn.getBoundingClientRect().top;
-    // [ДОБАВЛЕНО] Запоминаем границу - последнюю карточку перед добавлением новых
-    const boundaryBefore = grid.lastElementChild || null;
-
-    loadMoreBtn.classList.add('hidden');
-
     fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
       if (sessionId !== activeSearchSessionId) return;
 
@@ -403,23 +396,6 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
       // Добавляем отсортированные карточки в grid
       appendSortedCards(grid, allCards);
       searchOffset += more.length;
-
-      // [ДОБАВЛЕНО] Плавный скролл к первой новой карточке
-      setTimeout(() => {
-        const firstNewEl = boundaryBefore
-          ? boundaryBefore.nextElementSibling
-          : grid.firstElementChild; // если ранее карточек не было
-
-        if (firstNewEl) {
-          const firstNewTop = firstNewEl.getBoundingClientRect().top;
-          const delta = firstNewTop - loadMoreBtnTop;
-
-          // Компенсируем сдвиг плавным скроллом
-          if (Number.isFinite(delta) && delta !== 0) {
-            window.scrollBy({ top: delta, behavior: 'smooth' });
-          }
-        }
-      }, 50); // ждём reflow для корректных координат
 
       if (searchOffset < searchAll.length) {
         loadMoreBtn.textContent = 'Посмотреть ещё';
