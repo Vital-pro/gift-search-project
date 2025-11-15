@@ -14,6 +14,7 @@ const AFF_HOSTS = new Set([
   'qwpeg.com', // Flor2U
   'dhwnh.com', // Aliexpress
   'gndrz.com', // Letual
+  'kjuzv.com', // chitai-gorod.ru
   'ytebb.com', // Askona
   'ogsib.com', // СоюзЦветТорг
   'uuwgc.com', // МаксидоМ

@@ -51,6 +51,7 @@ export function validatePartnerUrl(raw) {
     'xpuvo.com',
     'rthsu.com',
     'ujhjj.com',
+    'kjuzv.com', // chitai-gorod.ru
     'www.floraexpress.ru',
     'kpwfp.com',
     'bywiola.com',

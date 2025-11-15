@@ -3,8 +3,8 @@ import { BOOBL_GOOM_11 } from './giftsBoobl-goom_11.js';
 import { GIFTS_FLOWERS_22 } from './giftsFlowers_22.js';
 import { GIFTS_BOXDARI_33 } from './giftsBoxDari_33.js';
 import { GIFTS_FOR_MEN_44 } from './giftsForMen_44.js';
-import { GIFTS_FOR_TEENS_55 } from './giftsForTeens_55.js';
-import { GIFTS_FOR_WOMEN_66 } from './giftsForWomen_66.js';
+import { GIFTS_FOR_WOMEN_55 } from './giftsForWomen_55.js';
+import { GIFTS_READ_THE_CITY_66 } from './giftsReadTheCity_66.js';
 
 export const GIFTS = [
   ...GIFTS_FOR_KIDS_1,
@@ -12,8 +12,8 @@ export const GIFTS = [
   ...GIFTS_FLOWERS_22,
   ...GIFTS_BOXDARI_33,
   ...GIFTS_FOR_MEN_44,
-  ...GIFTS_FOR_TEENS_55,
-  ...GIFTS_FOR_WOMEN_66,
+  ...GIFTS_FOR_WOMEN_55,
+  ...GIFTS_READ_THE_CITY_66,
 ];
 
 [
