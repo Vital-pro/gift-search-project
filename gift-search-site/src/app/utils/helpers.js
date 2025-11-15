@@ -54,6 +54,7 @@ export function validatePartnerUrl(raw) {
     'www.floraexpress.ru',
     'kpwfp.com',
     'bywiola.com',
+    'yyczo.com', // mir-kubikov.ru
     'qwpeg.com',
     'dhwnh.com',
     'gndrz.com',

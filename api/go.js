@@ -10,6 +10,7 @@ const AFF_HOSTS = new Set([
   'www.floraxpress.ru', // Прямой магазин (добавить UTM)
   'kpwfp.com', // BoxDari / впечатления
   'bywiola.com', // Бубль Гум
+  'yyczo.com', // mir-kubikov.ru
   'qwpeg.com', // Flor2U
   'dhwnh.com', // Aliexpress
   'gndrz.com', // Letual

@@ -36,6 +36,7 @@ export function validatePartnerUrl(raw) {
 
   const affiliateDomains = new Set([
     'bywiola.com',
+    'yyczo.com',
     'uuwgc.com',
     'qwpeg.com',
     'xpuvo.com',
