@@ -22,7 +22,7 @@ export function translateCategory(category) {
     tools: 'Инструменты',
     sport: 'Спорт',
     office: 'Офис',
-    food: 'Еда',
+    food: 'Готовая еда, комбо, сеты',
     home: 'Дом',
     entertainment: 'Развлечения',
     impressions: 'Впечатления',

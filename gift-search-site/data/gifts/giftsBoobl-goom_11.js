@@ -1,16 +1,5 @@
 export const BOOBL_GOOM_11 = [
   // {
-  //   id: 121312313132,
-  //   name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Ручка 3D Lanson Toys «Космическое путешествие»',
-  //   price: 100,
-  //   recipientTags: ['ребёнок', 'сын', 'дочь'],
-  //   ageRange: [7, 13],
-  //   description:
-  //     'Старт в 3D-рисовании: развивает креативность и усидчивость, безопасные скорости подачи пластика.',
-  //   category: 'creativity',
-  //   link: 'https://bywiola.com/g/nm7npggtboc4e3de98ac69725a826c/?erid=2bL9aMPo2e49hMef4pfyz45bur&ulp=https%3A%2F%2Fboobl-goom.ru%2Fproduct%2Fruchcheskoe-puteshestvie-v-assortimente%2F',
-  // },
-  // {
   //   id: 27879878798,
   //   name: 'ПОСЛЕ ТЕСТА ПРОСТО УДАЛИТЬ!!  Игровой набор раций Lanson Toys 2шт',
   //   price: 150,

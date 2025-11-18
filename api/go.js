@@ -15,9 +15,11 @@ const AFF_HOSTS = new Set([
   'dhwnh.com', // Aliexpress
   'gndrz.com', // Letual
   'kjuzv.com', // chitai-gorod.ru
+  'kjuzv.com', //? dominopizza.ru и chitai-gorod.ru одинково?
   'ytebb.com', // Askona
   'ogsib.com', // СоюзЦветТорг
   'uuwgc.com', // МаксидоМ
+  'naiawork.com', // pizzasushiwok.ru
   'admitad.com', // Admitad
   'advcake.com', // advcake.com
 ]);
