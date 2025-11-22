@@ -35,9 +35,11 @@ export function renderPromoGifts(promoIds, GIFT_CARD_DEPS) {
 
   // если есть список id — берём их; иначе первые PROMO_COUNT
   let promoGifts = [];
-  if (Array.isArray(promoIds) && promoIds.length) {
-    const set = new Set(promoIds);
-    promoGifts = GIFTS.filter((g) => set.has(g.id));
+  if(Array.isArray(promoIds) && promoIds.length) {
+    // Создаем Map для быстрого доступа к подаркам по ID,
+    // чтобы затем собрать их в нужном порядке.
+    const giftsMap = new Map(GIFTS.map((g) => [g.id, g]));
+    promoGifts = promoIds.map((id) => giftsMap.get(id)).filter(Boolean);
   } else {
     promoGifts = GIFTS.slice(0, PROMO_COUNT);
   }

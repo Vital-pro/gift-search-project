@@ -18,7 +18,7 @@ import { initUI } from './initUI.js';
 
 
 // Явный список промо-ID как было в main.js
-const PROMO_GIFTS_IDS = [330, 18, 2207, 3357, 5501, 3368];
+const PROMO_GIFTS_IDS = [330, 18, , 3368, 2207, 3357, 5501];
 
 export function initApp() {
   // === Собираем зависимости для карточек (как было в main.js)
