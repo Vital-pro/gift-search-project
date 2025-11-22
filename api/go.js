@@ -20,8 +20,6 @@ const AFF_HOSTS = new Set([
   'ogsib.com', // СоюзЦветТорг
   'uuwgc.com', // МаксидоМ
   'naiawork.com', // pizzasushiwok.ru
-  'admitad.com', // Admitad
-  'advcake.com', // advcake.com
 ]);
 
 const PROBLEMATIC_REDIRECT_PATTERNS = ['offerwall.admitad.com'];

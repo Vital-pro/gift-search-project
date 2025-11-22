@@ -1,1 +1,0 @@
-export const GIFTS_FOR_WOMEN_55 = [];

@@ -1,7 +1,7 @@
 export const categoryPlaceholderImages = {
   beauty: '/images/category_images/beauty/beauty-woman-makeup.jpg',
   health: '/images/category_images/flowers/flowers.jpg',
-  tech: '/images/category_images/tech/tech.jpg',
+  technic: '/images/category_images/technic/tech.jpg',
   hobby: '/images/category_images/creative/creative.jpg',
   tools: '/images/category_images/creative/сreative-1.jpg',
   toys: '/images/category_images/toys/toys-new.jpg',

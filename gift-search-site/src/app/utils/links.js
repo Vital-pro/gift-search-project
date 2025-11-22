@@ -35,16 +35,22 @@ export function validatePartnerUrl(raw) {
   if (!hostLooksOk) return { ok: false, reason: 'bad-host' };
 
   const affiliateDomains = new Set([
-    'bywiola.com',
-    'yyczo.com',
-    'uuwgc.com',
-    'qwpeg.com',
-    'xpuvo.com',
-    'admitad.com',
-    'actionpay.net',
-    'cityads.com',
-    'effiliation.com',
-    'advcake.com',
+    'xpuvo.com', // Tefal
+    'rthsu.com', // Moulinex
+    'ujhjj.com', // Партнёрская сеть FloraExpress
+    'www.floraxpress.ru', // Прямой магазин (добавить UTM)
+    'kpwfp.com', // BoxDari / впечатления
+    'bywiola.com', // Бубль Гум
+    'yyczo.com', // mir-kubikov.ru
+    'qwpeg.com', // Flor2U
+    'dhwnh.com', // Aliexpress
+    'gndrz.com', // Letual
+    'kjuzv.com', // chitai-gorod.ru
+    'kjuzv.com', //? dominopizza.ru и chitai-gorod.ru одинково?
+    'ytebb.com', // Askona
+    'ogsib.com', // СоюзЦветТорг
+    'uuwgc.com', // МаксидоМ
+    'naiawork.com', // pizzasushiwok.ru
   ]);
   const CLICK_PARAMS = ['erid', 'subid', 'sub_id', 'sub1', 'clickid', 'admitad_uid'];
 

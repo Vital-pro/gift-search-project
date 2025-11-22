@@ -17,8 +17,8 @@ import { API_BASE } from './config.js';
 import { initUI } from './initUI.js';
 
 
-// [ВОССТАНОВЛЕНО] Явный список промо-ID как было в main.js
-const PROMO_GIFTS_IDS = [1, 3, 5, 8, 12, 15];
+// Явный список промо-ID как было в main.js
+const PROMO_GIFTS_IDS = [330, 18, 2207, 3357, 5501, 3368];
 
 export function initApp() {
   // === Собираем зависимости для карточек (как было в main.js)
@@ -43,12 +43,12 @@ export function initApp() {
   renderPromoGifts(PROMO_GIFTS_IDS, GIFT_CARD_DEPS);
   initCatalogList(GIFT_CARD_DEPS);
 
-  // [ВОССТАНОВЛЕНО] Ленивая отрисовка секций (каталог и др. получают .visible)
+  // Ленивая отрисовка секций (каталог и др. получают .visible)
   initLazySections();
 
   initStickySearch();
 
-  // [ДОБАВЛЕНО] вспомогательные UI (to-top, tooltip, UTM в футере)
+  // вспомогательные UI (to-top, tooltip, UTM в футере)
   initUI();
 
   registerServiceWorker();

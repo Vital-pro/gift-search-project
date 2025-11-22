@@ -3,7 +3,7 @@ import { BOOBL_GOOM_11 } from './giftsBoobl-goom_11.js';
 import { GIFTS_FLOWERS_22 } from './giftsFlowers_22.js';
 import { GIFTS_BOXDARI_33 } from './giftsBoxDari_33.js';
 import { GIFTS_ASKONA_44 } from './giftsAskona_44.js';
-import { GIFTS_FOR_WOMEN_55 } from './giftsForWomen_55.js';
+import { GIFTS_TECHNIC_55 } from './giftsTechnic_55.js';
 import { GIFTS_READ_THE_CITY_66 } from './giftsReadTheCity_66.js';
 import { GIFTS_FOOD_77 } from './giftsFood_77.js';
 
@@ -13,41 +13,41 @@ export const GIFTS = [
   ...GIFTS_FLOWERS_22,
   ...GIFTS_BOXDARI_33,
   ...GIFTS_ASKONA_44,
-  // ...GIFTS_FOR_WOMEN_55,
+  ...GIFTS_TECHNIC_55,
   ...GIFTS_FOOD_77,
   ...GIFTS_READ_THE_CITY_66,
 ];
 
 //todo когда закончишь - убери
-[
-  {
-    recipientTags: [
-      'мама',
-      'папа',
-      'жена',
-      'муж',
-      'дочь',
-      'сын',
-      'девочка',
-      'мальчик',
-      'внучка',
-      'внук',
-      'племянница',
-      'племянник',
-      'сестра',
-      'брат',
-      'подруга',
-      'друг',
-      'девушка',
-      'парень',
-      'женщина',
-      'мужчина',
-      'бабушка',
-      'дедушка',
-      'коллега',
-      'начальник',
-      'ребенок',
-      'ребёнок',
-    ],
-  },
-];
+// [
+//   {
+//     recipientTags: [
+//       'мама',
+//       'папа',
+//       'жена',
+//       'муж',
+//       'дочь',
+//       'сын',
+//       'девочка',
+//       'мальчик',
+//       'внучка',
+//       'внук',
+//       'племянница',
+//       'племянник',
+//       'сестра',
+//       'брат',
+//       'подруга',
+//       'друг',
+//       'девушка',
+//       'парень',
+//       'женщина',
+//       'мужчина',
+//       'бабушка',
+//       'дедушка',
+//       'коллега',
+//       'начальник',
+//       'ребенок',
+//       'ребёнок',
+//     ],
+//   },
+// ];
