@@ -22,6 +22,7 @@
   --glass-bg: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(255, 255, 255, 0.5);
   --hero-title: #9b3fb5fa;
+  --hero-text-on-dark: #e8e7ff;
   --parallax-opacity: 0.6;
 }
 
@@ -44,6 +45,7 @@
   --glass-bg: rgba(18, 20, 28, 0.7);
   --glass-border: rgba(255, 255, 255, 0.06);
   --parallax-opacity: 0.25;
+  --hero-text-on-dark: #e8e7ff;
 }
 
 /* Автоопределение темной темы */

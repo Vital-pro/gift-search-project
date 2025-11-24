@@ -151,3 +151,119 @@ section { padding: 2rem 0; }
 .gift-buy-btn--checking:hover {
   opacity: 1;
 } */
+
+/* --- Текст в hero: подзаголовок и описание --- */
+.hero-subtitle {
+  margin-top: 12px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--hero-text-on-dark);
+}
+
+.hero-text {
+  margin-top: 8px;
+  margin-bottom: 20px;
+  max-width: 640px;
+  line-height: 1.6;
+  color: var(--hero-text-on-dark);
+  opacity: 0.9;
+}
+
+/* --- Блоки "О нас" и "О партнёрах" --- */
+.info-block {
+  padding: 40px 0;
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+  scroll-margin-top: 80px; /* чтобы якорь не уезжал под шапку */
+}
+
+.info-block h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+.info-block p {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+/* --- FAQ-блок внизу страницы --- */
+.seo-faq {
+  padding: 40px 0 48px;
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+  scroll-margin-top: 80px;
+}
+
+.seo-faq h2 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+/* Карточки вопросов */
+.seo-faq details {
+  margin-top: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Первый элемент чуть ближе к заголовку */
+.seo-faq details:first-of-type {
+  margin-top: 4px;
+}
+
+/* Лёгкий подсвет при наведении/фокусе */
+.seo-faq details:hover,
+.seo-faq details:focus-within {
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(108, 99, 255, 0.35); /* завязанно на твоём accent (см. var(--accent)) */
+}
+
+/* Заголовок вопроса */
+.seo-faq summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-primary);
+  list-style: none; /* убираем маркер в некоторых браузерах */
+  outline: none;
+}
+
+/* Убираем стандартный маркер-стрелку в Chrome/Safari */
+.seo-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Своя стрелка справа */
+.seo-faq summary::after {
+  content: "▾";
+  float: right;
+  opacity: 0.7;
+  font-size: 0.9em;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* При открытом спойлере переворачиваем стрелку */
+.seo-faq details[open] summary::after {
+  transform: rotate(180deg);
+  opacity: 1;
+  color: var(--error);
+}
+
+/* Текст ответа */
+.seo-faq p {
+  margin-top: 8px;
+  margin-bottom: 0;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
