@@ -15,7 +15,7 @@ const AFF_HOSTS = new Set([
   'dhwnh.com', // Aliexpress
   'gndrz.com', // Letual
   'kjuzv.com', // chitai-gorod.ru
-  'kjuzv.com', //? dominopizza.ru и chitai-gorod.ru одинково?
+  // 'kjuzv.com', //? dominopizza.ru и chitai-gorod.ru одинково?
   'ytebb.com', // Askona
   'ogsib.com', // СоюзЦветТорг
   'uuwgc.com', // МаксидоМ
@@ -276,6 +276,7 @@ async function notifyIfNeededTelegram(
 
 // ОСНОВНОЙ ОБРАБОТЧИК
 module.exports = async (req, res) => {
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   console.log('🎯 API/go ВЫЗВАН!');
   console.log('Query params:', req.query);
 

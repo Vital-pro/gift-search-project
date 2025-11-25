@@ -161,7 +161,7 @@ export function createGiftCard(gift, options) {
       <a class="gift-buy-btn"
          href="${interstitialUrl}"
          target="_blank"
-         rel="noopener nofollow sponsored"
+         rel="noopener nofollow sponsored noreferrer"
          aria-label="Перейти к подарку на площадке">К подарку</a>
     `;
     const linkEl = actions.querySelector('.gift-buy-btn');

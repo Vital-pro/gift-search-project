@@ -5,15 +5,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Что подарить: сервис подбора подарков онлайн за 10 секунд</title>
+  <title>Что подарить: онлайн-сервис подбора подарков по возрасту и бюджету</title>
 
   <!-- Основные SEO-метатеги -->
   <meta name="description"
-    content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — и за секунды получите список идей по 250+ вариантам для семьи, друзей, коллег и второй половинки." />
-  <meta name="robots" content="index,follow" />
+    content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — сервис подберёт идеи, что подарить на день рождения, Новый год и другие праздники для семьи, друзей, коллег и второй половинки." />
+
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
+
 
   <link rel="canonical" href="https://gift-search-project.vercel.app/" />
-
 
   <!-- Open Graph -->
   <meta property="og:title" content="Что подарить: сервис подбора подарков онлайн">
@@ -31,9 +32,9 @@
   <meta name="twitter:title" content="Что подарить: сервис подбора подарков онлайн">
   <meta name="twitter:description"
     content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — и за секунды получите список идей по 250+ вариантам для семьи, друзей, коллег и второй половинки.">
-  <meta name="twitter:image" content="https://gift-search-project.vercel.app/assets/images/hero-gift.svg">
+  <meta name="twitter:image" content="https://gift-search-project.vercel.app/images/hero-gift.svg">
 
-  <!-- Структурированные данные -->
+  <!-- Структурированные данные  -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -48,6 +49,49 @@
   }
   </script>
 
+  <!-- НОВОЕ: микроразметка FAQPage для блока "Ответы на частые вопросы" -->
+  <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Как работает сервис подбора подарков?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Вы вводите в строку, для кого нужен подарок, возраст и примерный бюджет. Мы сопоставляем запрос с нашей базой идей и показываем подходящие варианты. Можно искать как текстом, так и через ручной выбор получателя, возраста и суммы."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Сервис «Что подарить» бесплатный?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Да, пользоваться сервисом бесплатно. Вы можете подбирать подарки сколько угодно раз. Проект окупается за счёт партнёрских ссылок и рекламы магазинов, но цена товаров для вас не меняется."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Можно ли подобрать подарок по бюджету?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Да. Введите нужный бюджет в рублях или укажите его в форме выбора — сервис покажет только те идеи подарков, которые укладываются в указанную сумму."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Для кого можно искать подарки?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "В сервисе можно подобрать подарок для членов семьи, друзей, коллег, начальника, детей, второй половинки и других получателей. Просто укажите, кому вы ищете подарок, и мы подберём подходящие варианты."
+            }
+          }
+        ]
+      }
+      </script>
+
+
   <!-- Верификации и PWA -->
   <!-- <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_HERE" /> -->
   <meta name="verify-admitad" content="1093e93c08" />
@@ -61,22 +105,7 @@
   <!-- Preload / preconnect (ускорение загрузки) -->
   <link rel="preload" href="/images/hero-gift.svg" as="image" fetchpriority="high">
 
-  <!-- Preconnect к частым партнёрским доменам (ускоряет соединение) Добавить, если появятся другие -->
   <link rel="preconnect" href="https://kpwfp.com" crossorigin>
-
-  <link rel="dns-prefetch" href="https://xpuvo.com" crossorigin>
-  <link rel="dns-prefetch" href="https://rthsu.com" crossorigin>
-  <link rel="dns-prefetch" href="https://ujhjj.com" crossorigin>
-  <!-- <link rel="dns-prefetch" href="https://bywiola.com" crossorigin> -->
-  <!-- <link rel="dns-prefetch" href="https://yyczo.com" crossorigin>
-  <link rel="dns-prefetch" href="https://qwpeg.com" crossorigin>
-  <link rel="dns-prefetch" href="https://dhwnh.com" crossorigin>
-  <link rel="dns-prefetch" href="https://gndrz.com" crossorigin>
-  <link rel="dns-prefetch" href="https://kjuzv.com" crossorigin>
-  <link rel="dns-prefetch" href="https://ytebb.com" crossorigin>
-  <link rel="dns-prefetch" href="https://ogsib.com" crossorigin>
-  <link rel="dns-prefetch" href="https://uuwgc.com" crossorigin>
-  <link rel="dns-prefetch" href="https://naiawork.com" crossorigin> -->
 
   <link rel="stylesheet" href="styles.css">
 
@@ -107,11 +136,15 @@
 </head>
 
 <body>
-  <noscript>
-    <div><img src="https://mc.yandex.ru/watch/XXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
-  </noscript>
+  <!-- ИЗМЕНЕНО: блок noscript для Яндекс.Метрики временно закомментирован,
+      чтобы не отправлять запросы на несуществующий счётчик с ID XXXXXXX.
+      Когда появится реальный ID, можно раскомментировать и подставить номер. -->
 
-  <div class="parallax-scene">
+  <!-- <noscript>
+    <div><img src="https://mc.yandex.ru/watch/XXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
+  </noscript> -->
+
+  <div class="parallax-scene" aria-hidden="true">
     <div class="parallax-layer layer-bg"></div>
     <div class="parallax-layer layer-shape-1"></div>
     <div class="parallax-layer layer-shape-2"></div>
@@ -121,10 +154,10 @@
 
   <header>
     <div class="container">
-      <nav class="header-nav">
+      <nav class="header-nav" aria-label="Основная навигация">
         <ul class="nav-menu">
-          <li><a href="/" class="logo"><img src='/images/hero-gift.svg' width="52px" height="52px" alt="logo" /><span
-                class="logo-text">Что подарить</span></a></li>
+          <li><a href="/" class="logo"><img src='/images/hero-gift.svg' width="52px" height="52px" alt="" aria-hidden="true" />
+              <span class="logo-text">Что подарить</span></a></li>
           <li><a href="#about" class=""> О нас</a></li>
           <li><a href="#partners" class=""> О партнерах</a></li>
           <li><button class="theme-toggle" aria-label="Переключить тему">
@@ -135,7 +168,7 @@
     </div>
   </header>
 
-  <main>
+  <main role="main">
     <!-- Hero секция -->
     <section class="hero compact-hero">
       <div class="container">
@@ -145,19 +178,20 @@
         </h2>
         <p class="hero-text">
           Введите в строку, кому вы ищете подарок, возраст и примерный бюджет — например: «маме 45 8000» или
-          «коллеге 30 2700». Сервис подберёт подходящие варианты из каталога готовых идей, чтобы вы не тратили часы
-          на бесконечный поиск.
+          «коллеге 30 2700». Сервис подберёт идеи, что подарить на день рождения, Новый год и другие праздники
+          для мамы, папы, мужа, жены, детей, друзей и коллег, чтобы вы не тратили часы на бесконечный поиск.
         </p>
 
-        <div class="search-block glass-effect">
+
+        <div class="search-block glass-effect" role="search">
           <div class="search-compact-title" aria-live="polite">
             <!-- в sticky-режиме показываем бренд и подсказку прямо в поиске -->
             <!-- <p><strong>Что подарить</strong> — найдём идеальный подарок за секунды</p> -->
             <!-- <div class="container"> -->
-            <nav class="header-nav nav">
+            <nav class="header-nav nav" aria-label="Навигация при прокрутке страницы">
               <ul class="nav-menu">
                 <li><a href="/" class="logo"><img src='/images/hero-gift.svg' width="52px" height="52px"
-                      alt="logo" /><span>Что подарить</span></a></li>
+                      alt="" aria-hidden="true" /><span>Что подарить</span></a></li>
                 <li><a href="#about" class=""> О нас</a></li>
                 <li><a href="#partners" class=""> О партнерах</a></li>
                 <li><button class="theme-toggle" aria-label="Переключить тему">
@@ -169,17 +203,17 @@
           </div>
 
 
-          <div class="search-hint">
+          <div class="search-hint" id="searchHintText">
             <p class="greeting">Привет! 👋</p>
             <!-- <p class="instruction">Я помогу подобрать подарок для кого скажешь.</p> -->
             <div class="example-block">
               <p class="example-title">Просто напиши: <strong>кому возраст бюджет</strong></p>
             </div>
           </div>
-
           <div class="search-input-group">
             <input type="text" id="searchInput" class="search-input" placeholder="например: сестре 26 3000"
-              aria-label="Поиск подарка">
+              aria-label="Поле поиска подарка" aria-describedby="searchHintText" aria-controls="resultsGrid"
+              autocomplete="off" />
             <button id="searchBtn" class="search-btn">Найти</button>
             <button class="help-btn" aria-label="Помощь">?</button>
           </div>
@@ -234,9 +268,9 @@
     </section>
 
     <!-- ПРОМО / стартовые карточки -->
-    <section class="random-gifts">
+    <section class="random-gifts" role="region" aria-label="Подборки подарков">
       <div class="container">
-        <h2 class="section-title">Подборки подарков</h2>
+        <h2 class="section-title">Подборки подарков для семьи, друзей и коллег</h2>
         <div id="randomGifts" class="gifts-grid"></div>
         <div id="promoLoader" class="loader">
           <div class="spinner"></div>
@@ -246,9 +280,11 @@
     </section>
 
     <!-- Каталог (обычные карточки с ленивой подгрузкой) -->
-    <section id="catalogSection" class="catalog-gifts lazy-section">
+    <section id="catalogSection" class="catalog-gifts lazy-section" role="region"
+      aria-label="Каталог случайных подарков">
+
       <div class="container">
-        <h2 class="section-title">Случайные подарки для вдохновения</h2>
+        <h2 class="section-title">Случайные идеи подарков для вдохновения</h2>
 
         <div id="catalogGifts" class="gifts-grid"></div>
         <div id="catalogInitialLoader" class="loader hidden">
@@ -274,7 +310,8 @@
     </section>
 
     <!-- Результаты поиска -->
-    <section id="searchResults" class="search-results hidden">
+    <section id="searchResults" class="search-results hidden" aria-live="polite"
+      aria-label="Результаты поиска подарков">
       <div class="container">
         <!-- ЗАМЕНЯЕМ ЭТОТ БЛОК -->
         <div class="search-results-header">
@@ -284,7 +321,8 @@
           </div>
         </div>
         <!-- КНОПКА СОРТИРОВКИ -->
-        <button id="sortToggle" class="sort-toggle hidden" aria-pressed="false">
+        <button id="sortToggle" class="sort-toggle hidden" aria-pressed="false"
+          aria-label="Переключить сортировку подарков">
           <span class="sort-text">Сначала дорогие</span>
           <span class="sort-icon">▼</span>
         </button>
@@ -319,10 +357,13 @@
         <h2>О сервисе «Что подарить»</h2>
         <p>
           «Что подарить» — это бесплатный онлайн-сервис, который помогает быстро подобрать идеи подарков по возрасту,
-          бюджету и получателю. Мы используем собственную базу из 250+ вариантов, которые регулярно обновляются.
-          Сервис создавался как удобный инструмент, чтобы экономить ваше время и избавлять от бесконечных поисков
-          в интернет-магазинах.
+          бюджету и получателю. Сервис помогает понять, что подарить на день рождения, Новый год, 8 Марта, 23 Февраля
+          и другие поводы для мамы, папы, мужа, жены, детей, друзей и коллег. Мы используем собственную базу из 250+
+          вариантов,
+          которые регулярно обновляются, чтобы экономить ваше время и избавлять от бесконечных поисков в
+          интернет-магазинах.
         </p>
+
       </div>
     </section>
     <section id="partners" class="info-block">
@@ -339,6 +380,7 @@
       <div class="container">
         <h2>Ответы на частые вопросы о подборе подарков</h2>
 
+        <h3 class="visually-hidden">Как работает сервис подбора подарков?</h3>
         <details>
           <summary>Как работает сервис подбора подарков?</summary>
           <p>
@@ -348,6 +390,7 @@
           </p>
         </details>
 
+        <h3 class="visually-hidden">Сервис «Что подарить» бесплатный?</h3>
         <details>
           <summary>Сервис «Что подарить» бесплатный?</summary>
           <p>
@@ -356,6 +399,7 @@
           </p>
         </details>
 
+        <h3 class="visually-hidden">Можно ли подобрать подарок по бюджету?</h3>
         <details>
           <summary>Можно ли подобрать подарок по бюджету?</summary>
           <p>
@@ -364,6 +408,7 @@
           </p>
         </details>
 
+        <h3 class="visually-hidden">Для кого можно искать подарки?</h3>
         <details>
           <summary>Для кого можно искать подарки?</summary>
           <p>
@@ -384,7 +429,8 @@
           <p class="telegram-text">
             Наш чат-бот в Telegram подскажет идеи подарков за секунды — где бы ты ни был
           </p>
-          <a href="https://t.me/presentsuperBot" id="telegramLink" class="telegram-btn">
+          <a href="https://t.me/presentsuperBot" id="telegramLink" class="telegram-btn" target="_blank"
+            rel="noopener noreferrer">
             <svg class="telegram-icon" viewBox="0 0 24 24" width="24" height="24">
               <path
                 d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.953l11.566-4.458c.538-.196 1.006.128.832.941z" />
@@ -435,25 +481,7 @@
       <p class="overlay-text">🎁 Подбираем лучший подарок для вас...</p>
     </div>
   </div>
-
-
-
-
   <script type="module" src="./main.js"></script>
-
-  <!-- <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js', { scope: '/' })
-          .then((reg) => {
-            console.log('[PWA] Service Worker зарегистрирован', reg.scope);
-          })
-          .catch((err) => console.warn('[PWA] Не удалось зарегистрировать SW', err));
-      });
-    }
-  </script> -->
-
 </body>
 
 </html>
