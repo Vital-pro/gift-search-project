@@ -246,4 +246,101 @@ section { padding: 2rem 0; }
   color: var(--text-secondary);
 }
 
+/* новые */
+/* Интент-секция с готовыми подборками подарков */
+.intents-section {
+  padding: 40px 0;
+  margin-top: 32px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+.intents-intro {
+  max-width: 640px;
+  margin: 0 0 32px;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.intents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.intent-card {
+  border-radius: 16px;
+  padding: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.intent-card:hover,
+.intent-card:focus-within {
+  background: var(--bg-tertiary);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in oklab, var(--accent) 30%, var(--border));
+  transform: translateY(-1px);
+}
+
+.intent-icon {
+  font-size: 1.6rem;
+}
+
+.intent-title {
+  font-size: 1.1rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.intent-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0 0 8px;
+  color: var(--text-secondary);
+}
+
+.intent-btn {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.intent-btn:hover {
+  background: var(--accent-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.intent-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+
 

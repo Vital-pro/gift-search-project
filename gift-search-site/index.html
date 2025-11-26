@@ -20,19 +20,23 @@
   <meta property="og:title" content="Что подарить: сервис подбора подарков онлайн">
   <meta property="og:description"
     content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — и за секунды получите список идей по 250+ вариантам для семьи, друзей, коллег и второй половинки.">
-  <meta property="og:image" content="https://gift-search-project.vercel.app/images/hero-gift.svg">
-  <meta property="og:image:alt" content="Яркий подарок в подарочной коробке" />
-  <meta property="og:locale" content="ru_RU">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://gift-search-project.vercel.app/">
-  <meta property="og:site_name" content="Gift Search Project">
+    <meta property="og:image" content="https://gift-search-project.vercel.app/images/og-preview-1200x630.jpg">
+    <meta property="og:image:alt" content="Онлайн-сервис «Что подарить» — подбор подарков по возрасту и бюджету" />
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://gift-search-project.vercel.app/">
+    <meta property="og:site_name" content="Gift Search Project">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Что подарить: сервис подбора подарков онлайн">
+    <meta name="twitter:description"
+      content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — и за секунды получите список идей по 250+ вариантам для семьи, друзей, коллег и второй половинки.">
+    <meta name="twitter:image" content="https://gift-search-project.vercel.app/images/og-preview-1200x630.jpg">
 
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Что подарить: сервис подбора подарков онлайн">
-  <meta name="twitter:description"
-    content="Бесплатный онлайн-сервис подбора подарков. Введите получателя, возраст и бюджет — и за секунды получите список идей по 250+ вариантам для семьи, друзей, коллег и второй половинки.">
-  <meta name="twitter:image" content="https://gift-search-project.vercel.app/images/hero-gift.svg">
 
   <!-- Структурированные данные  -->
   <script type="application/ld+json">
@@ -43,7 +47,7 @@
     "url":"https://gift-search-project.vercel.app/",
     "potentialAction":{
       "@type":"SearchAction",
-      "target":"https://gift-search-project.vercel.app/search?q={search_term_string}",
+      "target":"https://gift-search-project.vercel.app/?q={search_term_string}",
       "query-input":"required name=search_term_string"
     }
   }
@@ -395,6 +399,114 @@
         </p>
       </div>
     </section>
+        <section id="giftIntents" class="intents-section">
+          <div class="container">
+            <h2 class="section-title">Популярные подборки подарков</h2>
+            <p class="intents-intro">
+              Если не хочется долго подбирать параметры, выбери готовую подборку — мы сразу подставим получателя и бюджет и
+              покажем подходящие идеи.
+            </p>
+        
+            <div class="intents-grid">
+              <!-- Подарки маме -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">💐</div>
+                <h3 class="intent-title">Подарки маме</h3>
+                <p class="intent-text">
+                  Тёплые и практичные идеи для мамы: от заботливых мелочей до вещей, которые надолго останутся в быту.
+                </p>
+                <button type="button" class="intent-btn" data-intent="mom">
+                  Посмотреть идеи для мамы
+                </button>
+              </article>
+        
+              <!-- Подарки мужу / парню -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">🎮</div>
+                <h3 class="intent-title">Подарки мужу и парню</h3>
+                <p class="intent-text">
+                  Полезные гаджеты, аксессуары и вещи для хобби — когда хочется порадовать не формально, а по-настоящему.
+                </p>
+                <button type="button" class="intent-btn" data-intent="husband">
+                  Идеи для мужа / парня
+                </button>
+              </article>
+        
+              <!-- Подарки жене / девушке -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">💖</div>
+                <h3 class="intent-title">Подарки жене и девушке</h3>
+                <p class="intent-text">
+                  Романтические, заботливые и просто приятные подарки, которые дают ощущение внимания и заботы.
+                </p>
+                <button type="button" class="intent-btn" data-intent="wife">
+                  Идеи для жены / девушки
+                </button>
+              </article>
+        
+              <!-- Подарки коллеге / начальнику -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">🧑‍💼</div>
+                <h3 class="intent-title">Подарки коллеге и начальнику</h3>
+                <p class="intent-text">
+                  Уместные и аккуратные подарки для офиса — без лишней фамильярности и неловких ситуаций.
+                </p>
+                <button type="button" class="intent-btn" data-intent="office">
+                  Подборка для работы
+                </button>
+              </article>
+        
+              <!-- Подарки на день рождения -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">🎂</div>
+                <h3 class="intent-title">Подарки на день рождения</h3>
+                <p class="intent-text">
+                  Идеи ко дню рождения для семьи, друзей и коллег — от небольших символических до более серьёзных вариантов.
+                </p>
+                <button type="button" class="intent-btn" data-intent="birthday">
+                  Идеи ко дню рождения
+                </button>
+              </article>
+        
+              <!-- Подарки до 3000 ₽ -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">💸</div>
+                <h3 class="intent-title">Подарки до 3000 ₽</h3>
+                <p class="intent-text">
+                  Разумный бюджет без ощущения «дёшево»: полезные мелочи, гаджеты и аккуратные наборы до 3000 рублей.
+                </p>
+                <button type="button" class="intent-btn" data-intent="budget3000">
+                  Смотреть до 3000 ₽
+                </button>
+              </article>
+        
+              <!-- Универсальные подарки -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">🎁</div>
+                <h3 class="intent-title">Универсальные подарки</h3>
+                <p class="intent-text">
+                  Подборка «на всякий случай» — то, что подойдёт почти любому получателю и не поставит в неловкое положение.
+                </p>
+                <button type="button" class="intent-btn" data-intent="universal">
+                  Универсальные идеи
+                </button>
+              </article>
+        
+              <!-- Оригинальные подарки -->
+              <article class="intent-card">
+                <div class="intent-icon" aria-hidden="true">🪄</div>
+                <h3 class="intent-title">Оригинальные подарки</h3>
+                <p class="intent-text">
+                  Нестандартные, запоминающиеся идеи для тех, кого уже сложно удивить привычными подарками.
+                </p>
+                <button type="button" class="intent-btn" data-intent="original">
+                  Найти что-нибудь необычное
+                </button>
+              </article>
+            </div>
+          </div>
+        </section>
+
     <section id="faq" class="seo-faq">
       <div class="container">
         <h2>Ответы на частые вопросы о подборе подарков</h2>

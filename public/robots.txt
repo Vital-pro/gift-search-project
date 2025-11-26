@@ -1,6 +1,4 @@
-# robots.txt
 User-agent: *
-Allow: /
 Disallow: /api/go
 
 Sitemap: https://gift-search-project.vercel.app/sitemap.xml
