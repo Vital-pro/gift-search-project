@@ -18,6 +18,16 @@ export const GIFTS = [
   ...GIFTS_READ_THE_CITY_66,
 ];
 
+export {
+  GIFTS_FOR_KIDS_1,
+  GIFTS_FLOWERS_22,
+  GIFTS_BOXDARI_33,
+  GIFTS_ASKONA_44,
+  GIFTS_TECHNIC_55,
+  GIFTS_FOOD_77,
+  GIFTS_READ_THE_CITY_66,
+};
+
 //todo когда закончишь - убери
 // [
 //   {

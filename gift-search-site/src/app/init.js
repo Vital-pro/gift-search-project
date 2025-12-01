@@ -1,6 +1,5 @@
 // gift-search-site/src/app/init.js
 // Единая инициализация приложения: промо, каталог, lazy-секции, sticky-панель, PWA и обработчики поиска.
-// Поведение 1:1 с тем, как было в main.js, только разнесено по модулям.
 
 import { showTransitionOverlay } from '../ui/components/Overlay.js';
 import { initStickySearch } from '../ui/stickySearch.js';
@@ -17,11 +16,11 @@ import { API_BASE } from './config.js';
 import { initUI } from './initUI.js';
 
 
-// Явный список промо-ID как было в main.js
+// Явный список промо-ID
 const PROMO_GIFTS_IDS = [330, 18, , 3368, 2207, 3357, 5501];
 
 export function initApp() {
-  // === Собираем зависимости для карточек (как было в main.js)
+  // === Собираем зависимости для карточек 
   const GIFT_CARD_DEPS = createGiftCardDeps(API_BASE);
 
   // === Тест-оверлей (Shift+O / Shift+О) — переносим без изменений

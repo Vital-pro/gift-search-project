@@ -28,7 +28,6 @@ export function createGiftCard(gift, options) {
   card.className = 'gift-card';
   card.style.animationDelay = `${Math.random() * 0.3}s`;
 
-  // === JSON-LD микроразметка (как было) ===
   const jsonLd = document.createElement('script');
   jsonLd.type = 'application/ld+json';
   jsonLd.textContent = JSON.stringify(

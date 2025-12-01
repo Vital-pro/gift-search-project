@@ -7,16 +7,13 @@
 
   <title>Что подарить: онлайн-сервис подбора подарков по возрасту и бюджету</title>
 
-  <!-- Основные SEO-метатеги -->
   <meta name="description"
     content="Бесплатный онлайн-сервис подбора подарков. Укажи получателя, возраст и бюджет — сервис подберёт идеи, что подарить на день рождения, Новый год и другие праздники для мамы, папы, мужа, жены, детей, друзей и коллег." />
 
   <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1">
 
-
   <link rel="canonical" href="https://gift-search-project.vercel.app/" />
 
-  <!-- Open Graph -->
   <meta property="og:title" content="Не знаешь, что подарить? Сервис подберёт идеи за секунды">
   <meta property="og:description"
     content="Укажи получателя, возраст и бюджет — сервис сразу покажет подходящие идеи подарков для мамы, папы, мужа, жены, детей, друзей и коллег.">
@@ -30,7 +27,6 @@
     <meta property="og:url" content="https://gift-search-project.vercel.app/">
     <meta property="og:site_name" content="Gift Search Project">
     
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Не знаешь, что подарить? Сервис подберёт идеи за секунды">
     <meta name="twitter:description"
@@ -38,7 +34,6 @@
     <meta name="twitter:image" content="https://gift-search-project.vercel.app/images/og-preview-1200x630.jpg">
 
 
-  <!-- Структурированные данные  -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -53,7 +48,6 @@
   }
   </script>
 
-  <!-- НОВОЕ: микроразметка FAQPage для блока "Ответы на частые вопросы" -->
   <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -95,25 +89,19 @@
       }
       </script>
 
-
-  <!-- Верификации и PWA -->
-  <!-- <meta name="google-site-verification" content="GOOGLE_VERIFICATION_CODE_HERE" /> -->
   <meta name="verify-admitad" content="1093e93c08" />
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-  <!-- Цвет адресной строки / UI браузера -->
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
 
-  <!-- Preload / preconnect (ускорение загрузки) -->
   <link rel="preload" href="/images/hero-gift.svg" as="image" fetchpriority="high">
 
   <link rel="preconnect" href="https://kpwfp.com" crossorigin>
 
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Yandex. webmaster-->
   <meta name="yandex-verification" content="076bf3ee4355ddeb" />
   <!-- Yandex.Metrica (без падения, если ID не задан) Теперь ym вызывается только если ID задан числом. -->
   <!-- <script type="text/javascript">
@@ -192,7 +180,7 @@
   </header>
 
   <main role="main">
-    <!-- Hero секция -->
+
     <section class="hero compact-hero">
       <div class="container">
         <h1 class="hero-title">Что подарить? Найдём идеальный подарок онлайн за секунды</h1>
@@ -208,9 +196,6 @@
 
         <div class="search-block glass-effect" role="search">
           <div class="search-compact-title" aria-live="polite">
-            <!-- в sticky-режиме показываем бренд и подсказку прямо в поиске -->
-            <!-- <p><strong>Что подарить</strong> — найдём идеальный подарок за секунды</p> -->
-            <!-- <div class="container"> -->
             <nav class="header-nav nav" aria-label="Навигация при прокрутке страницы">
               <ul class="nav-menu">
                 <li><a href="/" class="logo"><img src='/images/hero-gift.svg' width="52px" height="52px"
@@ -222,13 +207,11 @@
                   </button></li>
               </ul>
             </nav>
-            <!-- </div> -->
           </div>
 
 
           <div class="search-hint" id="searchHintText">
             <p class="greeting">Привет! 👋</p>
-            <!-- <p class="instruction">Я помогу подобрать подарок для кого скажешь.</p> -->
             <div class="example-block">
               <p class="example-title">Просто напиши: <strong>кому возраст бюджет</strong></p>
             </div>
@@ -241,12 +224,10 @@
             <button class="help-btn" aria-label="Помощь">?</button>
           </div>
 
-          <!-- Компактная ссылка на альтернативные контролы (показывается в sticky режиме) -->
           <div class="search-compact-alt">
             <a href="#" class="compact-alt-link">Или выберите параметры вручную</a>
           </div>
 
-          <!-- Альтернативные контролы -->
           <div class="alternative-controls">
             <details class="controls-dropdown">
               <summary>Или выберите параметры вручную</summary>
@@ -336,7 +317,7 @@
     <section id="searchResults" class="search-results hidden" aria-live="polite"
       aria-label="Результаты поиска подарков">
       <div class="container">
-        <!-- ЗАМЕНЯЕМ ЭТОТ БЛОК -->
+
         <div class="search-results-header">
           <div class="results-title-group">
             <h2 id="resultsTitle" class="results-title-fade">Результаты поиска</h2>
@@ -369,7 +350,6 @@
           <p>Измените параметры поиска или</p>
           <button id="restartSearchBtn" class="btn-restart">
             <span>🔄</span> Начните поиск заново
-            <!-- 🔄 Начните поиск заново -->
           </button>
         </div>
       </div>
@@ -551,7 +531,7 @@
     </section>
 
   </main>
-  <!-- Footer с акцентом на Telegram-бот -->
+
   <footer class="footer">
     <div class="container">
       <div class="telegram-cta glass-effect">
@@ -597,7 +577,6 @@
     </p>
   </div>
 
-  <!-- Кнопка "Наверх" -->
   <button id="toTopBtn" class="to-top-btn hidden" aria-label="Вернуться наверх">
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
       stroke-linecap="round" stroke-linejoin="round">
