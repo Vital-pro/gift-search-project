@@ -1,7 +1,7 @@
 // gift-search-site/src/app/features/catalog.js
 // [НОВЫЙ МОДУЛЬ] Логика каталога: подгрузка, пагинация, сброс к промо.
 
-import { GIFTS } from '../../../data/index.js';
+// import { GIFTS } from '../../../data/index.js';
 import {
   GIFTS_FOR_KIDS_1,
   GIFTS_FLOWERS_22,
