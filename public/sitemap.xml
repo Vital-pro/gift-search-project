@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- [add] Базовый сайтмап. Позже можно генерировать автоматически. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://gift-search-project.vercel.app/</loc>

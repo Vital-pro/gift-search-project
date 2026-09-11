@@ -1,6 +1,5 @@
 // gift-search-site/src/app/init.js
 // Единая инициализация приложения: промо, каталог, lazy-секции, sticky-панель, PWA и обработчики поиска.
-// Поведение 1:1 с тем, как было в main.js, только разнесено по модулям.
 
 import { showTransitionOverlay } from '../ui/components/Overlay.js';
 import { initStickySearch } from '../ui/stickySearch.js';
@@ -17,11 +16,11 @@ import { API_BASE } from './config.js';
 import { initUI } from './initUI.js';
 
 
-// [ВОССТАНОВЛЕНО] Явный список промо-ID как было в main.js
-const PROMO_GIFTS_IDS = [1, 3, 5, 8, 12, 15];
+// Явный список промо-ID
+const PROMO_GIFTS_IDS = [330, 18, , 3368, 2207, 3357, 5501];
 
 export function initApp() {
-  // === Собираем зависимости для карточек (как было в main.js)
+  // === Собираем зависимости для карточек 
   const GIFT_CARD_DEPS = createGiftCardDeps(API_BASE);
 
   // === Тест-оверлей (Shift+O / Shift+О) — переносим без изменений
@@ -43,12 +42,12 @@ export function initApp() {
   renderPromoGifts(PROMO_GIFTS_IDS, GIFT_CARD_DEPS);
   initCatalogList(GIFT_CARD_DEPS);
 
-  // [ВОССТАНОВЛЕНО] Ленивая отрисовка секций (каталог и др. получают .visible)
+  // Ленивая отрисовка секций (каталог и др. получают .visible)
   initLazySections();
 
   initStickySearch();
 
-  // [ДОБАВЛЕНО] вспомогательные UI (to-top, tooltip, UTM в футере)
+  // вспомогательные UI (to-top, tooltip, UTM в футере)
   initUI();
 
   registerServiceWorker();
@@ -58,9 +57,50 @@ export function initApp() {
   const searchInput = document.getElementById('searchInput');
   const altSearchBtn = document.getElementById('altSearchBtn');
 
+  // --- Интент-подборки: готовые сценарии поиска --- //
+  const intentButtons = document.querySelectorAll('.intent-btn');
+
+  const intentQueryMap = {
+    mom: 'маме 45 8000',
+    husband: 'мужу 35 7000',
+    wife: 'жене 30 7000',
+    office: 'коллеге 30 3000',
+    birthday: 'другу 30 4000',
+    budget3000: 'подарок 30 3000',
+    universal: 'подарок 30 5000',
+    original: 'подарок 30 6000',
+  };
+
+  intentButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const intent = btn.dataset.intent;
+      const query = intentQueryMap[intent];
+
+      if (!query || !searchInput || !searchBtn) return;
+
+      // Подставляем запрос в основное поле
+      searchInput.value = query;
+
+      // Запускаем тот же сценарий, что и при обычном клике по "Найти"
+      searchBtn.click();
+
+      // Скроллим к результатам (если уже есть секция)
+      const resultsSection = document.getElementById('searchResults');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
   const recipientSelect = document.getElementById('recipientSelect');
   const ageInput = document.getElementById('ageInput');
   const budgetInput = document.getElementById('budgetInput');
+  const layer2 = document.getElementsByClassName('layer-shape-2')[0];
+  const layer3 = document.getElementsByClassName('layer-shape-3')[0];
+  setTimeout(() => {
+    layer2.classList.add('work-bg');
+    layer3.classList.add('work-bg');
+  }, 4000);
 
   // Локальные триггеры, захватывающие GIFT_CARD_DEPS
   function triggerTextSearch() {
@@ -124,11 +164,10 @@ export function initApp() {
   window.resetSearch = () => resetSearchAndBack(GIFT_CARD_DEPS, PROMO_GIFTS_IDS);
 
   // === Обработчик кнопки "Начать поиск заново" в блоке noResults ===
-const restartBtn = document.getElementById('restartSearchBtn');
-if (restartBtn) {
-  restartBtn.addEventListener('click', () => {
-    window.location.href = '/';
-  });
-}
-
+  const restartBtn = document.getElementById('restartSearchBtn');
+  if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+      window.location.href = '/';
+    });
+  }
 }

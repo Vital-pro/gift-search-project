@@ -4,7 +4,8 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f8f9fa;
   --bg-tertiary: #f0f2f5;
-  --text-primary: #1a1a1a;
+  /* --text-primary: #1a1a1a; */
+  --text-primary: #204f81;
   --text-secondary: #6c757d;
   --text-muted: #999999;
   --accent: #6c63ff;
@@ -21,6 +22,7 @@
   --glass-bg: rgba(255, 255, 255, 0.9);
   --glass-border: rgba(255, 255, 255, 0.5);
   --hero-title: #9b3fb5fa;
+  --hero-text-on-dark: #e8e7ff;
   --parallax-opacity: 0.6;
 }
 
@@ -43,6 +45,7 @@
   --glass-bg: rgba(18, 20, 28, 0.7);
   --glass-border: rgba(255, 255, 255, 0.06);
   --parallax-opacity: 0.25;
+  --hero-text-on-dark: #e8e7ff;
 }
 
 /* Автоопределение темной темы */

@@ -2,7 +2,17 @@
 // Единая логика поиска: текстовый и альтернативные контролы.
 // Управление экранами — через searchView (enterSearchMode/resetSearchView/scrollWithOffset).
 
-import { GIFTS } from '../../../data/index.js';
+// import { GIFTS } from '../../../data/index.js';
+import {
+  GIFTS,
+  GIFTS_FOR_KIDS_1,
+  GIFTS_FLOWERS_22,
+  GIFTS_BOXDARI_33,
+  GIFTS_ASKONA_44,
+  GIFTS_TECHNIC_55,
+  GIFTS_FOOD_77,
+  GIFTS_READ_THE_CITY_66,
+} from '../../../data/index.js';
 import { parseQuery } from '../../domain/parseQuery.js';
 import { filterGifts } from '../../domain/filterGifts.js';
 
@@ -64,6 +74,152 @@ function readAltControlsValues() {
   return { recipient, ageRaw, budgetRaw, source: 'original' };
 }
 
+// ============================================================================
+// [НОВЫЙ БЛОК] Взвешенное распределение категорий в результатах поиска
+// ============================================================================
+//
+// Цель:
+//   - Сделать поведение ближе к каталогу (catalog.js):
+//     в ЛЮБОМ фрагменте выдачи поиск показывает смесь категорий,
+//     но при этом техника и детские подарки встречаются чаще.
+//   - Работать не со всей базой GIFTS, а только с уже отфильтрованными
+//     по поисковым параметрам карточками.
+//
+// Как работает:
+//   1) Берём массив filteredItems (после rankAndSortGifts + filterGifts).
+//   2) Разбиваем его по категориям (technic, kids, и т.п.)
+//      — только те подарки, которые реально попали в результаты.
+//   3) Добавляем пул "other" для подарков, не попавших ни в одну категорию.
+//   4) Строим итоговый список result длиной = filteredItems.length,
+//      выбирая на каждой позиции категорию с максимальным "дефицитом"
+//      относительно её веса (идея как в buildWeightedCatalog).
+// ============================================================================
+
+// Конфиг категорий и их весов.
+// Значения взяты по мотивам CATALOG_CATEGORY_CONFIG из catalog.js.
+const SEARCH_CATEGORY_CONFIG = [
+  { name: 'flowers',       items: GIFTS_FLOWERS_22,       weight: 0.01 }, // ~1%
+  { name: 'kids',          items: GIFTS_FOR_KIDS_1,       weight: 0.25 }, // ~25%
+  { name: 'technic',       items: GIFTS_TECHNIC_55,       weight: 0.35 }, // ~35%
+  { name: 'read_the_city', items: GIFTS_READ_THE_CITY_66, weight: 0.20 }, // ~20%
+  { name: 'boxdari',       items: GIFTS_BOXDARI_33,       weight: 0.10 }, // ~10%
+  { name: 'askona',        items: GIFTS_ASKONA_44,        weight: 0.06 }, // ~6%
+  { name: 'food',          items: GIFTS_FOOD_77,          weight: 0.03 }, // ~3%
+];
+
+// [НОВОЕ] Строим "умный" список результатов поиска с учётом весов категорий.
+function buildWeightedSearchList(filteredItems) {
+  // Если входной массив пуст или не массив — нечего перераспределять.
+  if (!Array.isArray(filteredItems) || filteredItems.length === 0) {
+    return filteredItems;
+  }
+
+  // --- 1. Строим пулы по категориям: пересечение filteredItems и массивов категорий.
+  const pools = [];
+  const usedInAnyCategory = new Set();
+
+  SEARCH_CATEGORY_CONFIG.forEach((cfg) => {
+    if (!Array.isArray(cfg.items) || !cfg.items.length || cfg.weight <= 0) {
+      return;
+    }
+
+    // В pool кладём ТОЛЬКО те подарки, которые:
+    //  - есть в исходном filteredItems (результаты поиска),
+    //  - и одновременно входят в соответствующий массив категории.
+    const pool = filteredItems.filter((gift) => cfg.items.includes(gift));
+
+    if (pool.length > 0) {
+      pools.push({
+        name: cfg.name,
+        weight: cfg.weight,
+        pool: [...pool], // копия массива, чтобы "вытаскивать" элементы по одному
+        used: 0,         // сколько уже взяли для этой категории
+      });
+
+      // Помечаем эти подарки как "участвующие" в какой-то категории.
+      pool.forEach((gift) => usedInAnyCategory.add(gift));
+    }
+  });
+
+  // Пул "other": подарки, которые не попали ни в одну из категорий SEARCH_CATEGORY_CONFIG.
+  const otherPoolItems = filteredItems.filter((gift) => !usedInAnyCategory.has(gift));
+  if (otherPoolItems.length > 0) {
+    pools.push({
+      name: 'other',
+      weight: 0.05,           // небольшой вес для "разного" (опционально можно изменить)
+      pool: [...otherPoolItems],
+      used: 0,
+    });
+  }
+
+  // Если ни один пул не собрался — возвращаем исходный порядок.
+  if (pools.length === 0) {
+    return filteredItems;
+  }
+
+  // --- 2. Нормализуем веса так, чтобы сумма была 1.
+  const totalWeight = pools.reduce((sum, c) => sum + c.weight, 0);
+  pools.forEach((c) => {
+    c.weightNorm = c.weight / totalWeight;
+  });
+
+  // Сколько всего карточек нам нужно выдать:
+  const totalItems = pools.reduce((sum, c) => sum + c.pool.length, 0);
+
+  const result = [];
+
+  // --- 3. Основной цикл: на каждую позицию выбираем категорию с наибольшим "дефицитом".
+  //
+  // Идея аналогична buildWeightedCatalog:
+  //  - i = позиция в итоговом списке (1..totalItems)
+  //  - для каждой категории считаем:
+  //        idealCount = weightNorm * i
+  //        deficit    = idealCount - used
+  //    и берём категорию с максимальным deficit.
+  for (let i = 1; i <= totalItems; i += 1) {
+    let bestCat = null;
+    let bestDeficit = -Infinity;
+
+    pools.forEach((c) => {
+      if (!c.pool.length || c.weightNorm <= 0) return;
+
+      const idealCount = c.weightNorm * i;
+      const deficit = idealCount - c.used;
+
+      if (deficit > bestDeficit) {
+        bestDeficit = deficit;
+        bestCat = c;
+      }
+    });
+
+    if (!bestCat) break;
+
+    const gift = bestCat.pool.pop(); // берём подарок из выбранной категории
+    if (gift) {
+      bestCat.used += 1;
+      result.push(gift);
+    }
+  }
+
+  // --- 4. Доп. защита:
+  // на случай, если по какой-то причине result оказался короче filteredItems
+  // (например, логика пулов изменилась), добавим недостающие элементы в конец.
+  if (result.length < filteredItems.length) {
+    filteredItems.forEach((gift) => {
+      if (!result.includes(gift)) {
+        result.push(gift);
+      }
+    });
+  }
+
+  return result;
+}
+
+// ============================================================================
+// Конец блока взвешенного распределения категорий
+// ============================================================================
+
+
 function rankAndSortGifts(items, params) {
   const rec = (params?.recipient || '').toLowerCase().trim();
   const age = Number.isFinite(params?.age) ? params.age : null;
@@ -75,57 +231,48 @@ function rankAndSortGifts(items, params) {
   console.log('Бюджет:', budget);
   console.log('Всего карточек на входе:', items.length);
 
-  // Если получатель не указан - работаем по старой логике
-  if (!rec) {
-    console.log('❌ Получатель не указан - обычная сортировка');
-    return items
+  // === ВАЖНОЕ ИЗМЕНЕНИЕ: если указан получатель, ищем ТОЛЬКО точные совпадения ===
+  if (rec) {
+    console.log('🔍 Ищем ТОЛЬКО точные совпадения по тегу:', rec);
+
+    const exactMatches = items.filter((g) => {
+      const hasExactTag =
+        Array.isArray(g.recipientTags) &&
+        g.recipientTags.some((tag) => String(tag).toLowerCase() === rec);
+
+      if (hasExactTag) {
+        console.log(`✅ Точное совпадение: "${g.name}" - теги: [${g.recipientTags}]`);
+      }
+      return hasExactTag;
+    });
+
+    console.log(`📊 Найдено точных совпадений: ${exactMatches.length}`);
+
+    // === КРИТИЧЕСКОЕ ИЗМЕНЕНИЕ: если нет точных совпадений - возвращаем ПУСТОЙ массив ===
+    if (exactMatches.length === 0) {
+      console.log('❌ Нет точных совпадений - возвращаем пустой массив');
+      return [];
+    }
+
+    // Если есть точные совпадения - сортируем их по релевантности
+    console.log('🎯 Сортируем точные совпадения по релевантности');
+    const sortedExact = exactMatches
       .map((g) => scoreOne(g))
       .sort(compareScored)
       .map((x) => x.g);
+
+    console.log('=== КОНЕЦ DEBUG (точные совпадения) ===');
+    return sortedExact;
   }
 
-  // ПРОСТАЯ ЛОГИКА: сначала ВСЕ с точным тегом, потом ВСЕ остальные
-  const exact = [];
-  const rest = [];
-
-  const hasExactTag = (g) => {
-    const has =
-      Array.isArray(g.recipientTags) &&
-      g.recipientTags.some((tag) => String(tag).toLowerCase() === rec);
-
-    if (has) {
-      console.log(`✅ Точное совпадение: "${g.name}" - теги: [${g.recipientTags}]`);
-    }
-    return has;
-  };
-
-  for (const g of items) {
-    if (hasExactTag(g)) {
-      exact.push(g);
-    } else {
-      rest.push(g);
-    }
-  }
-
-  console.log(`📊 ИТОГ: exact=${exact.length}, rest=${rest.length}`);
-
-  // ВАЖНО: внутри каждой группы сортируем по обычным правилам
-  const exactSorted = exact
+  // === СТАРАЯ ЛОГИКА: если получатель не указан - обычная сортировка ===
+  console.log('❌ Получатель не указан - обычная сортировка');
+  return items
     .map((g) => scoreOne(g))
     .sort(compareScored)
     .map((x) => x.g);
 
-  const restSorted = rest
-    .map((g) => scoreOne(g))
-    .sort(compareScored)
-    .map((x) => x.g);
-
-  console.log('=== КОНЕЦ DEBUG ===');
-
-  // Сначала ВСЕ точные совпадения, потом ВСЕ остальные
-  return [...exactSorted, ...restSorted];
-
-  // --- вспомогательные внутри функции ---
+  // --- вспомогательные функции (без изменений) ---
   function scoreOne(g) {
     let score = 0;
 
@@ -188,6 +335,31 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
 
   if (!section || !grid || !loadMoreBtn || !cta || !sortToggle) return;
 
+  // ИЗМЕНЕНИЕ: Вспомогательная функция для склонения слова "подарок"
+  function getGiftWordForm(count) {
+    // Получаем последнюю цифру числа (для единиц)
+    const lastDigit = count % 10;
+    // Получаем последние две цифры числа (для десятков, чтобы учесть 11, 12, 13, 14)
+    const lastTwoDigits = count % 100;
+
+    // Если число заканчивается на 11, 12, 13, 14, то всегда "подарков"
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+      return 'подарков';
+    }
+
+    // В остальных случаях склоняем по последней цифре:
+    // 1 -> "подарок"
+    if (lastDigit === 1) {
+      return 'подарок';
+    }
+    // 2, 3, 4 -> "подарка"
+    if (lastDigit >= 2 && lastDigit <= 4) {
+      return 'подарка';
+    }
+    // 0, 5, 6, 7, 8, 9 -> "подарков"
+    return 'подарков';
+  }
+
   // === ДИАГНОСТИКА: проверяем порядок ДО изменений ===
   console.log('🔍 renderSearchResultsGrid - ДИАГНОСТИКА:');
   console.log('Всего карточек:', searchAll.length);
@@ -225,7 +397,9 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
     title = `Подарки для ${rGen}`;
   }
   resultsTitle.textContent = title;
-  resultsCount.textContent = `— найдено ${searchAll.length}`;
+  // resultsCount.textContent = `— ${searchAll.length} подарок`;
+  // ИЗМЕНЕНИЕ: Используем функцию getGiftWordForm для динамического склонения слова "подарок"
+  resultsCount.textContent = `— ${searchAll.length} ${getGiftWordForm(searchAll.length)}`;
 
   // Перезапуск короткой анимации появления заголовка
   resultsTitle.classList.remove('results-title-fade');
@@ -314,14 +488,25 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   }
 
   function resetToDefaultSort() {
-    // Восстанавливаем исходную сортировку через rankAndSortGifts
+    // 1) Восстанавливаем исходную сортировку через rankAndSortGifts
+    //    с текущими параметрами поиска (recipient, age, budget).
     const prioritized = rankAndSortGifts(GIFTS, currentParams);
+
+    // 2) Фильтруем по тем же параметрам, чтобы убрать неподходящие подарки.
     const filtered = filterGifts(prioritized, currentParams);
-    searchAll = filtered;
+
+    // 3) [НОВОЕ] Строим взвешенный список категорий,
+    //    чтобы "по умолчанию" выдача поиска вела себя так же,
+    //    как и при первом показе — с сочетанием категорий.
+    const weightedList = buildWeightedSearchList(filtered);
+
+    searchAll = weightedList;
     searchOffset = 0;
     grid.innerHTML = '';
     renderCurrentBatch();
   }
+
+
 
   function renderCurrentBatch() {
     fetchGiftsBatch(searchAll, searchOffset, INITIAL_BATCH).then((batch) => {
@@ -363,6 +548,13 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
   function handleLoadMore() {
     if (sessionId !== activeSearchSessionId) return;
 
+    // [ДОБАВЛЕНО] Сохраняем позицию кнопки ДО скрытия для скролла
+    const loadMoreBtnTop = loadMoreBtn.getBoundingClientRect().top;
+    // [ДОБАВЛЕНО] Запоминаем границу - последнюю карточку перед добавлением новых
+    const boundaryBefore = grid.lastElementChild || null;
+
+    loadMoreBtn.classList.add('hidden');
+
     fetchGiftsBatch(searchAll, searchOffset, LOAD_BATCH).then((more) => {
       if (sessionId !== activeSearchSessionId) return;
 
@@ -378,6 +570,23 @@ function renderSearchResultsGrid(GIFT_CARD_DEPS) {
       // Добавляем отсортированные карточки в grid
       appendSortedCards(grid, allCards);
       searchOffset += more.length;
+
+      // [ДОБАВЛЕНО] Плавный скролл к первой новой карточке
+      setTimeout(() => {
+        const firstNewEl = boundaryBefore
+          ? boundaryBefore.nextElementSibling
+          : grid.firstElementChild; // если ранее карточек не было
+
+        if (firstNewEl) {
+          const firstNewTop = firstNewEl.getBoundingClientRect().top;
+          const delta = firstNewTop - loadMoreBtnTop;
+
+          // Компенсируем сдвиг плавным скроллом
+          if (Number.isFinite(delta) && delta !== 0) {
+            window.scrollBy({ top: delta, behavior: 'smooth' });
+          }
+        }
+      }, 50); // ждём reflow для корректных координат
 
       if (searchOffset < searchAll.length) {
         loadMoreBtn.textContent = 'Посмотреть ещё';
@@ -441,12 +650,21 @@ export function performSearch(GIFT_CARD_DEPS) {
   // === ИЗМЕНЕНИЕ: Сначала сортировка по тегу, потом фильтрация ===
   currentParams = params;
 
-  // Сначала сортируем ВСЕ подарки по приоритету тега
+  // 1) Сначала сортируем ВСЕ подарки по приоритету тега, возраста и бюджета.
   const prioritized = rankAndSortGifts(GIFTS, params);
-  // Потом фильтруем по возрасту/бюджету
+
+  // 2) Потом фильтруем по возрасту/бюджету.
+  // filterGifts НЕ меняет порядок, только выбрасывает неподходящие варианты.
   const filtered = filterGifts(prioritized, params);
 
-  if (!filtered.length) {
+  // 3) [НОВОЕ] Строим взвешенный список результатов поиска.
+  // Здесь включается "умная" логика категорий, как в каталоге:
+  //  - в каждой части выдачи будут разные категории,
+  //  - техничных и детских подарков станет больше, но не "стеной".
+  const weightedList = buildWeightedSearchList(filtered);
+
+  if (!weightedList.length) {
+    // Если после всех шагов подарков не осталось — показываем блок «Ничего не нашлось».
     enterSearchMode(); // скрываем стартовый UI
     const section = document.getElementById('noResults');
     section?.classList.remove('hidden');
@@ -461,7 +679,8 @@ export function performSearch(GIFT_CARD_DEPS) {
     return;
   }
 
-  searchAll = filtered;
+  // 4) Сохраняем результирующий список для пагинации и рендера.
+  searchAll = weightedList;
   enterSearchMode();
   renderSearchResultsGrid(GIFT_CARD_DEPS);
 }
@@ -489,12 +708,16 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
   // === ИЗМЕНЕНИЕ: Сначала сортировка по тегу, потом фильтрация ===
   currentParams = params;
 
-  // Сначала сортируем ВСЕ подарки по приоритету тега
+  // 1) Сортируем все подарки по тегу/возрасту/бюджету.
   const prioritized = rankAndSortGifts(GIFTS, params);
-  // Потом фильтруем по возрасту/бюджету
+
+  // 2) Фильтруем по возрасту/бюджету.
   const filtered = filterGifts(prioritized, params);
 
-  if (!filtered.length) {
+  // 3) [НОВОЕ] Строим взвешенный список результатов для альтернативного поиска.
+  const weightedList = buildWeightedSearchList(filtered);
+
+  if (!weightedList.length) {
     enterSearchMode(); // скрываем стартовый UI
     const section = document.getElementById('noResults');
     section?.classList.remove('hidden');
@@ -509,39 +732,11 @@ export function performAlternativeSearch(GIFT_CARD_DEPS) {
     return;
   }
 
-  searchAll = filtered;
+  // 4) Сохраняем результирующий взвешенный список.
+  searchAll = weightedList;
   enterSearchMode();
   renderSearchResultsGrid(GIFT_CARD_DEPS);
 }
-
-/**
- * Полный сброс к промо/каталогу (кнопка «Начать поиск заново»)
- */
-// export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
-//   // 1) Сбросим режим и прокрутим мгновенно (чтоб фокус не «съедал» smooth)
-//   resetSearchView({ instantScroll: true });
-
-//   // 2) Явно вернём видимость оригинальной панели и уберём липкую
-//   const floatHost = document.querySelector('.search-float');
-//   const originalBlock = document.querySelector('.search-block');
-//   // липкую выключаем
-//   if (floatHost) {
-//     floatHost.classList.remove('visible');
-//     floatHost.classList.remove('force-visible'); // на всякий случай
-//   }
-//   // оригинальную показываем
-//   if (originalBlock) {
-//     originalBlock.classList.remove('search-original-hidden');
-//     originalBlock.classList.remove('compact');
-//   }
-
-//   // 3) Сброс обработчика и перерисовка стартового экрана
-//   const loadMoreBtn = document.getElementById('loadMoreBtn');
-//   if (loadMoreBtn) loadMoreBtn.onclick = null;
-
-//   renderPromoGifts(Array.isArray(promoIds) ? promoIds : [1, 3, 5, 8, 12, 15], GIFT_CARD_DEPS);
-//   initCatalogList(GIFT_CARD_DEPS);
-// }
 
 export function resetSearchAndBack(GIFT_CARD_DEPS, promoIds) {
   // 1) Сбросим режим и прокрутим мгновенно (чтоб фокус не «съедал» smooth)

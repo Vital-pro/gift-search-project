@@ -10,14 +10,16 @@ const AFF_HOSTS = new Set([
   'www.floraxpress.ru', // Прямой магазин (добавить UTM)
   'kpwfp.com', // BoxDari / впечатления
   'bywiola.com', // Бубль Гум
+  'yyczo.com', // mir-kubikov.ru
   'qwpeg.com', // Flor2U
   'dhwnh.com', // Aliexpress
   'gndrz.com', // Letual
+  'kjuzv.com', // chitai-gorod.ru
+  // 'kjuzv.com', //? dominopizza.ru и chitai-gorod.ru одинково?
   'ytebb.com', // Askona
   'ogsib.com', // СоюзЦветТорг
   'uuwgc.com', // МаксидоМ
-  'admitad.com', // Admitad
-  'advcake.com', // advcake.com
+  'naiawork.com', // pizzasushiwok.ru
 ]);
 
 const PROBLEMATIC_REDIRECT_PATTERNS = ['offerwall.admitad.com'];
@@ -274,6 +276,7 @@ async function notifyIfNeededTelegram(
 
 // ОСНОВНОЙ ОБРАБОТЧИК
 module.exports = async (req, res) => {
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   console.log('🎯 API/go ВЫЗВАН!');
   console.log('Query params:', req.query);
 

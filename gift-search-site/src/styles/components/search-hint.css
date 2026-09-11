@@ -1,7 +1,7 @@
-.search-hint { margin-bottom: 2rem; text-align: center; }
+.search-hint { margin-bottom: clamp(0rem, -2.414rem + 9.2vw, 2rem); text-align: center; }
 
 .greeting {
-  font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);
+  font-size: clamp(1rem, 0.852rem + 0.74vw, 1.5rem); font-weight: 700; color: var(--text-primary);
 }
 
 .instruction { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1rem; }
@@ -21,6 +21,12 @@
   padding: 2px 8px; border-radius: 6px; font-weight: 600; white-space: nowrap;
 }
 
-.search-hint { margin-bottom: 0.75rem; }
-.example-block { padding: 0.9rem; border-radius: 12px; }
 .example-text { font-size: 0.92rem; line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .example-block {
+    padding: clamp(0.5rem, -0.5rem + 5vw, 1rem);
+    margin-top: clamp(0.2rem, -1.4rem + 8vw, 1rem);
+  }
+  .example-title { font-size: clamp(0.7rem, 4vw, 1.2rem); line-height: clamp(1rem, 0.33rem + 3.35vw, 1.938rem);}
+}

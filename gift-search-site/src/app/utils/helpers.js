@@ -51,9 +51,11 @@ export function validatePartnerUrl(raw) {
     'xpuvo.com',
     'rthsu.com',
     'ujhjj.com',
+    'kjuzv.com', // chitai-gorod.ru
     'www.floraexpress.ru',
     'kpwfp.com',
     'bywiola.com',
+    'yyczo.com', // mir-kubikov.ru
     'qwpeg.com',
     'dhwnh.com',
     'gndrz.com',
@@ -186,7 +188,7 @@ export function openWithPreloader(
     animation: fadeInUpOverlay 0.6s ease both;
     max-width: 90vw;
     padding: 24px 20px;
-    background: rgba(255, 255, 255, 0.04);
+    background: #8a84ff;
     border-radius: 20px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);

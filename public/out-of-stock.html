@@ -5,6 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Товар временно недоступен</title>
+  <link rel="canonical" href="/" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="robots" content="noindex,nofollow" />
   <link rel="icon" href="/favicon.ico" />
   <style>
@@ -53,13 +55,38 @@
     a:hover {
       filter: brightness(1.05)
     }
+
+    a:hover {
+      filter: brightness(1.05)
+    }
+
+    /* Поддержка тёмной темы — чисто UX, не влияет на SEO */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1b1d23;
+        color: #e8e8ea;
+      }
+
+      .card {
+        background: #24262e;
+        border-color: #3a3c45;
+      }
+
+      p {
+        color: #babac3;
+      }
+
+      a {
+        background: #7a73ff;
+      }
+    }
   </style>
 </head>
 
 <body>
   <div class="card">
     <div style="font-size:42px">🎁</div>
-    <h1>Эта ссылка пока недоступна</h1>
+    <h1>Похоже, выбранный товар временно отсутствует</h1>
     <p>Но у нас есть другие идеи. Вернёмся на главную?</p>
     <a href="/">На главную</a>
   </div>

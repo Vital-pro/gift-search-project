@@ -3,6 +3,7 @@ import { categoryPlaceholderImages } from '../../../data/gifts/categoryPlacehold
 import { getGiftLinkStatus } from '../../utils/link-checker.js';
 
 export function createGiftCard(gift, options) {
+
   // НОВАЯ ПРОВЕРКА: получаем статус ссылок товара
   const linkStatus = getGiftLinkStatus(gift);
 
@@ -27,7 +28,6 @@ export function createGiftCard(gift, options) {
   card.className = 'gift-card';
   card.style.animationDelay = `${Math.random() * 0.3}s`;
 
-  // === JSON-LD микроразметка (как было) ===
   const jsonLd = document.createElement('script');
   jsonLd.type = 'application/ld+json';
   jsonLd.textContent = JSON.stringify(
@@ -160,7 +160,7 @@ export function createGiftCard(gift, options) {
       <a class="gift-buy-btn"
          href="${interstitialUrl}"
          target="_blank"
-         rel="noopener nofollow sponsored"
+         rel="noopener nofollow sponsored noreferrer"
          aria-label="Перейти к подарку на площадке">К подарку</a>
     `;
     const linkEl = actions.querySelector('.gift-buy-btn');
@@ -289,12 +289,13 @@ function createCheckingAvailabilityCard(gift, options) {
   card.addEventListener('mouseenter', () => {
     button.style.transform = 'scale(1.05)';
     button.style.fontWeight = '600';
-    button.style.transition = 'all 0.2s ease';
+    button.style.transition = 'all 0.3s ease';
   });
 
   card.addEventListener('mouseleave', () => {
     button.style.transform = 'scale(1)';
     button.style.fontWeight = '400';
+    button.style.transition = 'all 0.3s ease';
   });
 
   return card;
